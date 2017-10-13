@@ -1,0 +1,456 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.7.0, compiled 2017-09-14-12:38:22 by mschramm, git commit c449f30b63c5eec5c8053a67dccd892fe2c5cef2)
+## Bond Simulation of Wheat Straw
+
+### Simulation Set Up -----------------------------------------------------------------------------
+variable dt equal 1.0e-8
+variable run1_sim equal ceil(0.0145/${dt})   #0.0245
+variable run1_sim equal ceil(0.0145/1e-08)   
+variable run2_sim equal ceil(0.025/${dt})	 #0.0500
+variable run2_sim equal ceil(0.025/1e-08)	 
+variable run3_sim equal ceil(0.15/${dt})
+variable run3_sim equal ceil(0.15/1e-08)
+variable runstep equal ceil(10/${dt})
+variable runstep equal ceil(10/1e-08)
+variable filestep equal ceil(0.001/${dt})
+variable filestep equal ceil(0.001/1e-08)
+variable thermo_out equal ceil(0.0001/${dt})
+variable thermo_out equal ceil(0.0001/1e-08)
+variable end_dump_step equal ceil(0.0001/${dt})
+variable end_dump_step equal ceil(0.0001/1e-08)
+variable bond_damp_val equal 10
+#--------------------------------------------------------------------------------------------------
+variable d  equal 0.00283 			# particle diameter
+variable rp equal $d/2.0
+variable rp equal 0.00283/2.0
+variable sc equal $d #-0.0000001		# for latice construction
+variable sc equal 0.00283 
+variable c  equal ${d}+0.1			# IDK...
+variable c  equal 0.00283+0.1			
+variable rb equal 1.0*${rp}			# bond radius
+variable rb equal 1.0*0.001415			
+variable ro equal 1.0
+variable ri equal 0.0
+variable lb equal 1.0
+variable L  equal 55*$d  	    	# Simulation Length
+variable L  equal 55*0.00283  	    	
+variable sL equal $L+2*$d
+variable sL equal 0.15565+2*$d
+variable sL equal 0.15565+2*0.00283
+variable L_2 equal 1.1*$L
+variable L_2 equal 1.1*0.15565
+variable P_x equal 53*$d
+variable P_x equal 53*0.00283
+variable density equal 125.0
+
+atom_style	hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 6
+hard_particles yes
+atom_modify	map array
+boundary	f f f
+newton		off
+
+processors * 1 1
+communicate	single vel yes
+shell mkdir post
+units si
+
+#New pair style
+pair_style 	gran model hertz tangential history
+#bond
+bond_style 	gran
+WARNING: Bond granular: This is a beta version - be careful! (../bond_gran.cpp:86)
+
+#read_data read_data_file.txt
+region		reg block -0.1 ${L_2} -${L_2} ${L_2} -${L_2} ${L_2} units box
+region		reg block -0.1 0.171215 -${L_2} ${L_2} -${L_2} ${L_2} units box
+region		reg block -0.1 0.171215 -0.171215 ${L_2} -${L_2} ${L_2} units box
+region		reg block -0.1 0.171215 -0.171215 0.171215 -${L_2} ${L_2} units box
+region		reg block -0.1 0.171215 -0.171215 0.171215 -0.171215 ${L_2} units box
+region		reg block -0.1 0.171215 -0.171215 0.171215 -0.171215 0.171215 units box
+create_box	1 reg
+Created orthogonal box = (-0.1 -0.171215 -0.171215) to (0.171215 0.171215 0.171215)
+  1 by 1 by 1 MPI processor grid
+region		bc cylinder x 0.00 0.00 ${rp} 0.0 $L units box
+region		bc cylinder x 0.00 0.00 0.001415 0.0 $L units box
+region		bc cylinder x 0.00 0.00 0.001415 0.0 0.15565 units box
+lattice		sc ${sc}
+lattice		sc 0.00283
+Lattice spacing in x,y,z = 0.00283 0.00283 0.00283
+create_atoms	1 region bc
+Created 56 atoms
+
+neighbor	0.001 bin
+neigh_modify	delay 0
+
+variable Y equal 4.4e9
+#variable Y  equal ${Y1}*((${ro}*${ro})/((${ro}*${ro})-(${ri}*${ri})))
+variable p equal 0.3
+variable G equal $Y/(2.0*(1+$p))
+variable G equal 4400000000/(2.0*(1+$p))
+variable G equal 4400000000/(2.0*(1+0.3))
+
+print $Y
+print 4400000000
+4400000000
+print $p
+print 0.3
+0.3
+print $G
+print 1692307692.30769
+1692307692.30769
+
+variable A equal PI*(${ro}*${ro}-${ri}*${ri})
+variable A equal PI*(1*${ro}-${ri}*${ri})
+variable A equal PI*(1*1-${ri}*${ri})
+variable A equal PI*(1*1-0*${ri})
+variable A equal PI*(1*1-0*0)
+
+variable Y_bond equal $Y
+variable Y_bond equal 4400000000
+variable G_bond equal $G
+variable G_bond equal 1692307692.30769
+
+#New pair style
+pair_coeff	* *
+bond_coeff 1 ${ro} ${ri} ${lb} ${Y_bond} ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 1 ${ri} ${lb} ${Y_bond} ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 1 0 ${lb} ${Y_bond} ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 1 0 1 ${Y_bond} ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 1 0 1 4400000000 ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 1 0 1 4400000000 1692307692.30769 ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 1 0 1 4400000000 1692307692.30769 10 1 1.0e32 1.0e32
+
+fix 		m1 all property/global youngsModulus peratomtype $Y
+fix 		m1 all property/global youngsModulus peratomtype 4400000000
+fix 		m2 all property/global poissonsRatio peratomtype $p
+fix 		m2 all property/global poissonsRatio peratomtype 0.3
+fix 		m3 all property/global coefficientRestitution peratomtypepair 1 0.5
+fix 		m4 all property/global coefficientFriction peratomtypepair 1 0.001
+
+variable part_mass equal ${density}*4.0/3.0*PI*${rp}*${rp}*${rp}
+variable part_mass equal 125*4.0/3.0*PI*${rp}*${rp}*${rp}
+variable part_mass equal 125*4.0/3.0*PI*0.001415*${rp}*${rp}
+variable part_mass equal 125*4.0/3.0*PI*0.001415*0.001415*${rp}
+variable part_mass equal 125*4.0/3.0*PI*0.001415*0.001415*0.001415
+mass 		1 ${part_mass} #dummy
+mass 		1 1.48343302023831e-06 
+run 1
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 8.15795 Mbytes
+    Step    Atoms         KinEng            CPU 
+       0       56              0              0 
+       1       56              0  0.00016093254 
+Loop time of 0.000165939 on 1 procs for 1 steps with 56 atoms, finish time Thu Sep 21 10:03:56 2017
+
+
+Pair  time (%) = 0.000151873 (91.523)
+Bond  time (%) = 1.19209e-06 (0.718391)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 9.53674e-07 (0.574713)
+Outpt time (%) = 5.00679e-06 (3.01724)
+Other time (%) = 6.91414e-06 (4.16667)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1540 ave 1540 max 1540 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1540
+Ave neighs/atom = 27.5
+Ave special neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+group 		bonded id >= 1
+56 atoms in group bonded
+set		group all density ${density} diameter $d
+set		group all density 125 diameter $d
+set		group all density 125 diameter 0.00283
+  56 settings made for density
+  56 settings made for diameter
+
+run 1
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 27.2176 Mbytes
+    Step    Atoms         KinEng            CPU 
+       1       56              0              0 
+       2       56              0  1.7166138e-05 
+Loop time of 2.21729e-05 on 1 procs for 1 steps with 56 atoms, finish time Thu Sep 21 10:03:56 2017
+
+
+Pair  time (%) = 7.15256e-06 (32.2581)
+Bond  time (%) = 9.53674e-07 (4.30108)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 9.53674e-07 (4.30108)
+Outpt time (%) = 6.91414e-06 (31.1828)
+Other time (%) = 6.19888e-06 (27.957)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    55 ave 55 max 55 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 55
+Ave neighs/atom = 0.982143
+Ave special neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+
+variable lastone equal atoms
+
+group		freezed id == 1
+1 atoms in group freezed
+group		tipball id == ${lastone}
+group		tipball id == 56
+1 atoms in group tipball
+
+run 1
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 27.2176 Mbytes
+    Step    Atoms         KinEng            CPU 
+       2       56              0              0 
+       3       56              0  1.6927719e-05 
+Loop time of 2.28882e-05 on 1 procs for 1 steps with 56 atoms, finish time Thu Sep 21 10:03:56 2017
+
+
+Pair  time (%) = 6.91414e-06 (30.2083)
+Bond  time (%) = 9.53674e-07 (4.16667)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 9.53674e-07 (4.16667)
+Outpt time (%) = 5.96046e-06 (26.0417)
+Other time (%) = 8.10623e-06 (35.4167)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    55 ave 55 max 55 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 55
+Ave neighs/atom = 0.982143
+Ave special neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+
+variable bond_skin equal 1.25*$d
+variable bond_skin equal 1.25*0.00283
+fix 		bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff btype newperts
+fix 		bondcr all bond/create/gran 1 1 1 0.0035375 1 6 
+
+timestep	${dt}
+timestep	1e-08
+
+variable atom2 equal ${lastone}
+variable atom2 equal 56
+variable sim_time equal step*${dt}
+variable sim_time equal step*1e-08
+variable px2 equal x[${atom2}]
+variable px2 equal x[56]
+variable py2 equal y[${atom2}]
+variable py2 equal y[56]
+variable pz2 equal z[${atom2}]
+variable pz2 equal z[56]
+variable vx2 equal vx[${atom2}]
+variable vx2 equal vx[56]
+variable vz2 equal vz[${atom2}]
+variable vz2 equal vz[56]
+thermo_style	custom step atoms numbond v_sim_time cpu cpuremain v_px2 v_pz2 v_vx2 v_vz2
+thermo		${thermo_out}
+thermo		10000
+thermo_modify	lost ignore norm no
+compute_modify	thermo_temp dynamic yes
+WARNING: Changing thermo_temp compute object. This object is deprecated and will be removed in the future. (../compute.cpp:159)
+
+fix integr all nve/sphere
+
+# Pusher CAD File
+variable push_z equal 1.05*$d
+variable push_z equal 1.05*0.00283
+fix p all mesh/surface file Mesh.stl type 1 scale 0.001 move ${P_x} -0.0005 ${push_z}
+fix p all mesh/surface file Mesh.stl type 1 scale 0.001 move 0.14999 -0.0005 ${push_z}
+fix p all mesh/surface file Mesh.stl type 1 scale 0.001 move 0.14999 -0.0005 0.0029715
+fix wall all wall/gran model hertz tangential history mesh n_meshes 1 meshes p
+fix move_P all move/mesh mesh p linear 0.0 0.0 -1.0
+
+fix air_drag all airdrag 1.81e-5 1.23
+
+#insert the first particles so that dump is not empty
+dump		dmp 	all custom		${filestep} post/dump*.liggghts id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+dump		dmp 	all custom		100000 post/dump*.liggghts id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+#dump 		stldmp 	all mesh/stl	${filestep} post/stldmp*.stl
+
+variable time equal step*dt
+variable px equal x[${lastone}]
+variable px equal x[56]
+variable py equal y[${lastone}]
+variable py equal y[56]
+variable pz equal z[${lastone}]
+variable pz equal z[56]
+
+fix outfile all print ${end_dump_step} "${time};${px};${py};${pz}" file beam.csv screen no title "t;x;y;z"
+fix outfile all print 10000 "${time};${px};${py};${pz}" file beam.csv screen no title "t;x;y;z"
+
+
+#insert particles
+run		1		#run one step
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 30.8791 Mbytes
+    Step    Atoms  numbond       sim_time            CPU        CPULeft            px2            pz2            vx2            vz2 
+       3       56        0          3e-08              0              0        0.15565              0              0              0 
+       4       56       55          4e-08   0.0057599545              0        0.15565              0   2.859113e-14              0 
+Loop time of 0.00577497 on 1 procs for 1 steps with 56 atoms, finish time Thu Sep 21 10:03:56 2017
+
+
+Pair  time (%) = 1.09673e-05 (0.18991)
+Bond  time (%) = 1.69277e-05 (0.293122)
+Neigh time (%) = 0.00524521 (90.8265)
+Comm  time (%) = 4.76837e-06 (0.0825696)
+Outpt time (%) = 2.90871e-05 (0.503674)
+Other time (%) = 0.000468016 (8.1042)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    55 ave 55 max 55 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 55
+Ave neighs/atom = 0.982143
+Ave special neighs/atom = 0
+Neighbor list builds = 1
+Dangerous builds = 0
+fix_modify	bondcr every 0  #do not create new bonds after this line
+run		1
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 31.0698 Mbytes
+    Step    Atoms  numbond       sim_time            CPU        CPULeft            px2            pz2            vx2            vz2 
+       4       56       55          4e-08              0              0        0.15565              0   2.859113e-14              0 
+       5       56       55          5e-08  4.1007996e-05              0        0.15565              0  7.2085432e-14              0 
+Loop time of 5.19753e-05 on 1 procs for 1 steps with 56 atoms, finish time Thu Sep 21 10:03:56 2017
+
+
+Pair  time (%) = 6.91414e-06 (13.3028)
+Bond  time (%) = 9.05991e-06 (17.4312)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.19209e-06 (2.29358)
+Outpt time (%) = 1.50204e-05 (28.8991)
+Other time (%) = 1.97887e-05 (38.0734)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    55 ave 55 max 55 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 55
+Ave neighs/atom = 0.982143
+Ave special neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+fix		gravi all gravity 9.81 vector 0.0 0.0 -1.0
+run 	1
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 31.0698 Mbytes
+    Step    Atoms  numbond       sim_time            CPU        CPULeft            px2            pz2            vx2            vz2 
+       5       56       55          5e-08              0              0        0.15565              0  7.2085432e-14              0 
+       6       56       55          6e-08  5.1021576e-05              0        0.15565     -4.905e-16  1.0605243e-13      -9.81e-08 
+Loop time of 6.22272e-05 on 1 procs for 1 steps with 56 atoms, finish time Thu Sep 21 10:03:56 2017
+
+
+Pair  time (%) = 7.15256e-06 (11.4943)
+Bond  time (%) = 1.5974e-05 (25.6705)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.90735e-06 (3.06513)
+Outpt time (%) = 1.40667e-05 (22.6054)
+Other time (%) = 2.31266e-05 (37.1648)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    55 ave 55 max 55 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 55
+Ave neighs/atom = 0.982143
+Ave special neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+fix f1	freezed freeze	#festlager
+
+run ${run1_sim} upto
+run 1450000 upto
+Setting up run at Thu Sep 21 10:03:56 2017
+
+Memory usage per processor = 31.0698 Mbytes
+    Step    Atoms  numbond       sim_time            CPU        CPULeft            px2            pz2            vx2            vz2 
+       6       56       55          6e-08              0              0        0.15565     -4.905e-16  1.0605243e-13      -9.81e-08 
+   10000       56       55         0.0001     0.28354716      40.855442        0.15565 -4.9064935e-08 -1.3870765e-09  -0.0009856611 
+   20000       56       55         0.0002     0.54836297      39.219804        0.15565 -1.9483032e-07 -5.1912361e-09  -0.0018695028 
+   30000       56       55         0.0003     0.80363107      38.046192        0.15565 -4.1835564e-07 -1.8167462e-08  -0.0026731865 
+   40000       56       55         0.0004       1.059186      37.341983        0.15565 -7.5430453e-07 -3.8248444e-08   -0.004170099 
+   50000       56       55         0.0005      1.3125992      36.757241        0.15565 -1.2698667e-06 -6.1618431e-08  -0.0061904414 
+   60000       56       55         0.0006      1.5771141      36.540175        0.15565 -1.9962214e-06 -1.0419334e-07  -0.0083293107 
+   70000       56       55         0.0007      1.8284211      36.049125        0.15565 -2.9301639e-06 -1.8737645e-07    -0.01031054 
+   80000       56       55         0.0008      2.0766051      35.564562        0.15565 -4.0517875e-06 -3.2348723e-07    -0.01210179 
+   90000       56       55         0.0009       2.323334      35.110545        0.15565 -5.3478452e-06 -5.1919058e-07   -0.013802209 
+  100000       56       55          0.001      2.5703411      34.701726        0.15565 -6.8053236e-06 -7.6737831e-07   -0.015291852 
+  110000       56       55         0.0011       2.836524      34.555916        0.15565 -8.3916214e-06  -1.039472e-06   -0.016350275 
+  120000       56       55         0.0012      3.0903702      34.253337        0.15565 -1.0058957e-05 -1.2983983e-06    -0.01692446 
+  130000       56       55         0.0013       3.343905      33.955086        0.15565 -1.1765948e-05 -1.5260275e-06    -0.01718381 
+  140000       56       55         0.0014       3.598145       33.66982        0.15565 -1.3493055e-05 -1.7323367e-06   -0.017358328 
+  150000       56       55         0.0015       3.851872      33.384236        0.15565 -1.5238728e-05 -1.9376242e-06   -0.017562667 
+  160000       56       55         0.0016       4.131175      33.308856     0.15564996 -5.8619513e-05  -0.0023311163     -1.5821949 
+  170000       56       55         0.0017      4.4015441      33.142215     0.15564974 -0.00016301651  -0.0032895938     -1.2102026 
+  180000       56       55         0.0018      4.6794682      33.017362     0.15564937 -0.00027288256  -0.0044426905     -1.1789739 
+  190000       56       55         0.0019      4.9377341      32.746014     0.15564891 -0.00037921279  -0.0048822721     -1.0166671 
+  200000       56       55          0.002      5.2407181      32.755483     0.15564841 -0.00048402444  -0.0048437968     -1.0642188 
+  210000       56       55         0.0021      5.5616171      32.840975     0.15564795   -0.000591541    -0.00449395     -1.0820399 
+  220000       56       55         0.0022      5.8260221      32.573654     0.15564753 -0.00069768274  -0.0039092976     -1.0337945 
+  230000       56       55         0.0023      6.0872111      32.289533     0.15564717 -0.00079830372  -0.0035092824    -0.98292562 
+  240000       56       55         0.0024      6.3469071        31.9998     0.15564678 -0.00089536167  -0.0044183467    -0.96389855 
+  250000       56       55         0.0025      6.6177661      31.766049     0.15564627 -0.00099252301   -0.005742801    -0.99489718 
+  260000       56       55         0.0026        6.87286      31.457291     0.15564561  -0.0010983463  -0.0075309531     -1.1204559 
+  270000       56       55         0.0027       7.127816      31.151893     0.15564477  -0.0012136176  -0.0091900862      -1.166842 
+  280000       56       55         0.0028       7.382791      30.850185     0.15564378  -0.0013296147    -0.01076563     -1.1525984 
+  290000       56       55         0.0029      7.6377602       30.55168      0.1556426  -0.0014457326   -0.012912346     -1.1834535 
+  300000       56       55          0.003      7.9069681      30.310658     0.15564116  -0.0015689267   -0.015861458     -1.2876523 
+  310000       56       55         0.0031      8.1676741      30.036551     0.15563942  -0.0017023563   -0.018968391     -1.3641061 
+  320000       56       55         0.0032       8.424005      29.747833     0.15563742  -0.0018368616   -0.020599438     -1.2992213 
+  330000       56       55         0.0033      8.6798441      29.459407      0.1556354  -0.0019577871   -0.019437208     -1.1047205 
+  340000       56       55         0.0034      8.9704962      29.286555     0.15563361  -0.0020565075   -0.015983027    -0.86964584 
+WARNING: Forced restart written (../output.cpp:427)
+  348745       56       55     0.00348745      9.2532921      29.220241     0.15563238  -0.0021239238   -0.011934367    -0.67417185 
+Loop time of 9.25331 on 1 procs for 1449994 steps with 56 atoms, finish time Thu Sep 21 10:04:05 2017
+
+
+Pair  time (%) = 1.32235 (14.2906)
+Bond  time (%) = 3.41251 (36.8788)
+Neigh time (%) = 0.0433147 (0.4681)
+Comm  time (%) = 0.492427 (5.32163)
+Outpt time (%) = 0.002424 (0.0261961)
+Other time (%) = 3.98029 (43.0147)
+
+Nlocal:    56 ave 56 max 56 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    55 ave 55 max 55 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 55
+Ave neighs/atom = 0.982143
+Ave special neighs/atom = 0
+Neighbor list builds = 8
+Dangerous builds = 0
