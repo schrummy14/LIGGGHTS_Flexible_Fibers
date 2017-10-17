@@ -162,6 +162,14 @@ void FixNVESphereLimit::initial_integrate(int vflag)
 
   for (int i = 0; i < nlocal; i++) {
     if (mask[i] & groupbit) {
+    
+      // reset velocity and angular velocity to zero
+      v[i][0] = 0.0;
+      v[i][1] = 0.0;
+      v[i][2] = 0.0;
+      omega[i][0] = 0.0;
+      omega[i][1] = 0.0;
+      omega[i][2] = 0.0;
 
       // velocity update for 1/2 step
       dtfm = dtf / (rmass[i]*onePlusCAddRhoFluid_);
