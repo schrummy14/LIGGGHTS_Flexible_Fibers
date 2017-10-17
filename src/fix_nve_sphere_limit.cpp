@@ -32,24 +32,33 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
-    (if not contributing author is listed, this file has been contributed
-    by the core developer)
+    This file is from LAMMPS, but has been modified. Copyright for
+    modification:
 
     Copyright 2012-     DCS Computing GmbH, Linz
     Copyright 2009-2012 JKU Linz
+
+    Copyright of original file:
+    LAMMPS - Large-scale Atomic/Molecular Massively Parallel Simulator
+    http://lammps.sandia.gov, Sandia National Laboratories
+    Steve Plimpton, sjplimp@sandia.gov
+
+    Copyright (2003) Sandia Corporation.  Under the terms of Contract
+    DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
+    certain rights in this software.  This software is distributed under
+    the GNU General Public License.
 ------------------------------------------------------------------------- */
 
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "fix_nve_sphere_limit.h"
 #include "atom.h"
-#include "force.h"
+#include "atom_vec.h"
 #include "update.h"
 #include "respa.h"
-#include "modify.h"
-#include "comm.h"
+#include "force.h"
 #include "error.h"
 #include "domain.h" 
 
@@ -57,191 +66,140 @@ using namespace LAMMPS_NS;
 using namespace FixConst;
 
 #define INERTIA 0.4          // moment of inertia prefactor for sphere
+
 enum{NONE,DIPOLE};
 
 /* ---------------------------------------------------------------------- */
 
 FixNVESphereLimit::FixNVESphereLimit(LAMMPS *lmp, int narg, char **arg) :
-  Fix(lmp, narg, arg)
+  FixNVE(lmp, narg, arg),
+  useAM_(false),
+  CAddRhoFluid_(0.0),
+  onePlusCAddRhoFluid_(1.0)
 {
-  if (narg != 5) error->all(FLERR,"Illegal fix nve/limit/sphere command"); 
+  if (narg < 3) error->all(FLERR,"Illegal fix nve/sphere/limit command");
 
   time_integrate = 1;
-  scalar_flag = 1;
-  global_freq = 1;
-  extscalar = 1;
 
-  if(strcmp(arg[3],"radius_ratio") == 0)
-      relflag = 1;
-  else if(strcmp(arg[3],"absolute") == 0)
-      relflag = 0;
-  else
-      error->fix_error(FLERR,this,"expecting keyword 'absolute' or 'radius_ratio'"); 
+  // process extra keywords
 
-  xlimit = atof(arg[4]);
+  extra = NONE;
 
-  ncount = 0;
-}
+  int iarg = 3;
+  while (iarg < narg) {
+    if (strcmp(arg[iarg],"update") == 0) {
+      if (iarg+2 > narg) error->all(FLERR,"Illegal fix nve/sphere/limit command");
+      if (strcmp(arg[iarg+1],"dipole") == 0) extra = DIPOLE;
+      else if (strcmp(arg[iarg+1],"CAddRhoFluid") == 0)
+      {
+            if(narg < iarg+2)
+                error->fix_error(FLERR,this,"not enough arguments for 'CAddRhoFluid'");
+            iarg+=2;
+            useAM_ = true;
+            CAddRhoFluid_        = atof(arg[iarg]);
+            onePlusCAddRhoFluid_ = 1.0 + CAddRhoFluid_;
+            fprintf(screen,"cfd_coupling_force_implicit will consider added mass with CAddRhoFluid = %f\n",
+                    CAddRhoFluid_);
+      }
+      else error->all(FLERR,"Illegal fix nve/sphere/limit command");
+      iarg += 2;
+    } else error->all(FLERR,"Illegal fix nve/sphere/limit command");
+  }
 
-/* ---------------------------------------------------------------------- */
+  // error checks
 
-int FixNVESphereLimit::setmask()
-{
-  int mask = 0;
-  mask |= INITIAL_INTEGRATE;
-  mask |= FINAL_INTEGRATE;
-  mask |= INITIAL_INTEGRATE_RESPA;
-  mask |= FINAL_INTEGRATE_RESPA;
-  return mask;
+  if (!atom->sphere_flag)
+    error->all(FLERR,"Fix nve/sphere/limit requires atom style sphere");
+  if (extra == DIPOLE && !atom->mu_flag)
+    error->all(FLERR,"Fix nve/sphere/limit requires atom attribute mu");
 }
 
 /* ---------------------------------------------------------------------- */
 
 void FixNVESphereLimit::init()
 {
-  dtv = update->dt;
-  dtf = 0.5 * update->dt * force->ftm2v;
-  vlimitsq = (xlimit/dtv) * (xlimit/dtv);
-  ncount = 0;
+  FixNVE::init();
 
-  if(relflag == 1 && (!atom->radius_flag || !atom->rmass_flag))
-        error->fix_error(FLERR,this,"using 'radius_ratio' needs per-atom radius and mass");
-
-  if (strstr(update->integrate_style,"respa"))
-    step_respa = ((Respa *) update->integrate)->step;
-  // warn if using fix shake, which will lead to invalid constraint forces
-
-  for (int i = 0; i < modify->nfix; i++)
-    if (strcmp(modify->fix[i]->style,"shake") == 0) {
-      if (comm->me == 0)
-        error->warning(FLERR,"Should not use fix nve/limit with fix shake");
-    }
-    
   // check that all particles are finite-size spheres
   // no point particles allowed
 
   double *radius = atom->radius;
-  int *mask_ = atom->mask;
-  int nlocal_ = atom->nlocal;
+  int *mask = atom->mask;
+  int nlocal = atom->nlocal;
 
-  for (int i = 0; i < nlocal_; i++)
-    if (mask_[i] & groupbit)
+  for (int i = 0; i < nlocal; i++)
+    if (mask[i] & groupbit)
       if (radius[i] == 0.0)
-        error->one(FLERR,"Fix nve/sphere requires extended particles");
+        error->one(FLERR,"Fix nve/sphere/limit requires extended particles");
 }
 
-/* ----------------------------------------------------------------------
-   allow for both per-type and per-atom mass
-------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- */
 
 void FixNVESphereLimit::initial_integrate(int vflag)
 {
-  double dtfm,vsq,scale, rsq; 
+  double dtfm,dtirotate,msq,scale;
+  double g[3];
 
   double **x = atom->x;
   double **v = atom->v;
   double **f = atom->f;
   double **omega = atom->omega;
   double **torque = atom->torque;
-  double *mass = atom->mass;
+  double *radius = atom->radius;
   double *rmass = atom->rmass;
-  double *radius = atom->radius; 
-  int *type = atom->type;
   int *mask = atom->mask;
   int nlocal = atom->nlocal;
-  
   if (igroup == atom->firstgroup) nlocal = atom->nfirst;
 
-  double dtfrotate, dtirotate; 
+  // set timestep here since dt may have changed or come via rRESPA
+
+  double dtfrotate; 
   if (domain->dimension == 2) dtfrotate = dtf / 0.5; // for discs the formula is I=0.5*Mass*Radius^2
   else dtfrotate  = dtf / INERTIA;
-  if (relflag == 1) 
-  {
-      for (int i = 0; i < nlocal; i++) {
-        if (mask[i] & groupbit) {
-          dtfm = dtf / rmass[i];
-          v[i][0] += dtfm * f[i][0];
-          v[i][1] += dtfm * f[i][1];
-          v[i][2] += dtfm * f[i][2];
 
-          vsq = v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2];
-          rsq = radius[i]*radius[i];
-          if (vsq > vlimitsq*rsq) {
-            ncount++;
-            scale = sqrt(vlimitsq*rsq/vsq);
-            v[i][0] *= scale;
-            v[i][1] *= scale;
-            v[i][2] *= scale;
-          }
-          
-          x[i][0] += dtv * v[i][0];
-          x[i][1] += dtv * v[i][1];
-          x[i][2] += dtv * v[i][2];
-          
-          
-          // rotation update
-          dtirotate = dtfrotate / (radius[i]*radius[i]*rmass[i]);
-          omega[i][0] += dtirotate * torque[i][0];
-          omega[i][1] += dtirotate * torque[i][1];
-          omega[i][2] += dtirotate * torque[i][2];
-          
-          vsq = omega[i][0]*omega[i][0];
-          vsq+= omega[i][1]*omega[i][1];
-          vsq+= omega[i][2]*omega[i][2];
-          vsq*= radius[i]*radius[i];
-          
-          if(vsq>vlimitsq*rsq){
-            ncount++;
-            scale = sqrt(vlimitsq*rsq/vsq);
-            omega[i][0] *= scale/radius[i];
-            omega[i][1] *= scale/radius[i];
-            omega[i][2] *= scale/radius[i];
-          }
-        }
-      }
+  // update 1/2 step for v and omega, and full step for  x for all particles
+  // d_omega/dt = torque / inertia
+
+  for (int i = 0; i < nlocal; i++) {
+    if (mask[i] & groupbit) {
+
+      // velocity update for 1/2 step
+      dtfm = dtf / (rmass[i]*onePlusCAddRhoFluid_);
+      v[i][0] += dtfm * f[i][0];
+      v[i][1] += dtfm * f[i][1];
+      v[i][2] += dtfm * f[i][2];
+
+      // position update
+      x[i][0] += dtv * v[i][0];
+      x[i][1] += dtv * v[i][1];
+      x[i][2] += dtv * v[i][2];
+      
+      // rotation update
+      dtirotate = dtfrotate / (radius[i]*radius[i]*rmass[i]);
+      omega[i][0] += dtirotate * torque[i][0];
+      omega[i][1] += dtirotate * torque[i][1];
+      omega[i][2] += dtirotate * torque[i][2];
+    }
   }
-  else
-  {
-      for (int i = 0; i < nlocal; i++) {
-        if (mask[i] & groupbit) {
-          dtfm = dtf / rmass[i];
-          v[i][0] += dtfm * f[i][0];
-          v[i][1] += dtfm * f[i][1];
-          v[i][2] += dtfm * f[i][2];
 
-          vsq = v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2];
-          if (vsq > vlimitsq) {
-            ncount++;
-            scale = sqrt(vlimitsq/vsq);
-            v[i][0] *= scale;
-            v[i][1] *= scale;
-            v[i][2] *= scale;
-          }
+  // update mu for dipoles
+  // d_mu/dt = omega cross mu
+  // renormalize mu to dipole length
 
-          x[i][0] += dtv * v[i][0];
-          x[i][1] += dtv * v[i][1];
-          x[i][2] += dtv * v[i][2];
-          
-          // rotation update
-          dtirotate = dtfrotate / (radius[i]*radius[i]*rmass[i]);
-          omega[i][0] += dtirotate * torque[i][0];
-          omega[i][1] += dtirotate * torque[i][1];
-          omega[i][2] += dtirotate * torque[i][2];
-          
-          vsq = omega[i][0]*omega[i][0];
-          vsq+= omega[i][1]*omega[i][1];
-          vsq+= omega[i][2]*omega[i][2];
-          vsq*= radius[i]*radius[i];
-          
-          if(vsq>vlimitsq*rsq){
-            ncount++;
-            scale = sqrt(vlimitsq/vsq);
-            omega[i][0] *= scale/radius[i];
-            omega[i][1] *= scale/radius[i];
-            omega[i][2] *= scale/radius[i];
-          }
+  if (extra == DIPOLE) {
+    double **mu = atom->mu;
+    for (int i = 0; i < nlocal; i++)
+      if (mask[i] & groupbit)
+        if (mu[i][3] > 0.0) {
+          g[0] = mu[i][0] + dtv * (omega[i][1]*mu[i][2]-omega[i][2]*mu[i][1]);
+          g[1] = mu[i][1] + dtv * (omega[i][2]*mu[i][0]-omega[i][0]*mu[i][2]);
+          g[2] = mu[i][2] + dtv * (omega[i][0]*mu[i][1]-omega[i][1]*mu[i][0]);
+          msq = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
+          scale = mu[i][3]/sqrt(msq);
+          mu[i][0] = g[0]*scale;
+          mu[i][1] = g[1]*scale;
+          mu[i][2] = g[2]*scale;
         }
-      }
   }
 }
 
@@ -249,118 +207,40 @@ void FixNVESphereLimit::initial_integrate(int vflag)
 
 void FixNVESphereLimit::final_integrate()
 {
-  double dtfm,vsq,scale,rsq; 
+  double dtfm,dtirotate;
 
   double **v = atom->v;
   double **f = atom->f;
-  double *mass = atom->mass;
+  double **omega = atom->omega;
+  double **torque = atom->torque;
   double *rmass = atom->rmass;
   double *radius = atom->radius;
-  int *type = atom->type;
   int *mask = atom->mask;
   int nlocal = atom->nlocal;
   if (igroup == atom->firstgroup) nlocal = atom->nfirst;
 
-  if (rmass) {
-    if (relflag == 1) 
-    {
-        for (int i = 0; i < nlocal; i++) {
-          if (mask[i] & groupbit) {
-            dtfm = dtf / rmass[i];
-            v[i][0] += dtfm * f[i][0];
-            v[i][1] += dtfm * f[i][1];
-            v[i][2] += dtfm * f[i][2];
+  // set timestep here since dt may have changed or come via rRESPA
 
-            vsq = v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2];
-            rsq = radius[i]*radius[i];
-            if (vsq > vlimitsq*rsq) {
-              ncount++;
-              scale = sqrt(vlimitsq*rsq/vsq);
-              v[i][0] *= scale;
-              v[i][1] *= scale;
-              v[i][2] *= scale;
-            }
-          }
-        }
+  double dtfrotate; 
+  if (domain->dimension == 2) dtfrotate = dtf / 0.5; // for discs the formula is I=0.5*Mass*Radius^2
+  else dtfrotate  = dtf / INERTIA;
+
+  // update 1/2 step for v,omega for all particles
+  // d_omega/dt = torque / inertia
+
+  for (int i = 0; i < nlocal; i++)
+    if (mask[i] & groupbit) {
+
+      // velocity update for 1/2 step
+      dtfm = dtf / (rmass[i]*onePlusCAddRhoFluid_);
+      v[i][0] += dtfm * f[i][0];
+      v[i][1] += dtfm * f[i][1];
+      v[i][2] += dtfm * f[i][2];
+
+      // rotation update
+      dtirotate = dtfrotate / (radius[i]*radius[i]*rmass[i]);
+      omega[i][0] += dtirotate * torque[i][0];
+      omega[i][1] += dtirotate * torque[i][1];
+      omega[i][2] += dtirotate * torque[i][2];
     }
-    else
-    {
-        for (int i = 0; i < nlocal; i++) {
-          if (mask[i] & groupbit) {
-            dtfm = dtf / rmass[i];
-            v[i][0] += dtfm * f[i][0];
-            v[i][1] += dtfm * f[i][1];
-            v[i][2] += dtfm * f[i][2];
-
-            vsq = v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2];
-            if (vsq > vlimitsq) {
-              ncount++;
-              scale = sqrt(vlimitsq/vsq);
-              v[i][0] *= scale;
-              v[i][1] *= scale;
-              v[i][2] *= scale;
-            }
-          }
-        }
-    }
-
-  } else {
-    for (int i = 0; i < nlocal; i++) {
-      if (mask[i] & groupbit) {
-        dtfm = dtf / mass[type[i]];
-        v[i][0] += dtfm * f[i][0];
-        v[i][1] += dtfm * f[i][1];
-        v[i][2] += dtfm * f[i][2];
-
-        vsq = v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2];
-        if (vsq > vlimitsq) {
-          ncount++;
-          scale = sqrt(vlimitsq/vsq);
-          v[i][0] *= scale;
-          v[i][1] *= scale;
-          v[i][2] *= scale;
-        }
-      }
-    }
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixNVESphereLimit::initial_integrate_respa(int vflag, int ilevel, int iloop)
-{
-  dtv = step_respa[ilevel];
-  dtf = 0.5 * step_respa[ilevel] * force->ftm2v;
-
-  if (ilevel == 0) initial_integrate(vflag);
-  else final_integrate();
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixNVESphereLimit::final_integrate_respa(int ilevel, int iloop)
-{
-  dtf = 0.5 * step_respa[ilevel] * force->ftm2v;
-  final_integrate();
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixNVESphereLimit::reset_dt()
-{
-  dtv = update->dt;
-  dtf = 0.5 * update->dt * force->ftm2v;
-  vlimitsq = (xlimit/dtv) * (xlimit/dtv);
-}
-
-/* ----------------------------------------------------------------------
-   energy of indenter interaction
-------------------------------------------------------------------------- */
-
-double FixNVESphereLimit::compute_scalar()
-{
-  double one = ncount;
-  double all;
-  MPI_Allreduce(&one,&all,1,MPI_DOUBLE,MPI_SUM,world);
-  return all;
 }

@@ -32,7 +32,13 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
-    This file is from LAMMPS
+    This file is from LAMMPS, but has been modified. Copyright for
+    modification:
+
+    Copyright 2012-     DCS Computing GmbH, Linz
+    Copyright 2009-2012 JKU Linz
+
+    Copyright of original file:
     LAMMPS - Large-scale Atomic/Molecular Massively Parallel Simulator
     http://lammps.sandia.gov, Sandia National Laboratories
     Steve Plimpton, sjplimp@sandia.gov
@@ -52,29 +58,24 @@ FixStyle(nve/sphere/limit,FixNVESphereLimit)
 #ifndef LMP_FIX_NVE_SPHERE_LIMIT_H
 #define LMP_FIX_NVE_SPHERE_LIMIT_H
 
-#include "fix.h"
+#include "fix_nve.h"
 
 namespace LAMMPS_NS {
 
-class FixNVESphereLimit : public Fix {
+class FixNVESphereLimit : public FixNVE {
  public:
   FixNVESphereLimit(class LAMMPS *, int, char **);
-  int setmask();
+  virtual ~FixNVESphereLimit() {}
   void init();
-  void initial_integrate(int);
-  void final_integrate();
-  void initial_integrate_respa(int, int, int);
-  void final_integrate_respa(int, int);
-  void reset_dt();
-  double compute_scalar();
+  virtual void initial_integrate(int);
+  virtual void final_integrate();
 
- private:
-  double dtv,dtf;
-  double *step_respa;
-  int mass_require,ncount;
-  double xlimit,vlimitsq;
+ protected:
+  int extra;
 
-  int relflag; 
+  bool   useAM_;
+  double CAddRhoFluid_;   //Added mass coefficient times relative fluid density (C_add*rhoFluid/rhoP)
+  double onePlusCAddRhoFluid_;
 };
 
 }
@@ -89,5 +90,17 @@ E: Illegal ... command
 Self-explanatory.  Check the input script syntax and compare to the
 documentation for the command.  You can use -echo screen as a
 command-line option when running LAMMPS to see the offending line.
+
+E: Fix nve/sphere/limit requires atom style sphere
+
+Self-explanatory.
+
+E: Fix nve/sphere/limit requires atom attribute mu
+
+An atom style with this attribute is needed.
+
+E: Fix nve/sphere/limit requires extended particles
+
+This fix can only be used for particles of a finite size.
 
 */
