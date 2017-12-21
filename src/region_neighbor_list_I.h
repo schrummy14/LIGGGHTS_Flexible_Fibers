@@ -74,8 +74,8 @@ bool RegionNeighborList<INTERPOLATE>::hasOverlap(double * x, double radius) cons
     const int offset = *it;
     if((ibin+offset < 0) || ((size_t)(ibin+offset) >= bins.size()))
     {
-        
-        error->one(FLERR,"assertion failed");
+        return true;
+        //error->one(FLERR,"assertion failed");
     }
     const std::vector<Particle<INTERPOLATE> > & plist = bins[ibin+offset].particles;
 
