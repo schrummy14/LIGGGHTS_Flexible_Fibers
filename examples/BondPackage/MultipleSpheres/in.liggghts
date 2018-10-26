@@ -12,7 +12,6 @@ variable rp equal $d/2.0			# atom radius
 variable rb equal 1.0				# bond radius multiplier
 variable ro equal 1.0				# bond outer radius multiplier
 variable ri equal 0.00201/0.00283	# bond inner radius multiplier
-variable lb equal 1.0				# bond length multiplier
 variable bond_damp equal 1.0
 variable density equal 125.0		# Atom density
 variable Young equal 4.4e9 			# Atom Young's Modulus
@@ -49,7 +48,7 @@ neigh_modify	delay 0
 pair_coeff	* *
 variable Y_bond equal ${Young}
 variable G_bond equal ${Young}/(2.0*(1+${poiso}))
-bond_coeff 	1 ${ro} ${ri} ${lb} ${Y_bond} ${G_bond} ${bond_damp} 1 1.0e32 1.0e32
+bond_coeff 	1 ${ro} ${ri} ${Y_bond} ${G_bond} ${bond_damp} 1 1.0e32 1.0e32
 
 fix 		m1 all property/global youngsModulus peratomtype ${Young} 180.0e9
 fix 		m2 all property/global poissonsRatio peratomtype ${poiso} 0.3

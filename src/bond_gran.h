@@ -54,7 +54,6 @@ class BondGran : public Bond {
   // Added by Matt Schramm, Iowa State University
   double *damp; // dampening coeffinient 
   double *ro, *ri; // Outside and Inside bond radius scale
-  double *lb; // Bond length scale
   
   void allocate();
 

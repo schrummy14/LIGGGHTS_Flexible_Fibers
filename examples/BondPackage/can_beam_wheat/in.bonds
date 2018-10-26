@@ -18,7 +18,6 @@ variable c  equal ${d}+0.1			# IDK...
 variable rb equal 1.0*${rp}			# bond radius
 variable ro equal 1.0
 variable ri equal 0.0
-variable lb equal 1.0
 variable L  equal 55*$d  	    	# Simulation Length
 variable sL equal $L+2*$d			
 variable L_2 equal 1.1*$L
@@ -52,22 +51,15 @@ neighbor	0.001 bin
 neigh_modify	delay 0
 
 variable Y equal 4.4e9
-#variable Y  equal ${Y1}*((${ro}*${ro})/((${ro}*${ro})-(${ri}*${ri})))
 variable p equal 0.3
 variable G equal $Y/(2.0*(1+$p))
-
-print $Y 
-print $p
-print $G
-
-variable A equal PI*(${ro}*${ro}-${ri}*${ri})
 
 variable Y_bond equal $Y
 variable G_bond equal $G
 
 #New pair style
 pair_coeff	* *
-bond_coeff 1 ${ro} ${ri} ${lb} ${Y_bond} ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 ${ro} ${ri} ${Y_bond} ${G_bond} ${bond_damp_val} 1 1.0e32 1.0e32
 
 fix 		m1 all property/global youngsModulus peratomtype $Y
 fix 		m2 all property/global poissonsRatio peratomtype $p
@@ -146,11 +138,3 @@ unfix wall
 unfix p
 
 run ${run3_sim} upto
-
-
-
-
-
-
-
-

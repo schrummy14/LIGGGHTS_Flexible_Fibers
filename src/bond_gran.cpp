@@ -95,7 +95,6 @@ BondGran::~BondGran()
     memory->destroy(setflag);
     memory->destroy(ro);
     memory->destroy(ri);
-    memory->destroy(lb);
     memory->destroy(Sn);
     memory->destroy(St);
     memory->destroy(damp);
@@ -168,18 +167,16 @@ void BondGran::compute(int eflag, int vflag)
 
   if(breakmode == BREAKSTYLE_STRESS_TEMP)
   {
-      if(!fix_Temp) error->all(FLERR,"Internal error in BondGran");
-      Temp = fix_Temp->vector_atom;
+    if(!fix_Temp) error->all(FLERR,"Internal error in BondGran");
+    Temp = fix_Temp->vector_atom;
   }
   
   for (n = 0; n < nbondlist; n++) { // Loop through Bond list
-    
-	
-	//1st check if bond is broken,
+    //1st check if bond is broken,
     if(bondlist[n][3])
     {
-		//printf("bond %d allready broken\n",n);
-        continue;
+      //printf("bond %d allready broken\n",n);
+      continue;
     }
 
     i1 = bondlist[n][0]; // Sphere 1
@@ -187,66 +184,67 @@ void BondGran::compute(int eflag, int vflag)
 
     //2nd check if bond overlap the box-borders
     if (x[i1][0]<(domain->boxlo[0]+cutoff)) {
-	bondlist[n][3]=1;
-	continue;
+      bondlist[n][3]=1;
+      continue;
     } else if (x[i1][0]>(domain->boxhi[0]-cutoff)) {
-	bondlist[n][3]=1;
-	continue;
+      bondlist[n][3]=1;
+      continue;
     } else if (x[i1][1]<(domain->boxlo[1]+cutoff)) {
-	bondlist[n][3]=1;
-	continue;
+      bondlist[n][3]=1;
+      continue;
     } else if (x[i1][1]>(domain->boxhi[1]-cutoff)) {
-	bondlist[n][3]=1;
-	continue;
+      bondlist[n][3]=1;
+      continue;
     } else if (x[i1][2]<(domain->boxlo[2]+cutoff)) {
-	bondlist[n][3]=1;
-	continue;
+      bondlist[n][3]=1;
+      continue;
     } else if (x[i1][2]>(domain->boxhi[2]-cutoff)) {
-	bondlist[n][3]=1;
-	continue;
-    } 
-    if (x[i2][0]<(domain->boxlo[0]+cutoff)) {
-	bondlist[n][3]=1;
-	continue;
-    } else if (x[i2][0]>(domain->boxhi[0]-cutoff)) {
-	bondlist[n][3]=1;
-	continue;
-    } else if (x[i2][1]<(domain->boxlo[1]+cutoff)) {
-	bondlist[n][3]=1;
-	continue;
-    } else if (x[i2][1]>(domain->boxhi[1]-cutoff)) {
-	bondlist[n][3]=1;
-	continue;
-    } else if (x[i2][2]<(domain->boxlo[2]+cutoff)) {
-	bondlist[n][3]=1;
-	continue;
-    } else if (x[i2][2]>(domain->boxhi[2]-cutoff)) {
-	bondlist[n][3]=1;
-	continue;
+      bondlist[n][3]=1;
+      continue;
     }
-    
+
+    if (x[i2][0]<(domain->boxlo[0]+cutoff)) {
+      bondlist[n][3]=1;
+      continue;
+    } else if (x[i2][0]>(domain->boxhi[0]-cutoff)) {
+      bondlist[n][3]=1;
+      continue;
+    } else if (x[i2][1]<(domain->boxlo[1]+cutoff)) {
+      bondlist[n][3]=1;
+      continue;
+    } else if (x[i2][1]>(domain->boxhi[1]-cutoff)) {
+      bondlist[n][3]=1;
+      continue;
+    } else if (x[i2][2]<(domain->boxlo[2]+cutoff)) {
+      bondlist[n][3]=1;
+      continue;
+    } else if (x[i2][2]>(domain->boxhi[2]-cutoff)) {
+      bondlist[n][3]=1;
+      continue;
+    }
+
     type = bondlist[n][2]; // Get current bond type properties      
 
-	rin = ri[type]*fmin(radius[i1],radius[i2]); 
-	rout= ro[type]*fmin(radius[i1],radius[i2]);
-	
-	A = M_PI * (rout*rout - rin*rin); // Bond Area
+    rin = ri[type]*fmin(radius[i1],radius[i2]); 
+    rout= ro[type]*fmin(radius[i1],radius[i2]);
+
+    A = M_PI * (rout*rout - rin*rin); // Bond Area
     J = A * 0.5 * (rout*rout - rin*rin);
-    
+
 //    m1 = 4.0/3.0*density[i1]*M_PI*radius[i1]*radius[i1]*radius[i1]; // 4/3 pi r^3 density
 //    m2 = 4.0/3.0*density[i2]*M_PI*radius[i2]*radius[i2]*radius[i2];
-    
+
     m1 = 4.1887902047863909846168578443*density[i1]*radius[i1]*radius[i1]*radius[i1];
     m2 = 4.1887902047863909846168578443*density[i2]*radius[i2]*radius[i2]*radius[i2];
-	Me = m1*m2/(m1+m2);
+    Me = m1*m2/(m1+m2);
 
     Ip = 0.5*M_PI*(rout*rout*rout*rout - rin*rin*rin*rin); // MS
     I  = 0.5*Ip;
 
-	J1 = 0.4 * m1 * radius[i1]*radius[i1];
-	J2 = 0.4 * m2 * radius[i2]*radius[i2];
-	Js = J1*J2/(J1+J2);
-	
+    J1 = 0.4 * m1 * radius[i1]*radius[i1];
+    J2 = 0.4 * m2 * radius[i2]*radius[i2];
+    Js = J1*J2/(J1+J2);
+
     delx = x[i1][0] - x[i2][0]; // x-directional seperation
     dely = x[i1][1] - x[i2][1]; // y-directional seperation
     delz = x[i1][2] - x[i2][2]; // z-directional seperation 
@@ -256,10 +254,22 @@ void BondGran::compute(int eflag, int vflag)
     rsqinv = 1./rsq;
     r = sqrt(rsq);
     rinv = 1./r;
-    
+
+    // Check if bond just formed and set eq distance
+    if (bondhistlist[n][12] == 0.0) {
+      bondhistlist[n][12] = r;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen, "INFO: Setting bond length between %i and %i at %g\n", i1, i2, bondhistlist[n][12]);
+#     endif
+    }
+
     // Set Bond Length
-    bondLength = lb[type]*(radius[i1]+radius[i2]);
-    
+    bondLength = fabs(bondhistlist[n][12]);
+    if (bondLength < 1.0e-10) {
+      fprintf(screen,"BondLength = %g\n",bondLength);
+      error->all(FLERR,"bondlength too small\n");
+    }
+
     // Set Stiffness Values
     Kn = Sn[type]*A/bondLength;
     Kt = St[type]*A/bondLength;
@@ -282,28 +292,28 @@ void BondGran::compute(int eflag, int vflag)
     vt1 = vr1 - vn1;
     vt2 = vr2 - vn2;
     vt3 = vr3 - vn3;
-    
+
     // relative rotational velocity for shear
     wr1 = (radius[i1]*omega[i1][0] + radius[i2]*omega[i2][0]) * rinv;
     wr2 = (radius[i1]*omega[i1][1] + radius[i2]*omega[i2][1]) * rinv;
     wr3 = (radius[i1]*omega[i1][2] + radius[i2]*omega[i2][2]) * rinv;
-    
+
     // relative velocities for shear at contact
     vtr1 = vt1 - (delz*wr2-dely*wr3);
     vtr2 = vt2 - (delx*wr3-delz*wr1);
     vtr3 = vt3 - (dely*wr1-delx*wr2);
-	
-	// relative angular velocity
+
+    // relative angular velocity
     wr1 = omega[i1][0] - omega[i2][0];
     wr2 = omega[i1][1] - omega[i2][1];
     wr3 = omega[i1][2] - omega[i2][2];
 
     // normal component
-	wnnr = wr1*delx + wr2*dely + wr3*delz;
-	wnnr *= rsqinv;
-	wn1 = delx*wnnr;
-	wn2 = dely*wnnr;
-	wn3 = delz*wnnr;
+    wnnr = wr1*delx + wr2*dely + wr3*delz;
+    wnnr *= rsqinv;
+    wn1 = delx*wnnr;
+    wn2 = dely*wnnr;
+    wn3 = delz*wnnr;
 
     // tangential component
     wt1 = wr1 - wn1;
@@ -311,17 +321,17 @@ void BondGran::compute(int eflag, int vflag)
     wt3 = wr3 - wn3;
 
     // calc change in bond normal forces (Can be directly calculated does not need history!!!)
-	sndt = Kn * (r-bondLength)*rinv;
+    sndt = Kn * (r-bondLength)*rinv;
     fn_bond[0] = - sndt*delx;
-	fn_bond[1] = - sndt*dely;
-	fn_bond[2] = - sndt*delz; 
- 
+    fn_bond[1] = - sndt*dely;
+    fn_bond[2] = - sndt*delz; 
+
     // calc change in shear forces
     stdt = Kt*dt; 
     dtforce[0] = -vtr1*stdt;
     dtforce[1] = -vtr2*stdt;
     dtforce[2] = -vtr3*stdt;
-    
+
     // calc change in normal torque
     K_tor_dt = K_tor*dt;
     dntorque[0] = -wn1*K_tor_dt;
@@ -329,36 +339,36 @@ void BondGran::compute(int eflag, int vflag)
     dntorque[2] = -wn3*K_tor_dt;
 
     // calc change in tang torque
-	K_ben_dt = K_ben*dt; // K_ben will become an input parameter
-	dttorque[0] = -wt1*K_ben_dt;
+    K_ben_dt = K_ben*dt; // K_ben will become an input parameter
+    dttorque[0] = -wt1*K_ben_dt;
     dttorque[1] = -wt2*K_ben_dt;
     dttorque[2] = -wt3*K_ben_dt;
-    
-    // normal force dampening
-	d_fn_sqrt_2_Me_Sn = 2.0*damp[type] * sqrt(Me*Kn);
-	force_damp_n[0] = d_fn_sqrt_2_Me_Sn*(-vn1);
-	force_damp_n[1] = d_fn_sqrt_2_Me_Sn*(-vn2);
-	force_damp_n[2] = d_fn_sqrt_2_Me_Sn*(-vn3);
 
-	// tangential force dampening
-	d_ft_sqrt_2_Me_St = 2.0*damp[type] * sqrt(Me*Kt);
-	force_damp_t[0] = d_ft_sqrt_2_Me_St*(-vtr1);
-	force_damp_t[1] = d_ft_sqrt_2_Me_St*(-vtr2);
-	force_damp_t[2] = d_ft_sqrt_2_Me_St*(-vtr3);
-	
-	// normal moment dampening
-	d_mn_sqrt_2_Js_Ktor = 2.0*damp[type] * sqrt(Js*K_tor);
-	torque_damp_n[0] = d_mn_sqrt_2_Js_Ktor*(-wn1);
-	torque_damp_n[1] = d_mn_sqrt_2_Js_Ktor*(-wn2);
-	torque_damp_n[2] = d_mn_sqrt_2_Js_Ktor*(-wn3);
-	
-	// tangential moment dampening
+    // normal force dampening
+    d_fn_sqrt_2_Me_Sn = 2.0*damp[type] * sqrt(Me*Kn);
+    force_damp_n[0] = d_fn_sqrt_2_Me_Sn*(-vn1);
+    force_damp_n[1] = d_fn_sqrt_2_Me_Sn*(-vn2);
+    force_damp_n[2] = d_fn_sqrt_2_Me_Sn*(-vn3);
+
+    // tangential force dampening
+    d_ft_sqrt_2_Me_St = 2.0*damp[type] * sqrt(Me*Kt);
+    force_damp_t[0] = d_ft_sqrt_2_Me_St*(-vtr1);
+    force_damp_t[1] = d_ft_sqrt_2_Me_St*(-vtr2);
+    force_damp_t[2] = d_ft_sqrt_2_Me_St*(-vtr3);
+
+    // normal moment dampening
+    d_mn_sqrt_2_Js_Ktor = 2.0*damp[type] * sqrt(Js*K_tor);
+    torque_damp_n[0] = d_mn_sqrt_2_Js_Ktor*(-wn1);
+    torque_damp_n[1] = d_mn_sqrt_2_Js_Ktor*(-wn2);
+    torque_damp_n[2] = d_mn_sqrt_2_Js_Ktor*(-wn3);
+
+    // tangential moment dampening
     d_mt_sqrt_2_Js_Kben = 2.0*damp[type] * sqrt(Js*K_ben);
-	torque_damp_t[0] = d_mt_sqrt_2_Js_Kben*(-wt1);
-	torque_damp_t[1] = d_mt_sqrt_2_Js_Kben*(-wt2);
-	torque_damp_t[2] = d_mt_sqrt_2_Js_Kben*(-wt3);
-	
-	
+    torque_damp_t[0] = d_mt_sqrt_2_Js_Kben*(-wt1);
+    torque_damp_t[1] = d_mt_sqrt_2_Js_Kben*(-wt2);
+    torque_damp_t[2] = d_mt_sqrt_2_Js_Kben*(-wt3);
+
+
     // rotate forces from previous time step
 
     //rotate tangential force
@@ -367,45 +377,51 @@ void BondGran::compute(int eflag, int vflag)
     vel_temp[0] = bondhistlist[n][3] - rot*delx;
     vel_temp[1] = bondhistlist[n][4] - rot*dely;
     vel_temp[2] = bondhistlist[n][5] - rot*delz;
-	vel_norm = sqrt (vel_temp[0]*vel_temp[0]+vel_temp[1]*vel_temp[1]+vel_temp[2]*vel_temp[2]);
-	f_norm = bondhistlist[n][3]*bondhistlist[n][3] + bondhistlist[n][4]*bondhistlist[n][4] + bondhistlist[n][5]*bondhistlist[n][5];
-	if (vel_norm == 0) f_norm =0;
-	else f_norm = sqrt (f_norm) /vel_norm;
-	
+    vel_norm = sqrt (vel_temp[0]*vel_temp[0]+vel_temp[1]*vel_temp[1]+vel_temp[2]*vel_temp[2]);
+    f_norm = bondhistlist[n][3]*bondhistlist[n][3] + bondhistlist[n][4]*bondhistlist[n][4] + bondhistlist[n][5]*bondhistlist[n][5];
+    if (vel_norm == 0)
+      f_norm =0;
+    else 
+      f_norm = sqrt(f_norm) /vel_norm;
+
     bondhistlist[n][3] = f_norm*vel_temp[0];
-	bondhistlist[n][4] = f_norm*vel_temp[1];
-	bondhistlist[n][5] = f_norm*vel_temp[2];
-	
+    bondhistlist[n][4] = f_norm*vel_temp[1];
+    bondhistlist[n][5] = f_norm*vel_temp[2];
+
     //rotate normal torque
     rot = bondhistlist[n][6]*delx + bondhistlist[n][7]*dely + bondhistlist[n][8]*delz;
     rot *= rsqinv;
     vel_temp[0] = rot*delx;
     vel_temp[1] = rot*dely;
     vel_temp[2] = rot*delz;
-	vel_norm = sqrt (vel_temp[0]*vel_temp[0]+vel_temp[1]*vel_temp[1]+vel_temp[2]*vel_temp[2]);
-	f_norm = bondhistlist[n][6]*bondhistlist[n][6] + bondhistlist[n][7]*bondhistlist[n][7] + bondhistlist[n][8]*bondhistlist[n][8];
-	if (vel_norm == 0) f_norm =0;
-	else f_norm = sqrt (f_norm) /vel_norm;
-	
+    vel_norm = sqrt (vel_temp[0]*vel_temp[0]+vel_temp[1]*vel_temp[1]+vel_temp[2]*vel_temp[2]);
+    f_norm = bondhistlist[n][6]*bondhistlist[n][6] + bondhistlist[n][7]*bondhistlist[n][7] + bondhistlist[n][8]*bondhistlist[n][8];
+    if (vel_norm == 0)
+      f_norm =0;
+    else
+      f_norm = sqrt (f_norm) /vel_norm;
+
     bondhistlist[n][6] = f_norm*vel_temp[0];
-	bondhistlist[n][7] = f_norm*vel_temp[1];
-	bondhistlist[n][8] = f_norm*vel_temp[2];	
+    bondhistlist[n][7] = f_norm*vel_temp[1];
+    bondhistlist[n][8] = f_norm*vel_temp[2];
 
     //rotate tangential torque
- 	rot = bondhistlist[n][9]*delx + bondhistlist[n][10]*dely + bondhistlist[n][11]*delz;
+    rot = bondhistlist[n][9]*delx + bondhistlist[n][10]*dely + bondhistlist[n][11]*delz;
     rot *= rsqinv;
     vel_temp[0] = bondhistlist[n][9] - rot*delx;
     vel_temp[1] = bondhistlist[n][10] - rot*dely;
     vel_temp[2] = bondhistlist[n][11] - rot*delz;
-	vel_norm = sqrt (vel_temp[0]*vel_temp[0]+vel_temp[1]*vel_temp[1]+vel_temp[2]*vel_temp[2]);
-	f_norm = bondhistlist[n][9]*bondhistlist[n][9] + bondhistlist[n][10]*bondhistlist[n][10] + bondhistlist[n][11]*bondhistlist[n][11];
-	if (vel_norm == 0) f_norm =0;
-	else f_norm = sqrt (f_norm) /vel_norm;
-	
-    bondhistlist[n][9] = f_norm*vel_temp[0];
+    vel_norm = sqrt (vel_temp[0]*vel_temp[0]+vel_temp[1]*vel_temp[1]+vel_temp[2]*vel_temp[2]);
+    f_norm = bondhistlist[n][9]*bondhistlist[n][9] + bondhistlist[n][10]*bondhistlist[n][10] + bondhistlist[n][11]*bondhistlist[n][11];
+    if (vel_norm == 0)
+      f_norm =0;
+    else
+      f_norm = sqrt (f_norm) /vel_norm;
+
+    bondhistlist[n][ 9] = f_norm*vel_temp[0];
     bondhistlist[n][10] = f_norm*vel_temp[1];
     bondhistlist[n][11] = f_norm*vel_temp[2];
-	
+
     //increment normal and tangential force and torque 
     bondhistlist[n][ 0] = fn_bond[0];
     bondhistlist[n][ 1] = fn_bond[1];
@@ -422,9 +438,9 @@ void BondGran::compute(int eflag, int vflag)
 
 //---torque due to tangential bond force 
     ft_bond_total[0] = bondhistlist[n][3];
-	ft_bond_total[1] = bondhistlist[n][4];
-	ft_bond_total[2] = bondhistlist[n][5];
-	
+    ft_bond_total[1] = bondhistlist[n][4];
+    ft_bond_total[2] = bondhistlist[n][5];
+
     tor1 = - rinv * (dely*ft_bond_total[2] - delz*ft_bond_total[1]);
     tor2 = - rinv * (delz*ft_bond_total[0] - delx*ft_bond_total[2]);
     tor3 = - rinv * (delx*ft_bond_total[1] - dely*ft_bond_total[0]);
@@ -508,7 +524,6 @@ void BondGran::allocate()
   // Create bond property variables
   memory->create(ro,n+1,"bond:ro");
   memory->create(ri,n+1,"bond:ri");
-  memory->create(lb,n+1,"bond:lb");
   memory->create(Sn,n+1,"bond:Sn");
   memory->create(St,n+1,"bond:St");
   memory->create(damp,n+1,"bond:damp");
@@ -531,14 +546,13 @@ void BondGran::allocate()
 void BondGran::coeff(int narg, char **arg)
 {
 
-  if(narg < 7) error->all(FLERR,"Incorrect args for bond coefficients (ro, ri, lb, sn, st, damp)"); // Matt Schramm
+  if(narg < 6) error->all(FLERR,"Incorrect args for bond coefficients (ro, ri, lb, sn, st, damp)"); // Matt Schramm
   
   double ro_one = force->numeric(FLERR,arg[1]);
   double ri_one = force->numeric(FLERR,arg[2]);
-  double lb_one = force->numeric(FLERR,arg[3]);
-  double Sn_one = force->numeric(FLERR,arg[4]);
-  double St_one = force->numeric(FLERR,arg[5]);
-  double damp_one = force->numeric(FLERR,arg[6]);
+  double Sn_one = force->numeric(FLERR,arg[3]);
+  double St_one = force->numeric(FLERR,arg[4]);
+  double damp_one = force->numeric(FLERR,arg[5]);
   
   if (ro_one <= ri_one) error->all(FLERR,"ro must be greater than ri");
 
@@ -547,20 +561,20 @@ void BondGran::coeff(int narg, char **arg)
       fprintf(screen,"   Ro = %f, Ri = %f, Sn = %f, St = %f, Damp = %f \n",ro_one,ri_one,Sn_one,St_one,damp_one);
   }
 
-  if(force->numeric(FLERR,arg[7]) == 0. )
+  if(force->numeric(FLERR,arg[6]) == 0. )
   {
       breakmode = BREAKSTYLE_SIMPLE;
-      if (narg != 9) error->all(FLERR,"Incorrect args for bond coefficients");
+      if (narg != 8) error->all(FLERR,"Incorrect args for bond coefficients");
   }
-  else if(force->numeric(FLERR,arg[7]) == 1. )
+  else if(force->numeric(FLERR,arg[6]) == 1. )
   {
       breakmode = BREAKSTYLE_STRESS;
-      if (narg != 10) error->all(FLERR,"Incorrect args for bond coefficients");
+      if (narg != 9) error->all(FLERR,"Incorrect args for bond coefficients");
   }
-  else if(force->numeric(FLERR,arg[7]) == 2. )
+  else if(force->numeric(FLERR,arg[6]) == 2. )
   {
       breakmode = BREAKSTYLE_STRESS_TEMP;
-      if (narg != 11) error->all(FLERR,"Incorrect args for bond coefficients");
+      if (narg != 10) error->all(FLERR,"Incorrect args for bond coefficients");
   }
   else  error->all(FLERR,"Incorrect args for bond coefficients");
 
@@ -568,16 +582,16 @@ void BondGran::coeff(int narg, char **arg)
 
   double r_break_one,sigma_break_one,tau_break_one,T_break_one;
 
-  if(breakmode == BREAKSTYLE_SIMPLE) r_break_one = force->numeric(FLERR,arg[8]);
+  if(breakmode == BREAKSTYLE_SIMPLE) r_break_one = force->numeric(FLERR,arg[7]);
   else
   {
-      sigma_break_one = force->numeric(FLERR,arg[8]);
-      tau_break_one = force->numeric(FLERR,arg[9]);
+      sigma_break_one = force->numeric(FLERR,arg[7]);
+      tau_break_one = force->numeric(FLERR,arg[8]);
       
       if(comm->me == 0)
         fprintf(screen,"   Sigma Break TOL == %e, Tau Break TOL == %e \n",sigma_break_one,tau_break_one);
         
-      if(breakmode == BREAKSTYLE_STRESS_TEMP) T_break_one = force->numeric(FLERR,arg[10]);
+      if(breakmode == BREAKSTYLE_STRESS_TEMP) T_break_one = force->numeric(FLERR,arg[9]);
   }
 
   int ilo,ihi;
@@ -586,7 +600,6 @@ void BondGran::coeff(int narg, char **arg)
   for (int i = ilo; i <= ihi; i++) {
     ro[i] = ro_one;
     ri[i] = ri_one;
-    lb[i] = lb_one;
     Sn[i] = Sn_one;
     St[i] = St_one;
     damp[i] = damp_one;
@@ -625,7 +638,6 @@ void BondGran::write_restart(FILE *fp)
 {
   fwrite(&ro[1],sizeof(double),atom->nbondtypes,fp);
   fwrite(&ri[1],sizeof(double),atom->nbondtypes,fp);
-  fwrite(&lb[1],sizeof(double),atom->nbondtypes,fp);
   fwrite(&Sn[1],sizeof(double),atom->nbondtypes,fp);
   fwrite(&St[1],sizeof(double),atom->nbondtypes,fp);
   fwrite(&damp[1],sizeof(double),atom->nbondtypes,fp);
@@ -642,14 +654,12 @@ void BondGran::read_restart(FILE *fp)
   if (comm->me == 0) {
     fread(&ro[1],sizeof(double),atom->nbondtypes,fp);
     fread(&ri[1],sizeof(double),atom->nbondtypes,fp);
-    fread(&lb[1],sizeof(double),atom->nbondtypes,fp);
     fread(&Sn[1],sizeof(double),atom->nbondtypes,fp);
     fread(&St[1],sizeof(double),atom->nbondtypes,fp);
     fread(&damp[1],sizeof(double),atom->nbondtypes,fp); //MS
   }
   MPI_Bcast(&ro[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&ri[1],atom->nbondtypes,MPI_DOUBLE,0,world);
-  MPI_Bcast(&lb[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&Sn[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&St[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&damp[1],atom->nbondtypes,MPI_DOUBLE,0,world); //MS
