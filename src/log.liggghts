@@ -1,6 +1,0 @@
-LIGGGHTS (Version LIGGGHTS-PUBLIC 3.7.0, compiled 2017-10-12-10:33:03 by mschramm, git commit c449f30b63c5eec5c8053a67dccd892fe2c5cef2)
-
-f
-ERROR: Unknown command: f (../input.cpp:259)
- 
-Comment from the off: Marvin says: Incredible... this error is even worse than I thought it would be. (../input.cpp:259)
