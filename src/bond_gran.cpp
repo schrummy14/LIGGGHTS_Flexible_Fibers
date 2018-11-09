@@ -59,7 +59,10 @@ enum{
      BREAKSTYLE_STRESS,
      BREAKSTYLE_STRESS_TEMP
     };
-
+enum {
+  DAMPSTYLE_NONE = 0,
+  DAMPSTYLE_YU_GUO
+};
 /* ---------------------------------------------------------------------- */
 
 BondGran::BondGran(LAMMPS *lmp) : Bond(lmp)
@@ -344,31 +347,6 @@ void BondGran::compute(int eflag, int vflag)
     dttorque[1] = -wt2*K_ben_dt;
     dttorque[2] = -wt3*K_ben_dt;
 
-    // normal force dampening
-    d_fn_sqrt_2_Me_Sn = 2.0*damp[type] * sqrt(Me*Kn);
-    force_damp_n[0] = d_fn_sqrt_2_Me_Sn*(-vn1);
-    force_damp_n[1] = d_fn_sqrt_2_Me_Sn*(-vn2);
-    force_damp_n[2] = d_fn_sqrt_2_Me_Sn*(-vn3);
-
-    // tangential force dampening
-    d_ft_sqrt_2_Me_St = 2.0*damp[type] * sqrt(Me*Kt);
-    force_damp_t[0] = d_ft_sqrt_2_Me_St*(-vtr1);
-    force_damp_t[1] = d_ft_sqrt_2_Me_St*(-vtr2);
-    force_damp_t[2] = d_ft_sqrt_2_Me_St*(-vtr3);
-
-    // normal moment dampening
-    d_mn_sqrt_2_Js_Ktor = 2.0*damp[type] * sqrt(Js*K_tor);
-    torque_damp_n[0] = d_mn_sqrt_2_Js_Ktor*(-wn1);
-    torque_damp_n[1] = d_mn_sqrt_2_Js_Ktor*(-wn2);
-    torque_damp_n[2] = d_mn_sqrt_2_Js_Ktor*(-wn3);
-
-    // tangential moment dampening
-    d_mt_sqrt_2_Js_Kben = 2.0*damp[type] * sqrt(Js*K_ben);
-    torque_damp_t[0] = d_mt_sqrt_2_Js_Kben*(-wt1);
-    torque_damp_t[1] = d_mt_sqrt_2_Js_Kben*(-wt2);
-    torque_damp_t[2] = d_mt_sqrt_2_Js_Kben*(-wt3);
-
-
     // rotate forces from previous time step
 
     //rotate tangential force
@@ -440,6 +418,47 @@ void BondGran::compute(int eflag, int vflag)
     ft_bond_total[0] = bondhistlist[n][3];
     ft_bond_total[1] = bondhistlist[n][4];
     ft_bond_total[2] = bondhistlist[n][5];
+
+    // Apply Damping
+    if (dampmode == DAMPSTYLE_NONE || damp[type] == 0.0) {
+
+        force_damp_n[0] = force_damp_n[1] = force_damp_n[2] = 0.0;
+        force_damp_t[0] = force_damp_t[1] = force_damp_t[2] = 0.0;
+        torque_damp_n[0] = torque_damp_n[1] = torque_damp_n[2] = 0.0;
+        torque_damp_t[0] = torque_damp_t[1] = torque_damp_t[2] = 0.0;
+
+    } else if (dampmode == DAMPSTYLE_YU_GUO) { // of the form fd = 2*b*sqrt(k*m)*v
+
+        double damp2 = 2.0 * damp[type];
+        // normal force dampening
+        double d_fn_sqrt_2_Me_Sn = -damp2 * sqrt(Me*Kn);
+        force_damp_n[0] = d_fn_sqrt_2_Me_Sn*vn1;
+        force_damp_n[1] = d_fn_sqrt_2_Me_Sn*vn2;
+        force_damp_n[2] = d_fn_sqrt_2_Me_Sn*vn3;
+
+        // tangential force dampening
+        double d_ft_sqrt_2_Me_St = -damp2 * sqrt(Me*Kt);
+        force_damp_t[0] = d_ft_sqrt_2_Me_St*vtr1;
+        force_damp_t[1] = d_ft_sqrt_2_Me_St*vtr2;
+        force_damp_t[2] = d_ft_sqrt_2_Me_St*vtr3;
+
+        // normal moment dampening
+        double d_mn_sqrt_2_Js_Ktor = -damp2 * sqrt(Js*K_tor);
+        torque_damp_n[0] = d_mn_sqrt_2_Js_Ktor*wn1;
+        torque_damp_n[1] = d_mn_sqrt_2_Js_Ktor*wn2;
+        torque_damp_n[2] = d_mn_sqrt_2_Js_Ktor*wn3;
+
+        // tangential moment dampening
+        double d_mt_sqrt_2_Js_Kben = -damp2 * sqrt(Js*K_ben);
+        torque_damp_t[0] = d_mt_sqrt_2_Js_Kben*wt1;
+        torque_damp_t[1] = d_mt_sqrt_2_Js_Kben*wt2;
+        torque_damp_t[2] = d_mt_sqrt_2_Js_Kben*wt3;
+
+    } else {
+
+        error->all(FLERR,"Damp style does not exist\n");
+
+    }
 
     tor1 = - rinv * (dely*ft_bond_total[2] - delz*ft_bond_total[1]);
     tor2 = - rinv * (delz*ft_bond_total[0] - delx*ft_bond_total[2]);
@@ -546,76 +565,107 @@ void BondGran::allocate()
 void BondGran::coeff(int narg, char **arg)
 {
 
-  if(narg < 6) error->all(FLERR,"Incorrect args for bond coefficients (ro, ri, lb, sn, st, damp)"); // Matt Schramm
-  
+  if(narg < 8) error->all(FLERR,"Incorrect args for bond coefficients (ro, ri, sn, st, damp_style, damp_perams, break_style, break_perams)"); // Matt Schramm
+
   double ro_one = force->numeric(FLERR,arg[1]);
   double ri_one = force->numeric(FLERR,arg[2]);
   double Sn_one = force->numeric(FLERR,arg[3]);
   double St_one = force->numeric(FLERR,arg[4]);
-  double damp_one = force->numeric(FLERR,arg[5]);
-  
-  if (ro_one <= ri_one) error->all(FLERR,"ro must be greater than ri");
+  double damp_one = 0.0;
 
-  if(comm->me == 0)
-  {
-      fprintf(screen,"   Ro = %f, Ri = %f, Sn = %f, St = %f, Damp = %f \n",ro_one,ri_one,Sn_one,St_one,damp_one);
+  if (ro_one <= ri_one)
+    error->all(FLERR,"ro must be greater than ri");
+
+  if(force->numeric(FLERR,arg[5]) == 0.0) {
+    dampmode = DAMPSTYLE_NONE;
+    damp_one = 0.0;
+  } else if (force->numeric(FLERR,arg[5]) == 1.0) {
+    dampmode = DAMPSTYLE_YU_GUO;
+    damp_one = force->numeric(FLERR,arg[6]);
+  } else {
+    error->all(FLERR,"Damping style does not exist");
   }
 
-  if(force->numeric(FLERR,arg[6]) == 0. )
-  {
-      breakmode = BREAKSTYLE_SIMPLE;
-      if (narg != 8) error->all(FLERR,"Incorrect args for bond coefficients");
+  if(force->numeric(FLERR,arg[7]) == 0.0) {
+    breakmode = BREAKSTYLE_SIMPLE;
+    if (narg != 9)
+      error->all(FLERR,"Incorrect args for bond coefficients");
   }
-  else if(force->numeric(FLERR,arg[6]) == 1. )
-  {
-      breakmode = BREAKSTYLE_STRESS;
-      if (narg != 9) error->all(FLERR,"Incorrect args for bond coefficients");
+  else if(force->numeric(FLERR,arg[7]) == 1.0) {
+    breakmode = BREAKSTYLE_STRESS;
+    if (narg != 10)
+      error->all(FLERR,"Incorrect args for bond coefficients");
   }
-  else if(force->numeric(FLERR,arg[6]) == 2. )
-  {
-      breakmode = BREAKSTYLE_STRESS_TEMP;
-      if (narg != 10) error->all(FLERR,"Incorrect args for bond coefficients");
+  else if(force->numeric(FLERR,arg[7]) == 2. ) {
+    breakmode = BREAKSTYLE_STRESS_TEMP;
+    if (narg != 11)
+      error->all(FLERR,"Incorrect args for bond coefficients");
   }
-  else  error->all(FLERR,"Incorrect args for bond coefficients");
-
-  if (!allocated) allocate();
-
-  double r_break_one,sigma_break_one,tau_break_one,T_break_one;
-
-  if(breakmode == BREAKSTYLE_SIMPLE) r_break_one = force->numeric(FLERR,arg[7]);
   else
-  {
-      sigma_break_one = force->numeric(FLERR,arg[7]);
-      tau_break_one = force->numeric(FLERR,arg[8]);
-      
-      if(comm->me == 0)
-        fprintf(screen,"   Sigma Break TOL == %e, Tau Break TOL == %e \n",sigma_break_one,tau_break_one);
-        
-      if(breakmode == BREAKSTYLE_STRESS_TEMP) T_break_one = force->numeric(FLERR,arg[9]);
+    error->all(FLERR,"Incorrect args for bond coefficients");
+
+  if (!allocated)
+    allocate();
+
+  double r_break_one = 0.0;
+  double sigma_break_one = 0.0;
+  double tau_break_one = 0.0;
+  double T_break_one = 0.0;
+
+  if(breakmode == BREAKSTYLE_SIMPLE)
+    r_break_one = force->numeric(FLERR,arg[8]);
+  else {
+    sigma_break_one = force->numeric(FLERR,arg[8]);
+    tau_break_one = force->numeric(FLERR,arg[9]);
+
+    if(breakmode == BREAKSTYLE_STRESS_TEMP)
+      T_break_one = force->numeric(FLERR,arg[10]);
   }
 
-  int ilo,ihi;
+  if(comm->me == 0) {
+    fprintf(screen,"\n--- Bond Parameters Being Set ---\n");
+    fprintf(screen,"   ro == %g\n",ro_one);
+    fprintf(screen,"   ri == %g\n",ri_one);
+    fprintf(screen,"   Sn == %g\n",Sn_one);
+    fprintf(screen,"   St == %g\n",St_one);
+    fprintf(screen,"   damp_type == %i\n",dampmode);
+    fprintf(screen,"   damp_val == %g\n",damp_one);
+    fprintf(screen,"   breakmode == %i\n",breakmode);
+    if(breakmode == BREAKSTYLE_SIMPLE)
+      fprintf(screen,"   r_break == %g\n\n",r_break_one);
+    else {
+      fprintf(screen,"   sigma_break == %g\n",sigma_break_one);
+      fprintf(screen,"   tau_break == %g\n",tau_break_one);
+      if(breakmode == BREAKSTYLE_STRESS_TEMP)
+        fprintf(screen,"   T_break == %g\n",T_break_one);
+    }
+    fprintf(screen,"--- End Bond Parameters ---\n\n");
+  }
+
+  int ilo, ihi;
   force->bounds(arg[0],atom->nbondtypes,ilo,ihi);
   int count = 0;
-  for (int i = ilo; i <= ihi; i++) {
+  for (int i = ilo; i <= ihi; ++i) {
     ro[i] = ro_one;
     ri[i] = ri_one;
     Sn[i] = Sn_one;
     St[i] = St_one;
     damp[i] = damp_one;
-    
-    if(breakmode == BREAKSTYLE_SIMPLE) r_break[i] = r_break_one;
-    else
-    {
-        sigma_break[i] = sigma_break_one;
-        tau_break[i] = tau_break_one;
-        if(breakmode == BREAKSTYLE_STRESS_TEMP) T_break[i] = T_break_one;
+
+    if(breakmode == BREAKSTYLE_SIMPLE)
+      r_break[i] = r_break_one;
+    else {
+      sigma_break[i] = sigma_break_one;
+      tau_break[i] = tau_break_one;
+      if(breakmode == BREAKSTYLE_STRESS_TEMP)
+        T_break[i] = T_break_one;
     }
     setflag[i] = 1;
-    count++;
+    ++count;
   }
 
-  if (count == 0) error->all(FLERR,"Incorrect args for bond coefficients - or the bonds are not initialized in create_atoms");
+  if (count == 0)
+    error->all(FLERR,"Incorrect args for bond coefficients - or the bonds are not initialized in create_atoms");
 }
 
 /* ----------------------------------------------------------------------
