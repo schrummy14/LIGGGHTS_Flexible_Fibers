@@ -1,0 +1,175 @@
+## DEM Shear Test of wheat straw in LIGGGHTS
+
+### Material Independent Properties
+variable particle_diameter             equal 2.50e-3    # particles diameter in meters
+variable bond_out_diameter             equal 2.50e-3    # fiber outer diameter in meters
+variable bond_in_diameter              equal 0.0        # fiber inner diameter in meters
+variable bond_length                   equal 2.50e-3    # distance, in meters, between two particles in bond 
+variable bond_damp_type                equal 3          # Use Global Force Damping
+variable bond_damp_val                 equal 0.001      # NA
+variable particle_density              equal 2500.0     # kg/m3
+variable fiber_contact_youngs_modulus  equal 1.4e9      # Pa
+variable wall_contact_youngs_modulus   equal 180.0e9    # Pa
+variable bond_youngs_modulus           equal 1.4e9      # Pa
+variable particle_poissons_ratio       equal 0.3        # NA
+variable wall_poissons_ratio           equal 0.3        # NA
+variable coef_res_pp                   equal 0.500      # particle-particle coefficient of restitution
+variable coef_res_pw                   equal 0.300      # particle-wall coefficient of restitution
+variable coef_res_ww                   equal 0.500      # wall-wall coefficient of restitution
+variable coef_fri_pp                   equal 0.400      # particle-particle coefficient of friction
+variable coef_fri_pw                   equal 0.600      # particle-wall coefficient of friction
+variable coef_fri_ww                   equal 0.200      # wall-wall coefficient of friction
+### Simulation Independent Parameters
+variable ke_tol                        equal 1.0e-4     # Energy that we will run the simulation to obtain
+variable res_tol                       equal 1.0e-6     # Change of height tollerance that must be met
+variable restart_time                  equal 1.0e-2     # how often we write a restart file
+variable fileprint_time                equal 1.0e-2     # how often we print to the file in seconds
+variable thermo_time                   equal 1.0e-3     # how often we print to the screen in seconds
+variable output_time                   equal 1.0e-3     # how often data is writen to csv file in seconds
+variable relax_time                    equal 1.0e-3
+variable shear_speed                   equal 0.04       # Shear speed
+variable percent_strain                equal 0.18       # Distance to shear
+variable shear_pressure                equal 50000      # Pressure in N/m2
+variable shear_box_length              equal 0.101      # Length of shear box in meters
+variable mass_shear_top_plate          equal 0.401      # Mass of the top shear plate
+
+### Material Dependent Properties
+variable particle_radius               equal 0.5*${particle_diameter}
+variable bond_shear_modulus            equal ${bond_youngs_modulus}/(2.0*(1.0+${particle_poissons_ratio}))
+variable bond_out_per                  equal ${bond_out_diameter}/${particle_diameter}
+variable bond_in_per                   equal ${bond_in_diameter}/${particle_diameter}
+
+
+### Calculate dt using the bond model
+variable r2                            equal ${particle_radius}*${particle_radius}
+variable r3                            equal ${r2}*${particle_radius}
+variable K                             equal ${bond_youngs_modulus}*PI*${r2}/${bond_length}
+variable m                             equal 4.0*PI*${r3}*${particle_density}/3.0
+variable w                             equal sqrt($K/$m)
+if (${bond_damp_type}==3) then &
+	"variable dt                   equal 0.95/((1.1695+0.41628*${bond_damp_val})*$w)" &
+else &
+	"variable dt                   equal 0.95/((1.0+2.9392*${bond_damp_val})*$w)"
+
+### Simulation Dependent Parameters
+variable restart_step                  equal ceil(${restart_time}/${dt})
+variable fileprint_step                equal ceil(${fileprint_time}/${dt})
+variable thermo_step                   equal ceil(${thermo_time}/${dt})
+variable output_step                   equal ceil(${output_time}/${dt})
+variable shear_force                   equal ${shear_pressure}*(${shear_box_length}*${shear_box_length})+${mass_shear_top_plate}*9.81
+variable relax_step                    equal ceil(${relax_time}/${dt})
+
+shell mkdir post
+
+### Build Simulation
+
+# Specify what we are simulating
+atom_style hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 6
+atom_modify map array
+hard_particles yes # <- Needed because of the high Youngs modulus
+
+## newton off is needed due to the tangential history contact model
+newton off
+communicate single vel yes
+
+# Use hertz-mindeln contact model
+pair_style gran model hertz tangential history
+# Use the stiff granular bond model
+bond_style gran
+
+processors * * *
+
+## Read in the restart file
+read_restart restarts/restart*.liggghts
+
+# Set neighbor bin sizes and update after each run step if needed
+neighbor      0.001 bin
+neigh_modify delay 0
+
+## Set coefficients for contact and bond model
+# For the contact model, we do not need to set anything
+pair_coeff * *
+# Set coefficients for bond model
+bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
+
+fix m1 all property/global youngsModulus peratomtype ${fiber_contact_youngs_modulus} ${wall_contact_youngs_modulus}
+fix m2 all property/global poissonsRatio peratomtype ${particle_poissons_ratio} ${wall_poissons_ratio}
+fix m3 all property/global coefficientRestitution peratomtypepair 2 ${coef_res_pp} ${coef_res_pw} &
+                                                                    ${coef_res_pw} ${coef_res_ww}
+
+fix m4 all property/global coefficientFriction peratomtypepair 2 ${coef_fri_pp} ${coef_fri_pw} &
+                                                                 ${coef_fri_pw} ${coef_fri_ww}
+
+fix BotShear all mesh/surface/stress file STL/ShearBox_TopPlate.STL type 2 &
+                       scale 0.001 move 0.0 0.0 0.0 curvature_tolerant yes
+
+# Top plate has a mass of 401 grams
+fix TopShear all mesh/surface/stress/servo file STL/ShearBox_TopPlate.STL type 2 &
+                       scale 0.001 rotate axis 1 0 0 angle 180 move 0.0 0.1015 0.080 &
+                       curvature_tolerant yes com 0.05 0.05 0.08 ctrlPV force &
+                       axis 0.0 0.0 -1.0 target_val ${shear_force} vel_max 5.0 &
+                       kp 5.0e-2 ki 0.0 kd 0.0
+
+fix BotHalfShear all mesh/surface/stress file STL/ShearBox_BottomHalf.STL &
+                       type 2 scale 0.001 move 0.0 0.0 0.0 curvature_tolerant yes
+
+fix TopHalfShear all mesh/surface/stress file STL/ShearBox_TopHalf.STL &
+                       type 2 scale 0.001 move 0.0 0.0 0.025 curvature_tolerant yes
+
+fix wall all wall/gran model hertz tangential history mesh n_meshes 4 meshes &
+                       BotShear TopShear BotHalfShear TopHalfShear
+
+fix wall_x1 all wall/gran model hertz tangential history primitive type 2 xplane 0.0
+fix wall_x2 all wall/gran model hertz tangential history primitive type 2 xplane 0.1015
+fix wall_y1 all wall/gran model hertz tangential history primitive type 2 yplane 0.0
+fix wall_y2 all wall/gran model hertz tangential history primitive type 2 yplane 0.1015
+
+# Get forces, torques, and eq dist from the bonds
+compute bc all property/local batom1x batom1y batom1z batom2x batom2y batom2z batom1 batom2 btype bforceX bforceY bforceZ btorqueX btorqueY btorqueZ beqdist
+
+fix grav all gravity 9.81 vector 0.0 0.0 -1.0
+
+fix integr all nve/sphere
+
+timestep ${dt}
+variable sim_time equal step*${dt}
+
+region bulk_box block 0.025 0.1 0.0 0.1 0.0065 0.0450 units box
+variable num_atoms equal count(all,bulk_box)
+variable vs equal v_num_atoms*4./3.*3.14*${r3}
+variable vt equal 0.1*0.1*(0.03-0.0065)
+variable bulk_den equal 114.12*v_vs/${vt} # ${density}*v_vs/${vt}
+
+variable zforc equal f_TopShear[3]
+variable zdisp equal f_TopShear[9]
+
+variable xforc equal f_TopShear[1]
+variable xdisp equal f_BotHalfShear[7]
+
+thermo_style custom step atoms numbond v_sim_time cpu cpuremain ke v_bulk_den v_zdisp v_zforc v_xdisp v_xforc
+thermo ${thermo_step}
+thermo_modify lost ignore norm no
+
+dump stlbotshear all mesh/vtk ${fileprint_step} post/stl_BotShear*.vtk stress stresscomponents BotShear
+dump stltopshear all mesh/vtk ${fileprint_step} post/stl_TopShear*.vtk stress stresscomponents TopShear
+dump stlbothalf  all mesh/vtk ${fileprint_step} post/stl_BotHalf*.vtk  stress stresscomponents BotHalfShear
+dump stltophalf  all mesh/vtk ${fileprint_step} post/stl_TopHalf*.vtk  stress stresscomponents TopHalfShear
+dump dmp all custom ${fileprint_step} post/dump*.liggghts id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
+dump bondforcechain all local ${fileprint_step} post/bfc*.bond &
+    c_bc[1] c_bc[2] c_bc[3] c_bc[4] c_bc[5] c_bc[6] c_bc[7] c_bc[8] c_bc[9] c_bc[10] c_bc[11] c_bc[12] c_bc[13] c_bc[14] c_bc[15] c_bc[16]
+
+variable my_ke equal ke
+fix outfile all print ${output_step} "${sim_time}, ${my_ke}, ${bulk_den}, ${xdisp}, ${zdisp}, ${xforc}, ${zforc}" file results2.csv screen no title "t, ke, bulk_den, x, z, fx, fz"
+
+restart ${restart_step} restarts/restart2.liggghts restarts/restart2.liggghts
+
+variable old_time file cur_time.txt
+
+fix mv_bot_half all move/mesh mesh BotHalfShear linear ${shear_speed} 0.0 0.0
+fix mv_bot_sher all move/mesh mesh BotShear linear ${shear_speed} 0.0 0.0
+
+variable shear_dist equal ${shear_box_length}*${percent_strain}
+variable time_shear equal ${shear_dist}/${shear_speed}+${old_time}
+variable run_shear equal round(${time_shear}/${dt})
+run ${run_shear} upto
+write_restart restarts/restart2.liggghts

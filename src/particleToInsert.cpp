@@ -409,6 +409,76 @@ int ParticleToInsert::check_near_set_x_v_omega_ms(double *x,double *v, double *o
 }
 
 
+/* ---------------------------------------------------------------------- */
+int ParticleToInsert::check_near_set_x_v_omega_dense(double *x,double *v, double *omega, double *quat, RegionNeighborList<interpolate_no> & neighList, int reg_id) // Added by Matt Schramm
+{
+    // x is position where insertion should take place
+    // v and omega are the velocity and omega for the newly inserted particles
+    double rel[3],xins_j_try[3];
+    //double del[3], rsq, radsum;
+
+    // check insertion position, take quat into account
+    // relative position of spheres to each other already stored at this point
+    // check sphere against all others in xnear
+    //fprintf(screen,"Check if spheres touch\n");
+    for(int j = 0; j < nspheres; j++)
+    {
+        // take orientation into account; x_bound_ins is in the global coordinate system
+        // calculate xins_j_try for every sphere and check if would work
+        vectorSubtract3D(x_ins[j],x_bound_ins,rel);
+        MathExtraLiggghts::vec_quat_rotate(rel,quat);
+        vectorAdd3D(rel,x,xins_j_try);
+
+        //fprintf(screen,"xins_j_try == %f, radius_ins_j == %f\n",xins_j_try,radius_ins[j]);
+
+        if(neighList.hasOverlap(xins_j_try, radius_ins[j])) {
+            //fprintf(screen,"Failed to insert particle...overlaps\n");
+            return 0;
+        }
+    }
+    
+    // Now check that all particles are inside the factory region???
+    //fprintf(screen,"Check if fiber is in region\n");
+    for(int j = 0; j < nspheres; j++)
+    {
+        vectorSubtract3D(x_ins[j],x_bound_ins,rel);
+        MathExtraLiggghts::vec_quat_rotate(rel,quat);
+        vectorAdd3D(rel,x,xins_j_try);
+//        fprintf(screen,"x = %e, y = %e, z = %e\n",xins_j_try[0],xins_j_try[1],xins_j_try[2]);
+        bool in_region = domain->regions[reg_id]->match(xins_j_try[0],xins_j_try[1],xins_j_try[2]);
+//        fprintf(screen,"In region == %d\n",in_region);
+        if(!in_region)
+        {
+            //fprintf(screen,"Failed to insert particle...extends from region\n");
+            return 0;
+        }
+    }
+
+
+
+    // no overlap with any other - success
+    // set x_ins, v_ins and omega_ins
+    //fprintf(screen,"So far so good, copy temp_vel to vel\n");
+    for(int j = 0; j < nspheres; j++)
+    {
+        vectorSubtract3D(x_ins[j],x_bound_ins,rel);
+        MathExtraLiggghts::vec_quat_rotate(rel,quat);
+        vectorAdd3D(rel,x,x_ins[j]);
+    }
+    vectorCopy3D(v,v_ins);
+    vectorCopy3D(omega,omega_ins);
+
+    // add to xnear for future checks
+    for(int j = 0; j < nspheres; j++)
+    {
+        //fprintf(screen,"j=%i, xins==%f, radius_ins==%f\n",j,x_ins[j],radius_ins[j]);
+        neighList.insert(x_ins[j], radius_ins[j]);
+    }
+
+    return nspheres;
+}
+
+
 
 /* ---------------------------------------------------------------------- */
 

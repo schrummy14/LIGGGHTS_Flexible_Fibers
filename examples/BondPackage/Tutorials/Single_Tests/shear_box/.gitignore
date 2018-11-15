@@ -1,0 +1,7 @@
+post/*
+restarts/*
+*.sh
+restart_*
+*.*~
+*.csv
+*.txt

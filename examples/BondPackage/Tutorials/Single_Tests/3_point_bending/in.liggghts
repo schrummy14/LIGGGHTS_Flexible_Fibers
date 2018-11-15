@@ -1,0 +1,211 @@
+#### Bond Simulation of 3-Point-Bending of Wheat Straw
+
+### Material Independent Properties
+variable beam_length             equal 0.055      # meters
+variable particle_diameter       equal 2.83e-3    # meters
+variable bond_length             equal 2.83e-3    # meters
+variable bond_out_diameter       equal 2.83e-3    # meters
+variable bond_in_diameter        equal 0.0        # meters
+variable support_radius          equal 1.50e-3
+variable bond_damp_type          equal 1          # Use Yu Guo Damping
+variable bond_damp_val           equal 0.5        # NA
+variable particle_density        equal 1000.0     # kg/m3
+variable contact_youngs_modulus  equal 1.4e7      # Pa 
+variable bond_youngs_modulus     equal 1.4e7      # Pa
+variable particle_poissons_ratio equal 0.3        # NA
+
+### Simulation Independent Parameters
+variable plung_speed             equal 0.004
+variable plung_distance          equal 0.002
+variable fileprint_time          equal 5.0e-2  # how often we print to the file in seconds
+variable thermo_time             equal 1.0e-2  # how often we print to the screen in seconds
+variable output_time             equal 1.0e-2  # how often we print to beam.csv in seconds
+
+### Material Dependent Properties
+variable particle_radius         equal 0.5*${particle_diameter}
+variable bond_shear_modulus      equal ${bond_youngs_modulus}/(2.0*(1.0+${particle_poissons_ratio}))
+variable bond_out_per            equal ${bond_out_diameter}/${particle_diameter}
+variable bond_in_per             equal ${bond_in_diameter}/${particle_diameter}
+
+### Calculate dt using the bond model
+variable r2                      equal ${particle_radius}*${particle_radius}
+variable r3                      equal ${r2}*${particle_radius}
+variable K                       equal ${bond_youngs_modulus}*PI*${r2}/${bond_length}
+variable m                       equal 4.0*PI*${r3}*${particle_density}/3.0
+variable w                       equal sqrt($K/$m)
+variable dt                      equal 0.95/((1.0+2.9392*${bond_damp_val})*$w)
+
+### Simulation Dependent Parameters
+variable time_to_deflect         equal (${plung_distance}+0.5*${particle_diameter})/${plung_speed}
+variable run_to_deflect          equal ceil(${time_to_deflect}/${dt})
+variable fileprint_step          equal ceil(${fileprint_time}/${dt})
+variable output_step             equal ceil(${output_time}/${dt})
+variable thermo_step             equal ceil(${thermo_time}/${dt})
+
+
+### Build Simulation
+
+# Define a granular particle with granular bonds
+# n_bondtypes 1 says that there is only one type of bond in the simulation
+# bonds_per_atom 6 means that each particle can have upto 6 bonds
+atom_style hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 6
+
+# Needed due to the Young's modulus being greater than 1.0E7
+hard_particles yes
+
+# map atoms as a vector for output
+atom_modify map array
+
+# Fixed boundary conditions
+boundary f f f
+
+# Do not use Newton's third law
+newton off
+
+# Parallel computing settings
+processors * 1 1           # x axis will be split for parallelism (Not needed for this simulation)
+communicate single vel yes # ghost particles are given position and velocity information
+shell mkdir post           # make a folder called post
+units si                   # Use SI units
+
+# Contact style
+pair_style gran model hertz tangential history # hertz-mindelen
+# Bond style
+bond_style gran # for the granular fiber bond
+
+# Build simulation area
+variable boundary_tol equal 2*${particle_diameter}
+variable length_tol equal 1.1*${beam_length}
+region reg block -${boundary_tol} ${length_tol} -${boundary_tol} ${boundary_tol} -${length_tol} ${length_tol} units box
+create_box 1 reg
+
+# Build region where we want to generate the fiber
+region bc cylinder x 0.00 0.00 ${particle_radius} 0.0 ${beam_length} units box
+lattice sc ${particle_diameter} 
+create_atoms 1 region bc
+
+# Skin that is used to determine size of bins for neighbor finding
+neighbor 0.001 bin
+neigh_modify delay 0 # Update neighbors whenever we need to
+
+# Contact coefficients are calculated from material properties
+pair_coeff * *
+
+# Bond coefficients (Bond type) (Outside Bond) (Inside Bond) (Bond_Y) (Bond_G) (Bond_Damp_Type) (Bond_Damp) (Bond_Break_Type) (Crit_Norm) (Crit_Tan)
+bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
+
+## Apply material properties
+fix m1 all property/global youngsModulus peratomtype ${contact_youngs_modulus}
+fix m2 all property/global poissonsRatio peratomtype ${particle_poissons_ratio}
+fix m3 all property/global coefficientRestitution peratomtypepair 1 0.5
+fix m4 all property/global coefficientFriction peratomtypepair 1 0.001
+
+# Get forces, torques, and eq dist from the bonds
+compute bc all property/local batom1x batom1y batom1z batom2x batom2y batom2z batom1 batom2 btype bforceX bforceY bforceZ btorqueX btorqueY btorqueZ beqdist
+
+## Import geometry
+# insert the atoms into the simulation but do not integrate them
+run 0
+
+# Get the number of atoms in the simulation so we can place the supports in the correct locations
+variable num_atoms equal atoms
+
+## Find the location of the center of the beam and how high it should be above the stem
+# Different procedure based on the nuber of atoms in the system
+variable b1 equal 0.5*${num_atoms}
+variable b2 equal floor(${b1})
+if "${b1}>${b2}" then &
+    "variable x_loc equal ${b2}+1" &
+    "variable push_x equal x[${x_loc}]" &
+    "variable push_z equal ${particle_radius}+1.01*${support_radius}" &
+else &
+    "variable x_loc1 equal ${b2}" &
+    "variable x_loc2 equal ${b2}+1" &
+    "variable push_x equal 0.5*(x[${x_loc1}]+x[${x_loc2}])" &
+    "variable push_z equal 1.01*sqrt(${support_radius}*${support_radius}+2.0*${support_radius}*${particle_radius})"
+
+## Find the location of the two support beams
+variable support_1_x equal 0.5*(x[2]+x[3])
+variable x_loc1 equal ${num_atoms}-1
+variable x_loc2 equal ${num_atoms}-2
+variable support_2_x equal 0.5*(x[${x_loc1}]+x[${x_loc2}])
+
+## Find the height the rods should be below the fiber
+variable rod_z  equal -1.01*sqrt(${support_radius}*${support_radius}+2.0*${support_radius}*${particle_radius})
+
+## Insert the plunger
+fix plung all mesh/surface/stress file Plunger_Part.STL type 1 scale 0.001 move ${push_x} 0.0 ${push_z}
+
+## Insert the two supports
+fix rod_1 all mesh/surface/stress file Rod_Part.STL type 1 scale 0.001 move ${support_1_x} 0.0 ${rod_z}
+fix rod_2 all mesh/surface/stress file Rod_Part.STL type 1 scale 0.001 move ${support_2_x} 0.0 ${rod_z}
+
+## Make all of the geometries a granular wall such that the fiber can interact with it
+fix wall all wall/gran model hertz tangential history mesh n_meshes 3 meshes plung rod_1 rod_2
+
+## Have the plunger move down towards the fiber at your set velocity
+fix move_P all move/mesh mesh plung linear 0.0 0.0 -${plung_speed}
+
+## Set the atoms to have a set density and set diameter
+set group all density ${particle_density} diameter ${particle_diameter}
+
+## Build the bonds between the fibers
+# This sets a skin tolerance such that the atoms within this distance will bond together
+variable bond_skin equal 1.05*${particle_diameter}
+
+# Have all the atoms in the simulation try to bond together
+fix bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff btype newperts
+
+## Set the integrator and the timestep
+fix integr all nve/sphere
+timestep ${dt}
+
+# Run one step such that the bonds can form, stop bond construction, and add gravity
+run 1
+
+# Do not create new bonds after this line
+fix_modify bondcr every 0
+
+# Apply gravity in the z direction
+fix gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+# Set variables for output
+variable sim_time equal step*${dt}
+variable pfx equal f_plung[1]
+variable pfy equal f_plung[2]
+variable pfz equal f_plung[3]
+variable pz  equal f_plung[9]
+
+# Set the output to screen to tell us how many atoms are in the system (atoms), how many bonds there are (numbond),
+# the simulation time (sim_time), an estimate to the time to completion (cpuremain), the plungers force in the z
+# direction, the position of the plunger in the z direction (pz), and the kinetic energy in the system (ke)
+thermo_style custom step atoms numbond v_sim_time cpuremain v_pfz v_pz ke
+
+# How often we report to the screen
+thermo ${thermo_step}
+
+# How LIGGGHTS' handels atoms that leave the simulation
+# lost ignore means that if we loose an atom because it leaves the domain, we just ignore it
+# norm no means we do not do normalization
+thermo_modify lost ignore norm no
+
+## Set up output to file for paraview
+# Dumps atom information to file
+dump dmp all custom ${fileprint_step} post/dump*.liggghts id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+
+dump bondforcechain all local ${fileprint_step} post/bfc*.bond &
+    c_bc[1] c_bc[2] c_bc[3] c_bc[4] c_bc[5] c_bc[6] c_bc[7] c_bc[8] c_bc[9] c_bc[10] c_bc[11] c_bc[12] c_bc[13] c_bc[14] c_bc[15] c_bc[16]
+
+# Dumps geomety postions to file
+dump stlplung all mesh/gran/VTK ${fileprint_step} post/plung*.vtk stress plung rod_1 rod_2
+
+# Dumps information to the csv file for matlab
+fix outfile all print ${output_step} "${sim_time},${pz},${pfz}" file post/3-point.csv screen no title "t,z,fz"
+
+# Run simulation to completion
+run ${run_to_deflect} upto
+
+## Have the plunger move back to where it started
+unfix move_P
+fix move_P all move/mesh mesh plung linear 0.0 0.0 ${plung_speed}
+run ${run_to_deflect}

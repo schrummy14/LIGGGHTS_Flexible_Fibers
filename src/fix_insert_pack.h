@@ -99,6 +99,9 @@ class FixInsertPack : public FixInsert {
   // warn if region extends outside box
   bool warn_region;
 
+  // use dense packing
+  bool use_dense_pack;
+
 };
 
 }

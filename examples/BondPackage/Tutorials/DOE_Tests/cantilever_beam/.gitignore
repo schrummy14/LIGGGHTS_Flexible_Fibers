@@ -1,0 +1,9 @@
+*.txt
+log.liggghts*
+screen*
+tmp.lammps.variable
+results/*
+restart_forced*
+in.liggghts~
+*.m~
+beam.csv
