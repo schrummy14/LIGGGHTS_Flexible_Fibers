@@ -5,3 +5,4 @@ restart_*
 *.*~
 *.csv
 *.txt
+log.lig*

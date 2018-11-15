@@ -5,12 +5,12 @@ variable particle_diameter             equal 2.50e-3    # particles diameter in 
 variable bond_out_diameter             equal 2.50e-3    # fiber outer diameter in meters
 variable bond_in_diameter              equal 0.0        # fiber inner diameter in meters
 variable bond_length                   equal 2.50e-3    # distance, in meters, between two particles in bond 
-variable bond_damp_type                equal 3          # Use Global Force Damping
-variable bond_damp_val                 equal 0.001      # NA
+variable bond_damp_type                equal 1          # Use Yu Guo Damping
+variable bond_damp_val                 equal 0.05       # NA
 variable particle_density              equal 2500.0     # kg/m3
-variable fiber_contact_youngs_modulus  equal 1.4e9      # Pa
+variable fiber_contact_youngs_modulus  equal 1.0e7      # Pa
 variable wall_contact_youngs_modulus   equal 180.0e9    # Pa
-variable bond_youngs_modulus           equal 1.4e9      # Pa
+variable bond_youngs_modulus           equal 1.0e7      # Pa
 variable particle_poissons_ratio       equal 0.3        # NA
 variable wall_poissons_ratio           equal 0.3        # NA
 variable coef_res_pp                   equal 0.500      # particle-particle coefficient of restitution
@@ -19,6 +19,7 @@ variable coef_res_ww                   equal 0.500      # wall-wall coefficient 
 variable coef_fri_pp                   equal 0.400      # particle-particle coefficient of friction
 variable coef_fri_pw                   equal 0.600      # particle-wall coefficient of friction
 variable coef_fri_ww                   equal 0.200      # wall-wall coefficient of friction
+
 ### Simulation Independent Parameters
 variable ke_tol                        equal 1.0e-4     # Energy that we will run the simulation to obtain
 variable res_tol                       equal 1.0e-6     # Change of height tollerance that must be met
@@ -46,10 +47,7 @@ variable r3                            equal ${r2}*${particle_radius}
 variable K                             equal ${bond_youngs_modulus}*PI*${r2}/${bond_length}
 variable m                             equal 4.0*PI*${r3}*${particle_density}/3.0
 variable w                             equal sqrt($K/$m)
-if (${bond_damp_type}==3) then &
-	"variable dt                   equal 0.95/((1.1695+0.41628*${bond_damp_val})*$w)" &
-else &
-	"variable dt                   equal 0.95/((1.0+2.9392*${bond_damp_val})*$w)"
+variable dt                            equal 0.8/((1.0+3.0*${bond_damp_val})*$w)
 
 ### Simulation Dependent Parameters
 variable restart_step                  equal ceil(${restart_time}/${dt})

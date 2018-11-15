@@ -10,8 +10,8 @@ variable support_radius          equal 1.50e-3
 variable bond_damp_type          equal 1          # Use Yu Guo Damping
 variable bond_damp_val           equal 0.5        # NA
 variable particle_density        equal 1000.0     # kg/m3
-variable contact_youngs_modulus  equal 1.4e7      # Pa 
-variable bond_youngs_modulus     equal 1.4e7      # Pa
+variable contact_youngs_modulus  equal 1.0e7      # Pa 
+variable bond_youngs_modulus     equal 1.0e7      # Pa
 variable particle_poissons_ratio equal 0.3        # NA
 
 ### Simulation Independent Parameters
