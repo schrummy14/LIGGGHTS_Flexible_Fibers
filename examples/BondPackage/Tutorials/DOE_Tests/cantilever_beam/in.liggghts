@@ -4,7 +4,7 @@
 include DOE_Params.txt
 
 ### Material Independent Properties
-variable bond_damp_val_max       equal 50.00      # Max bond damping value (Needed for calculation of time step)
+variable bond_damp_val_max       equal 10.00      # Max bond damping value (Needed for calculation of time step)
 variable bond_youngs_mod_max     equal 10.0e9     # Max bond youngs modulus (Needed for calculation of time step)
 variable beam_length             equal 0.150      # meters
 variable particle_diameter       equal 2.83e-3    # meters
