@@ -67,7 +67,7 @@ hard_particles yes # <- Needed because of the high Youngs modulus
 newton off
 communicate single vel yes
 
-# Use hertz-mindeln contact model
+# Use hertz-mindlin contact model
 pair_style gran model hertz tangential history
 # Use the stiff granular bond model
 bond_style gran

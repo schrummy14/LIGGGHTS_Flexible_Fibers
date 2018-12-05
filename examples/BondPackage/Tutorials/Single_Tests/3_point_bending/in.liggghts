@@ -111,7 +111,7 @@ run 0
 variable num_atoms equal atoms
 
 ## Find the location of the center of the beam and how high it should be above the stem
-# Different procedure based on the nuber of atoms in the system
+# Different procedure based on the number of atoms in the system
 variable b1 equal 0.5*${num_atoms}
 variable b2 equal floor(${b1})
 if "${b1}>${b2}" then &
@@ -184,19 +184,19 @@ thermo_style custom step atoms numbond v_sim_time cpuremain v_pfz v_pz ke
 # How often we report to the screen
 thermo ${thermo_step}
 
-# How LIGGGHTS' handels atoms that leave the simulation
+# How LIGGGHTS' handles atoms that leave the simulation
 # lost ignore means that if we loose an atom because it leaves the domain, we just ignore it
 # norm no means we do not do normalization
 thermo_modify lost ignore norm no
 
-## Set up output to file for paraview
+## Set up output to file for ParaView
 # Dumps atom information to file
 dump dmp all custom ${fileprint_step} post/dump*.liggghts id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
 
 dump bondforcechain all local ${fileprint_step} post/bfc*.bond &
     c_bc[1] c_bc[2] c_bc[3] c_bc[4] c_bc[5] c_bc[6] c_bc[7] c_bc[8] c_bc[9] c_bc[10] c_bc[11] c_bc[12] c_bc[13] c_bc[14] c_bc[15] c_bc[16]
 
-# Dumps geomety postions to file
+# Dumps geometry positions to file
 dump stlplung all mesh/gran/VTK ${fileprint_step} post/plung*.vtk stress plung rod_1 rod_2
 
 # Dumps information to the csv file for matlab

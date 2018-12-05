@@ -7,8 +7,8 @@ variable bond_out_diameter       equal 2.83e-3    # meters
 variable bond_in_diameter        equal 0.0        # meters
 variable bond_damp_type          equal 1          # Use Yu Guo Damping
 variable bond_damp_val           equal 50.0       # NA
-variable particle_density        equal 420.0     # kg/m3
-variable contact_youngs_modulus  equal 1.0e9      # Pa 
+variable particle_density        equal 420.0      # kg/m3
+variable contact_youngs_modulus  equal 1.0e9      # Pa
 variable bond_youngs_modulus     equal 1.0e9      # Pa
 variable particle_poissons_ratio equal 0.3        # NA
 
@@ -61,7 +61,7 @@ atom_modify map array
 # Fixed boundary conditions
 boundary f f f
 
-# Do not use Newton's third law
+# Do not use Newton's third law (This cannot be used due to the pair style being used)
 newton off
 
 # Parallel computing settings
@@ -120,30 +120,42 @@ fix bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff
 # Set the time step
 timestep ${dt}
 
-# Set output parameters
+## Set output parameters
+# Get the number of atoms in the system
 variable lastone equal atoms
-variable atom2 equal ${lastone}
+# Get the current simulation time
 variable sim_time equal step*${dt}
+# Get the x-directional position of the last atom
 variable px equal x[${lastone}]
+# Get the z-directional position of the last atom
 variable pz equal z[${lastone}]
+# Get the z-directional velocity of the last atom
 variable vz equal vz[${lastone}]
+# Print to screen a custom array that includes, the current step of the simulation, the number of atoms in the system, the number of bonds in the system, the current simulation time, how much cpu time has passed, the estimated cpu time remaining, the z-directional position, the z-directional velocity, and the current kinetic energy in the system
 thermo_style custom step atoms numbond v_sim_time cpu cpuremain v_pz v_vz ke
+# Have this printed to the screen every "thermo_step" steps
 thermo ${thermo_step}
+# Ignore lost atoms and do not normalize output
 thermo_modify lost ignore norm no
 
 # Select the velocity verlet integrator
 fix integr all nve/sphere
 
-# Import Pusher CAD File
+## Import Pusher CAD File
+# Get positional data so we know where to place the "pusher"
 variable push_x equal ${beam_length}-2.0*${particle_diameter}
 variable push_z equal 1.0001*${particle_diameter}
+# Import the cad file specifying that the file is in mm and reposition it into the correct area
 fix p all mesh/surface file Mesh.stl type 1 scale 0.001 move ${push_x} 0.0 ${push_z}
+# Tell liggghts that we wish to interact with this geometry
 fix wall all wall/gran model hertz tangential history mesh n_meshes 1 meshes p
+# Tell liggghts that this geometry moves with a constant velocity
 fix move_P all move/mesh mesh p linear 0.0 0.0 -${deflection_speed}
 
 # Set dump file parameters for paraview
 dump dmp all custom ${fileprint_step} post/dump*.liggghts id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
 
+# Get bond force and torque values
 dump bondforcechain all local ${fileprint_step} post/bfc*.bond &
     c_bc[1] c_bc[2] c_bc[3] c_bc[4] c_bc[5] c_bc[6] c_bc[7] c_bc[8] c_bc[9] c_bc[10] c_bc[11] c_bc[12] c_bc[13] c_bc[14] c_bc[15] c_bc[16]
 
@@ -170,7 +182,7 @@ run ${run_to_deflect} upto
 unfix move_P
 run ${run_to_waittime}
 
-# Remove the pusher from the simulation
+# Remove the pusher from the simulation. This must be done in the opposite manner of creating the pusher
 unfix wall
 unfix p
 
