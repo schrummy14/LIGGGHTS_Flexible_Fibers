@@ -109,6 +109,7 @@ class ComputePropertyLocal : public Compute {
   void pack_btorqueZ(int);
   void pack_beqdist(int);
   void pack_btype(int);
+  void pack_bondbroken(int);
 
   void pack_aatom1(int);
   void pack_aatom2(int);

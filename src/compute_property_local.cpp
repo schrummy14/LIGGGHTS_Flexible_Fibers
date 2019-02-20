@@ -178,6 +178,8 @@ ComputePropertyLocal::ComputePropertyLocal(LAMMPS *lmp, int &iarg, int narg, cha
         pack_choice[i] = &ComputePropertyLocal::pack_btorqueZ;
       else if (strcmp(arg[iarg],"beqdist") == 0)
         pack_choice[i] = &ComputePropertyLocal::pack_beqdist;
+      else if (strcmp(arg[iarg],"bbondbroken") == 0)
+        pack_choice[i] = &ComputePropertyLocal::pack_bondbroken;
       else if (strcmp(arg[iarg],"aatom1") == 0) {
         pack_choice[i] = &ComputePropertyLocal::pack_aatom1;
       if (kindflag != NONE && kindflag != ANGLE)
@@ -1092,6 +1094,32 @@ void ComputePropertyLocal::pack_beqdist(int n)
   }
 }
 
+void ComputePropertyLocal::pack_bondbroken(int n)
+{
+  int i,j,k,i1,j1,atom1,atom2;
+  int nbondlist = neighbor->nbondlist;
+  int **bondlist = neighbor->bondlist;
+
+  //search for every pair i,j in bondlist
+  for (int m = 0; m < ncount; m++) {
+    i = indices[m][0];
+    j = indices[m][1];
+    atom1=i;                                 //intern index of selected atom
+    atom2=atom->map(atom->bond_atom[i][j]);  //mapped index of bond-partner
+    if (atom2<0) continue; //is not on this proc, no Idea how to handle this ..
+
+     for (k = 0; k < nbondlist; k++) {
+        i1 = bondlist[k][0];
+        j1 = bondlist[k][1];
+        //printf("|-> i1=%d,j1=%d",atom1,atom2);
+        if (((atom1==i1) && (atom2==j1)) || ((atom1==j1) && (atom2==i1))) {
+            buf[n] = bondlist[k][3];
+            break;
+        }
+     }
+    n += nvalues;
+  }
+}
 /* ---------------------------------------------------------------------- */
 
 void ComputePropertyLocal::pack_aatom3(int n)
