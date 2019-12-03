@@ -40,7 +40,7 @@
     Copyright 2009-2015 JKU Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <string.h>
 #include "fix_insert_pack.h"
@@ -78,7 +78,8 @@ FixInsertPack::FixInsertPack(LAMMPS *lmp, int narg, char **arg) :
 
   bool hasargs = true;
   bool set_check_dist_from_subdomain_border = false;
-  while(iarg < narg && hasargs) {
+  while(iarg < narg && hasargs)
+  {
     hasargs = false;
     if (strcmp(arg[iarg],"region") == 0) {
       if (iarg+2 > narg) error->fix_error(FLERR,this,"");
@@ -132,13 +133,11 @@ FixInsertPack::FixInsertPack(LAMMPS *lmp, int narg, char **arg) :
       hasargs = true;
     } else if (strcmp(arg[iarg],"check_dist_from_subdomain_border") == 0) {
       if (iarg+2 > narg) error->fix_error(FLERR,this,"");
-      if(strcmp(arg[iarg+1],"yes") == 0) {
+      if(strcmp(arg[iarg+1],"yes") == 0)
         check_dist_from_subdomain_border_ = true;
-        set_check_dist_from_subdomain_border = true;
-      } else if(strcmp(arg[iarg+1],"no") == 0) {
+      else if(strcmp(arg[iarg+1],"no") == 0)
         check_dist_from_subdomain_border_ = false;
-        set_check_dist_from_subdomain_border = true;
-      } else
+      else
         error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'check_dist_from_subdomain_border'");
       iarg += 2;
       hasargs = true;
@@ -158,11 +157,8 @@ FixInsertPack::FixInsertPack(LAMMPS *lmp, int narg, char **arg) :
         error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'do_dense_pack'");
       iarg += 2;
       hasargs = true;
-    } else if(strcmp(style,"insert/pack") == 0){
-        fprintf(screen,"ERROR:: Unknown Style == %s\n",style);
-        fprintf(screen,"narg == %i\n",narg);
+    } else if(strcmp(style,"insert/pack") == 0)
         error->fix_error(FLERR,this,"unknown keyword");
-    }
   }
 
   // no fixed total number of particles inserted by this fix exists
@@ -196,7 +192,6 @@ void FixInsertPack::init_defaults()
       check_dist_from_subdomain_border_ = true;
 
       warn_region = true;
-
       use_dense_pack = false;
 }
 
@@ -437,146 +432,132 @@ int FixInsertPack::calc_maxtry(int ninsert_this_local)
 
 void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, int &ninserted_spheres_this_local, double &mass_inserted_this_local)
 {
-	ninserted_this_local = ninserted_spheres_this_local = 0;
-	mass_inserted_this_local = 0.;
+  ninserted_this_local = ninserted_spheres_this_local = 0;
+  mass_inserted_this_local = 0.;
 
-	double pos[3];
-	ParticleToInsert *pti;
+  double pos[3];
+  ParticleToInsert *pti;
 
-	int ntry = 0;
-	int maxtry = calc_maxtry(ninsert_this_local);
+  int ntry = 0;
+  int maxtry = calc_maxtry(ninsert_this_local);
 
-	double v_toInsert[3];
-	vectorZeroize3D(v_toInsert);
+  double v_toInsert[3];
+  vectorZeroize3D(v_toInsert);
 
-	if(use_dense_pack) {
-		// only uses overlap check
-		//fprintf(screen,"First Check\n");
-		while(ntry < maxtry && ninserted_this_local < ninsert_this_local){
-			pti = fix_distribution->pti_list[ninserted_this_local];
-			double rbound = pti->r_bound_ins/double(pti->nspheres);
-			//fprintf(screen,"rbound == %f\n",rbound);
-			if (screen && print_stats_during_flag && (ninsert_this_local >= 10) && 
-										(0 == ninserted_this_local % (ninsert_this_local/10)))
-				fprintf(screen, "insertion: proc %d at %d %%\n",
-								comm->me, 10*ninserted_this_local/(ninsert_this_local/10));
+  if(use_dense_pack) {
+    // only uses overlap check
+    //fprintf(screen,"First Check\n");
+    while(ntry < maxtry && ninserted_this_local < ninsert_this_local){
+      pti = fix_distribution->pti_list[ninserted_this_local];
+      double rbound = pti->r_bound_ins/double(pti->nparticles);
+      //fprintf(screen,"rbound == %f\n",rbound);
+      if (screen && print_stats_during_flag && (ninsert_this_local >= 10) && 
+                  (0 == ninserted_this_local % (ninsert_this_local/10)))
+        fprintf(screen, "insertion: proc %d at %d %%\n",
+              comm->me, 10*ninserted_this_local/(ninsert_this_local/10));
 
-			int nins = 0;
-			while(nins == 0 && ntry < maxtry) {
-				//fprintf(screen,"Looking for insertion point\n");
-				ins_region->generate_random_shrinkby_cut(pos, rbound, true);
-				//fprintf(screen,"Found insertion point\n");
-				++ntry;
-				// randomize vel, omega, quat here
-				//fprintf(screen,"Getting Velocity\n");
-				vectorCopy3D(v_insert, v_toInsert);
+      int nins = 0;
+      while(nins == 0 && ntry < maxtry) {
+        //fprintf(screen,"Looking for insertion point\n");
+        ins_region->generate_random_shrinkby_cut(pos, rbound, true);
+        //fprintf(screen,"Found insertion point\n");
+        ++ntry;
+        // randomize vel, omega, quat here
+        //fprintf(screen,"Getting Velocity\n");
+        vectorCopy3D(v_insert, v_toInsert);
 
-				// could ramdonize vel, omega, quat here
-				generate_random_velocity(v_toInsert);
+        // could ramdonize vel, omega, quat here
+        generate_random_velocity(v_toInsert);
 
-				if(quat_random_)
-					MathExtraLiggghts::random_unit_quat(random, quat_insert);
+        if(quat_random_)
+          MathExtraLiggghts::random_unit_quat(random, quat_insert);
 
-			//fprintf(screen,"Trying to insert entire fiber...\n");
-				nins = pti->check_near_set_x_v_omega_dense(pos, v_toInsert, omega_insert, quat_insert, neighList, iregion);
-			//fprintf(screen,"nins == %i, ntry == %i\n",nins,ntry);
-			}
+        //fprintf(screen,"Trying to insert entire fiber...\n");
+        nins = pti->check_near_set_x_v_omega_dense(pos, v_toInsert, omega_insert, quat_insert, neighList, iregion);
+        //fprintf(screen,"nins == %i, ntry == %i\n",nins,ntry);
+      }
 
-			if(nins > 0) {
-				ninserted_spheres_this_local += nins;
-				mass_inserted_this_local += pti->mass_ins;
-				ninserted_this_local++;
-				ntry = 0;
-			}
-		}
+      if(nins > 0) {
+        ninserted_spheres_this_local += nins;
+        mass_inserted_this_local += pti->mass_ins;
+        ninserted_this_local++;
+        ntry = 0;
+      }
+    }
+  } else {
+    // no overlap check
+    if(!check_ol_flag) {
+      for(int itotal = 0; itotal < ninsert_this_local; itotal++) {
+        pti = fix_distribution->pti_list[ninserted_this_local];
+        double rbound = pti->r_bound_ins;
 
-	} else {
+        if(screen && print_stats_during_flag && (ninsert_this_local >= 10) && (0 == itotal % (ninsert_this_local/10)))
+          fprintf(screen,"insertion: proc %d at %d %%\n",comm->me,10*itotal/(ninsert_this_local/10));
 
-	// no overlap check
-		if(!check_ol_flag)
-		{
-			for(int itotal = 0; itotal < ninsert_this_local; itotal++)
-			{
-				pti = fix_distribution->pti_list[ninserted_this_local];
-				double rbound = pti->r_bound_ins;
+        if(all_in_flag) ins_region->generate_random_shrinkby_cut(pos,rbound,true);
+        else ins_region->generate_random(pos,true);
 
-				if(screen && print_stats_during_flag && (ninsert_this_local >= 10) && (0 == itotal % (ninsert_this_local/10)))
-					fprintf(screen,"insertion: proc %d at %d %%\n",comm->me,10*itotal/(ninsert_this_local/10));
+        // randomize vel, omega, quat here
+        vectorCopy3D(v_insert,v_toInsert);
+        // could ramdonize vel, omega, quat here
+        generate_random_velocity(v_toInsert);
 
-				if(all_in_flag)
-					ins_region->generate_random_shrinkby_cut(pos,rbound,true);
-				else
-					ins_region->generate_random(pos,true);
+        if(quat_random_)
+          MathExtraLiggghts::random_unit_quat(random,quat_insert);
 
-				// randomize vel, omega, quat here
-				vectorCopy3D(v_insert,v_toInsert);
-				// could ramdonize vel, omega, quat here
-				generate_random_velocity(v_toInsert);
+        if(pos[0] == 0. && pos[1] == 0. && pos[2] == 0.)
+          error->one(FLERR,"FixInsertPack::x_v_omega() illegal position");
+        ninserted_spheres_this_local += pti->set_x_v_omega(pos,v_toInsert,omega_insert,quat_insert);
+        mass_inserted_this_local += pti->mass_ins;
+        ninserted_this_local++;
 
-				if(quat_random_)
-					MathExtraLiggghts::random_unit_quat(random,quat_insert);
+      }
+    } else {
+      // overlap check
+      // account for maxattempt
+      // pti checks against xnear and adds self contributions
+          
+      while(ntry < maxtry && ninserted_this_local < ninsert_this_local) {
+              
+        pti = fix_distribution->pti_list[ninserted_this_local];
+        double rbound = pti->r_bound_ins;
 
-				if(pos[0] == 0. && pos[1] == 0. && pos[2] == 0.)
-					error->one(FLERR,"FixInsertPack::x_v_omega() illegal position");
+        if(screen && print_stats_during_flag && (ninsert_this_local >= 10) && (0 == ninserted_this_local % (ninsert_this_local/10)) )
+          fprintf(screen,"insertion: proc %d at %d %%\n",comm->me,10*ninserted_this_local/(ninsert_this_local/10));
 
-				ninserted_spheres_this_local += pti->set_x_v_omega(pos,v_toInsert,omega_insert,quat_insert);
-				mass_inserted_this_local += pti->mass_ins;
-				++ninserted_this_local;
+        int nins = 0;
+        while(nins == 0 && ntry < maxtry) {
+          do {
+                      
+            if(all_in_flag) ins_region->generate_random_shrinkby_cut(pos,rbound,true);
+            else ins_region->generate_random(pos,true);
+            ntry++;
 
-			} 
-		}
-		// overlap check
-		// account for maxattempt
-		// pti checks against xnear and adds self contributions
-		else
-		{
+          }while((check_dist_from_subdomain_border_) && (ntry < maxtry && domain->dist_subbox_borders(pos) < rbound));
 
-			while(ntry < maxtry && ninserted_this_local < ninsert_this_local)
-			{
+          if(ntry == maxtry) break;
 
-				pti = fix_distribution->pti_list[ninserted_this_local];
-				double rbound = pti->r_bound_ins;
-				//            fprintf(screen,"rbound == %f\n",rbound);
+          // randomize vel, omega, quat here
+          vectorCopy3D(v_insert,v_toInsert);
 
-				if(screen && print_stats_during_flag && (ninsert_this_local >= 10) && (0 == ninserted_this_local % (ninsert_this_local/10)) )
-					fprintf(screen,"insertion: proc %d at %d %%\n",comm->me,10*ninserted_this_local/(ninsert_this_local/10));
+          // could ramdonize vel, omega, quat here
+          generate_random_velocity(v_toInsert);
 
-				int nins = 0;
-				while(nins == 0 && ntry < maxtry)
-				{
-					do
-					{
+          if(quat_random_)
+            MathExtraLiggghts::random_unit_quat(random,quat_insert);
 
-						if(all_in_flag) ins_region->generate_random_shrinkby_cut(pos,rbound,true);
-						else ins_region->generate_random(pos,true);
-						ntry++;
+          nins = pti->check_near_set_x_v_omega(pos,v_toInsert,omega_insert,quat_insert,neighList);
 
-					} while ((check_dist_from_subdomain_border_) && (ntry < maxtry && domain->dist_subbox_borders(pos) < rbound));
+        }
 
-					if(ntry == maxtry) break;
-
-					// randomize vel, omega, quat here
-					vectorCopy3D(v_insert,v_toInsert);
-
-					// could ramdonize vel, omega, quat here
-					generate_random_velocity(v_toInsert);
-
-					if(quat_random_)
-						MathExtraLiggghts::random_unit_quat(random,quat_insert);
-
-					nins = pti->check_near_set_x_v_omega(pos,v_toInsert,omega_insert,quat_insert,neighList,iregion);
-
-				}
-
-				if(nins > 0)
-				{
-					ninserted_spheres_this_local += nins;
-					mass_inserted_this_local += pti->mass_ins;
-					ninserted_this_local++;
-				}
-			}
-		}
-	}
+        if(nins > 0) {
+          ninserted_spheres_this_local += nins;
+          mass_inserted_this_local += pti->mass_ins;
+          ninserted_this_local++;
+        }
+      }
+    }
+  }
 }
 
 /* ---------------------------------------------------------------------- */

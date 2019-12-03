@@ -132,7 +132,7 @@ variable pz equal z[${lastone}]
 # Get the z-directional velocity of the last atom
 variable vz equal vz[${lastone}]
 # Print to screen a custom array that includes, the current step of the simulation, the number of atoms in the system, the number of bonds in the system, the current simulation time, how much cpu time has passed, the estimated cpu time remaining, the z-directional position, the z-directional velocity, and the current kinetic energy in the system
-thermo_style custom step atoms numbond v_sim_time cpu cpuremain v_pz v_vz ke
+thermo_style custom step atoms numbonds v_sim_time cpu cpuremain v_pz v_vz ke
 # Have this printed to the screen every "thermo_step" steps
 thermo ${thermo_step}
 # Ignore lost atoms and do not normalize output

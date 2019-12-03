@@ -43,7 +43,7 @@
     the GNU General Public License.
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <string.h>
 #include "ctype.h"
@@ -1486,8 +1486,10 @@ double Variable::evaluate(char *str, Tree **tree)
                        "Variable evaluation before simulation box is defined");
 
           int flag = output->thermo->evaluate_keyword(word,&value1);
-          if (flag)
+          if (flag) {
+            fprintf(screen, "word = %s\n", word);
             error->all(FLERR,"Invalid thermo keyword in variable formula");
+          }
           if (tree) {
             Tree *newtree = new Tree();
             newtree->type = VALUE;
@@ -1953,7 +1955,10 @@ double Variable::collapse_tree(Tree *tree)
       int seed = static_cast<int> (collapse_tree(tree->right));
       if (seed <= 0)
         error->one(FLERR,"Invalid math function in variable formula");
-      randomatom = new RanMars(lmp,seed+me);
+      char * seed_char = new char[50];
+      sprintf(seed_char, "%d", seed);
+      randomatom = new RanMars(lmp, seed_char, true);
+      delete [] seed_char;
     }
     return 0.0;
   }
@@ -1967,7 +1972,10 @@ double Variable::collapse_tree(Tree *tree)
       int seed = static_cast<int> (collapse_tree(tree->right));
       if (seed <= 0)
         error->one(FLERR,"Invalid math function in variable formula");
-      randomatom = new RanMars(lmp,seed+me);
+      char * seed_char = new char[50];
+      sprintf(seed_char, "%d", seed);
+      randomatom = new RanMars(lmp, seed_char, true);
+      delete [] seed_char;
     }
     return 0.0;
   }
@@ -2244,7 +2252,10 @@ double Variable::eval_tree(Tree *tree, int i)
       int seed = static_cast<int> (eval_tree(tree->right,i));
       if (seed <= 0)
         error->one(FLERR,"Invalid math function in variable formula");
-      randomatom = new RanMars(lmp,seed+me);
+      char * seed_char = new char[50];
+      sprintf(seed_char, "%d", seed);
+      randomatom = new RanMars(lmp, seed_char, true);
+      delete [] seed_char;
     }
     return randomatom->uniform()*(upper-lower)+lower;
   }
@@ -2257,7 +2268,10 @@ double Variable::eval_tree(Tree *tree, int i)
       int seed = static_cast<int> (eval_tree(tree->right,i));
       if (seed <= 0)
         error->one(FLERR,"Invalid math function in variable formula");
-      randomatom = new RanMars(lmp,seed+me);
+      char * seed_char = new char[50];
+      sprintf(seed_char, "%d", seed);
+      randomatom = new RanMars(lmp, seed_char, true);
+      delete [] seed_char;
     }
     return mu + sigma*randomatom->gaussian();
   }
@@ -2648,7 +2662,10 @@ int Variable::math_function(char *word, char *contents, Tree **tree,
         int seed = static_cast<int> (value3);
         if (seed <= 0)
           error->all(FLERR,"Invalid math function in variable formula");
-        randomequal = new RanMars(lmp,seed);
+        char * seed_char = new char[50];
+        sprintf(seed_char, "%d", seed);
+        randomequal = new RanMars(lmp, seed_char);
+        delete [] seed_char;
       }
       argstack[nargstack++] = randomequal->uniform()*(value2-value1) + value1;
     }
@@ -2663,7 +2680,10 @@ int Variable::math_function(char *word, char *contents, Tree **tree,
         int seed = static_cast<int> (value3);
         if (seed <= 0)
           error->all(FLERR,"Invalid math function in variable formula");
-        randomequal = new RanMars(lmp,seed);
+        char * seed_char = new char[50];
+        sprintf(seed_char, "%d", seed);
+        randomequal = new RanMars(lmp, seed_char);
+        delete [] seed_char;
       }
       argstack[nargstack++] = value1 + value2*randomequal->gaussian();
     }
@@ -3440,7 +3460,10 @@ void Variable::peratom2global(int flag, char *word,
       else if ((strcmp(word,"tqy") == 0) && atom->torque_flag) mine = atom->torque[index][1];
       else if ((strcmp(word,"tqz") == 0) && atom->torque_flag) mine = atom->torque[index][2]; 
       else if ((strcmp(word,"r") == 0) && atom->radius_flag) mine = atom->radius[index];
-
+      else if ((strcmp(word,"quat1") == 0) && atom->superquadric_flag) mine = atom->quaternion[index][0];
+      else if ((strcmp(word,"quat2") == 0) && atom->superquadric_flag) mine = atom->quaternion[index][1];
+      else if ((strcmp(word,"quat3") == 0) && atom->superquadric_flag) mine = atom->quaternion[index][2];
+      else if ((strcmp(word,"quat4") == 0) && atom->superquadric_flag) mine = atom->quaternion[index][3];
       else error->one(FLERR,"Invalid atom vector in variable formula");
 
     } else mine = vector[index*nstride];
@@ -3488,6 +3511,10 @@ int Variable::is_atom_vector(char *word)
   if ((strcmp(word,"tqz") == 0) && atom->torque_flag) return 1; 
   if ((strcmp(word,"r") == 0) && atom->radius_flag) return 1;
   if ((strcmp(word,"density") == 0) && atom->density_flag) return 1;
+  if ((strcmp(word,"quat1") == 0) && atom->superquadric_flag) return 1;
+  if ((strcmp(word,"quat2") == 0) && atom->superquadric_flag) return 1;
+  if ((strcmp(word,"quat3") == 0) && atom->superquadric_flag) return 1;
+  if ((strcmp(word,"quat4") == 0) && atom->superquadric_flag) return 1;
   return 0;
 }
 
@@ -3544,6 +3571,10 @@ void Variable::atom_vector(char *word, Tree **tree,
   else if ((strcmp(word,"tqx") == 0) && atom->torque_flag) newtree->array = &atom->torque[0][0];
   else if ((strcmp(word,"tqy") == 0) && atom->torque_flag) newtree->array = &atom->torque[0][1];
   else if ((strcmp(word,"tqz") == 0) && atom->torque_flag) newtree->array = &atom->torque[0][2]; 
+  else if ((strcmp(word,"quat1") == 0) && atom->superquadric_flag) newtree->array = &atom->quaternion[0][0];
+  else if ((strcmp(word,"quat2") == 0) && atom->superquadric_flag) newtree->array = &atom->quaternion[0][1];
+  else if ((strcmp(word,"quat3") == 0) && atom->superquadric_flag) newtree->array = &atom->quaternion[0][2];
+  else if ((strcmp(word,"quat4") == 0) && atom->superquadric_flag) newtree->array = &atom->quaternion[0][3];
   else if ((strcmp(word,"density") == 0) && atom->density_flag) {
     newtree->nstride = 1;
     newtree->array = atom->density;

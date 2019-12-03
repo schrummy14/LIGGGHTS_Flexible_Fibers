@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>11. Errors &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -82,7 +83,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
@@ -113,8 +117,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -127,24 +133,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>11. Errors</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/Section_errors.txt" rel="nofollow"> View page source</a> 
+      <li>11. Errors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/Section_errors.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
@@ -162,14 +185,17 @@
 <h1>11. Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h1>
 <p>This section describes the errors you can encounter when using LIGGGHTS(R)-PUBLIC,
 either conceptually, or as printed out by the program.</p>
-<div class="line-block">
-<div class="line">10.1 <a class="reference internal" href="#err-1"><em>Common problems</em></a></div>
-<div class="line">10.2 <a class="reference internal" href="#err-2"><em>Reporting bugs</em></a></div>
-<div class="line">10.3 <a class="reference internal" href="#err-3"><em>Error &amp; warning messages</em></a></div>
-<div class="line"><br /></div>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#common-problems" id="id6">Common problems</a></li>
+<li><a class="reference internal" href="#reporting-bugs" id="id7">Reporting bugs</a></li>
+<li><a class="reference internal" href="#error-warning-messages" id="id8">Error &amp; warning messages</a></li>
+<li><a class="reference internal" href="#error" id="id9">Errors:</a></li>
+<li><a class="reference internal" href="#warnings" id="id10">Warnings:</a></li>
+</ul>
 </div>
 <div class="section" id="common-problems">
-<span id="err-1"></span><h2>11.1. Common problems<a class="headerlink" href="#common-problems" title="Permalink to this headline">¶</a></h2>
+<span id="err-1"></span><h2><a class="toc-backref" href="#id6">11.1. Common problems</a><a class="headerlink" href="#common-problems" title="Permalink to this headline">¶</a></h2>
 <p>If two LIGGGHTS(R)-PUBLIC runs do not produce the same answer on different
 machines or different numbers of processors, this is typically not a
 bug.  In theory you should get identical answers on any number of
@@ -192,7 +218,7 @@ of processors.</p>
 <p>Some commands use random number generators which may be setup to
 produce different random number streams on each processor and hence
 will produce different effects when run on different numbers of
-processors.  A commonly-used example is the <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">langevin</span></tt> command for thermostatting.</p>
+processors.  A commonly-used example is the <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">langevin</span></code> command for thermostatting.</p>
 <p>A LIGGGHTS(R)-PUBLIC simulation typically has two stages, setup and run.  Most
 LIGGGHTS(R)-PUBLIC errors are detected at setup time; others like a bond
 stretching too far may not occur until the middle of a run.</p>
@@ -219,7 +245,7 @@ decide if the WARNING is important or not.  A WARNING message that is
 generated in the middle of a run is only printed to the screen, not to
 the logfile, to avoid cluttering up thermodynamic output.  If LIGGGHTS(R)-PUBLIC
 crashes or hangs without spitting out an error message first then it
-could be a bug (see <a class="reference internal" href="#err-2"><em>this section</em></a>) or one of the following
+could be a bug (see <a class="reference internal" href="#err-2"><span>this section</span></a>) or one of the following
 cases:</p>
 <p>LIGGGHTS(R)-PUBLIC runs in the available memory a processor allows to be
 allocated.  Most reasonable MD runs are compute limited, not memory
@@ -247,10 +273,10 @@ buffering or boost the sizes of messages that can be buffered.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="reporting-bugs">
-<span id="err-2"></span><h2>11.2. Reporting bugs<a class="headerlink" href="#reporting-bugs" title="Permalink to this headline">¶</a></h2>
+<span id="err-2"></span><h2><a class="toc-backref" href="#id7">11.2. Reporting bugs</a><a class="headerlink" href="#reporting-bugs" title="Permalink to this headline">¶</a></h2>
 <p>If you are confident that you have found a bug in LIGGGHTS(R)-PUBLIC, follow these
 steps.</p>
-<p>Check the <a class="reference external" href="http://www.cfdem.com/liggghtsr-version-historyhttp://www.cfdem.com/liggghtsr-version-historyhttp://www.cfdem.com/liggghtsr-version-history">New features and bug fixes</a> section of the <a class="reference external" href="liws_">LIGGGHTS(R)-PUBLIC WWW site</a> to see if the bug has already been reported or fixed or the
+<p>Check the <a class="reference external" href="http://www.cfdem.com/liggghtsr-version-historyhttp://www.cfdem.com/liggghtsr-version-historyhttp://www.cfdem.com/liggghtsr-version-history">New features and bug fixes</a> section of the <a class="reference external" href="http://www.cfdem.com">LIGGGHTS(R)-PUBLIC WWW site</a> to see if the bug has already been reported or fixed or the
 <a class="reference external" href="http://www.cfdem.com/forums/bug-reports-cfdemrcoupling-liggghtsr-and-parscale">Unfixed bug</a>
 to see if a fix is pending.</p>
 <p>Check the <a class="reference external" href="http://www.cfdem.com/forum">forums</a>
@@ -273,9 +299,9 @@ and the <a class="reference external" href="http://lammps.sandia.gov/mail.html">
 <hr class="docutils" />
 </div>
 <div class="section" id="error-warning-messages">
-<span id="err-3"></span><h2>11.3. Error &amp; warning messages<a class="headerlink" href="#error-warning-messages" title="Permalink to this headline">¶</a></h2>
-<p>These are two alphabetic lists of the <a class="reference internal" href="#error"><em>ERROR</em></a> and
-<a class="reference internal" href="#warn"><em>WARNING</em></a> messages LIGGGHTS(R)-PUBLIC prints out and the reason why.  If the
+<span id="err-3"></span><h2><a class="toc-backref" href="#id8">11.3. Error &amp; warning messages</a><a class="headerlink" href="#error-warning-messages" title="Permalink to this headline">¶</a></h2>
+<p>These are two alphabetic lists of the <a class="reference internal" href="#error"><span>ERROR</span></a> and
+<a class="reference internal" href="#warn"><span>WARNING</span></a> messages LIGGGHTS(R)-PUBLIC prints out and the reason why.  If the
 explanation here is not sufficient, the documentation for the
 offending command may help.
 Error and warning messages also list the source file and line number
@@ -283,12 +309,12 @@ where the error was generated.  For example, this message</p>
 <p>ERROR: Illegal velocity command (velocity.cpp:78)</p>
 <p>means that line #78 in the file src/velocity.cpp generated the error.
 Looking in the source code may help you figure out what went wrong.</p>
-<p>Note that error messages from <a class="reference internal" href="Section_start.html#start-3"><em>user-contributed packages</em></a> are not listed here.  If such an
+<p>Note that error messages from <a class="reference internal" href="Section_start.html#start-3"><span>user-contributed packages</span></a> are not listed here.  If such an
 error occurs and is not self-explanatory, you&#8217;ll need to look in the
 source code or contact the author of the package.</p>
 </div>
 <div class="section" id="error">
-<span id="id2"></span><h2>11.4. Errors:<a class="headerlink" href="#error" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2><a class="toc-backref" href="#id9">11.4. Errors:</a><a class="headerlink" href="#error" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt><em>1-3 bond count is inconsistent</em></dt>
 <dd>An inconsistency was detected when computing the number of 1-3
@@ -464,7 +490,7 @@ be computed.</dd>
 <dd>Specified bond type is not valid.</dd>
 <dt><em>Bad fix ID in fix append/atoms command</em></dt>
 <dd>The value of the fix_id for keyword spatial must start with the suffix
-<a href="#id6"><span class="problematic" id="id7">f_</span></a>.</dd>
+<a href="#id11"><span class="problematic" id="id12">f_</span></a>.</dd>
 <dt><em>Bad grid of processors</em></dt>
 <dd>The 3d grid of processors defined by the processors command does not
 match the number of processors LIGGGHTS(R)-PUBLIC is being run on.</dd>
@@ -4602,7 +4628,7 @@ read_restart, or create_box command.</dd>
 </dl>
 </div>
 <div class="section" id="warnings">
-<span id="warn"></span><h2>11.5. Warnings:<a class="headerlink" href="#warnings" title="Permalink to this headline">¶</a></h2>
+<span id="warn"></span><h2><a class="toc-backref" href="#id10">11.5. Warnings:</a><a class="headerlink" href="#warnings" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt><em>Adjusting Coulombic cutoff for MSM, new cutoff = %g</em></dt>
 <dd>The adjust/cutoff command is turned on and the Coulombic cutoff has been
@@ -4991,13 +5017,16 @@ infinity.</dd>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="Section_python.html" class="btn btn-neutral" title="10. Python interface to LIGGGHTS(R)-PUBLIC" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Section_python.html" class="btn btn-neutral" title="10. Python interface to LIGGGHTS(R)-PUBLIC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -5027,11 +5056,13 @@ infinity.</dd>
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

@@ -51,7 +51,7 @@
 
 #include "lmptype.h"
 #include <mpi.h>
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <string.h>
 #include "thermo.h"
@@ -638,8 +638,8 @@ void Thermo::parse_fields(char *str)
       addfield("Elaplong",&Thermo::compute_elapsed_long,BIGINT);
     } else if (strcmp(word,"dt") == 0) {
       addfield("Dt",&Thermo::compute_dt,FLOAT);
-    } else if (strcmp(word,"numbond") == 0) {  // added for bond_package
-      addfield("numbond",&Thermo::compute_numbond,BIGINT);  // added for bond_package
+    } else if (strcmp(word,"numbonds") == 0) {  // added for bond_package
+      addfield("numbonds",&Thermo::compute_numbond,BIGINT);  // added for bond_package
     } else if (strcmp(word,"time") == 0) {
       addfield("Time",&Thermo::compute_time,FLOAT);
     } else if (strcmp(word,"cpu") == 0) {
@@ -1035,10 +1035,9 @@ int Thermo::evaluate_keyword(char *word, double *answer)
   else if (strcmp(word,"cellalpha") == 0) compute_cellalpha();
   else if (strcmp(word,"cellbeta") == 0) compute_cellbeta();
   else if (strcmp(word,"cellgamma") == 0) compute_cellgamma();
-  else if (strcmp(word,"numbonds") == 0) {				// added for bond package
-                                  compute_numbond();	// added for bond package
-                                  dvalue = bivalue;		// added for bond package
-  }else return 1;
+  else if (strcmp(word,"numbonds") == 0) compute_numbond();	// added for bond package
+
+  else return 1;
 
   *answer = dvalue;
   return 0;

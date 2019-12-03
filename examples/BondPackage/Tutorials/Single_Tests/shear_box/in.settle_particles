@@ -141,7 +141,7 @@ variable zdisp equal f_TopShear[9]
 variable xforc equal f_TopShear[1]
 variable xdisp equal f_BotHalfShear[7]
 
-thermo_style	custom step atoms numbond v_sim_time cpu cpuremain ke v_bulk_den v_zdisp v_zforc v_xdisp v_xforc
+thermo_style	custom step atoms numbonds v_sim_time cpu cpuremain ke v_bulk_den v_zdisp v_zforc v_xdisp v_xforc
 thermo		${thermo_step}
 thermo_modify	lost ignore norm no
 

@@ -21,7 +21,7 @@ variable coef_fri_pp                   equal 0.400      # particle-particle coef
 variable coef_fri_pw                   equal 0.600      # particle-wall coefficient of friction
 variable coef_fri_ww                   equal 0.200      # wall-wall coefficient of friction
 variable plung_speed                   equal 0.100      # Speed of plunger
-variable plung_dist                    equal 0.025      # Distance the plunger will travel
+variable plung_dist                    equal 0.035      # Distance the plunger will travel
 ### Simulation Independent Parameters
 variable restart_time                  equal 1.0e-2     # how often we write a restart file
 variable fileprint_time                equal 1.0e-2     # how often we print to the file in seconds
@@ -103,8 +103,10 @@ fix Plung all mesh/surface/stress file STL_files/Plung_225.STL type 2 scale 0.00
 fix wall all wall/gran model hertz tangential history mesh n_meshes 2 meshes Drum Plung
 # Create a thin infinitly large plane in the x plain at a height of 0.15 meters
 fix w1 all wall/gran model hertz tangential history primitive type 2 zplane 0.15
-
+# Add gravity
 fix grav all gravity 9.81 vector 0.0 0.0 -1.0
+# Check for ray and hertz timestep complience
+fix ts_check all check/timestep/gran ${thermo_step} 0.1 0.1 
 
 fix integr all nve/sphere
 
@@ -124,7 +126,7 @@ variable sim_time equal step*${dt}
 # Add location of plunger and force on plunger to screen output
 variable fz equal f_Plung[3]
 variable pz equal f_Plung[9]
-thermo_style custom step atoms numbond v_sim_time cpuremain ke v_max_h v_fz v_pz
+thermo_style custom step atoms numbonds v_sim_time cpuremain ke v_max_h v_fz v_pz
 # Set how often the simulation outputs to the screen
 thermo ${thermo_step}
 # Ignore particles that leave the domain and do NOT noramlize the data

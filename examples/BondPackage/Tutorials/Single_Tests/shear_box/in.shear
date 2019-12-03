@@ -117,11 +117,6 @@ fix TopHalfShear all mesh/surface/stress file STL/ShearBox_TopHalf.STL &
 fix wall all wall/gran model hertz tangential history mesh n_meshes 4 meshes &
                        BotShear TopShear BotHalfShear TopHalfShear
 
-fix wall_x1 all wall/gran model hertz tangential history primitive type 2 xplane 0.0
-fix wall_x2 all wall/gran model hertz tangential history primitive type 2 xplane 0.1015
-fix wall_y1 all wall/gran model hertz tangential history primitive type 2 yplane 0.0
-fix wall_y2 all wall/gran model hertz tangential history primitive type 2 yplane 0.1015
-
 # Get forces, torques, and eq dist from the bonds
 compute bc all property/local batom1x batom1y batom1z batom2x batom2y batom2z batom1 batom2 btype bforceX bforceY bforceZ btorqueX btorqueY btorqueZ beqdist
 
@@ -144,7 +139,7 @@ variable zdisp equal f_TopShear[9]
 variable xforc equal f_TopShear[1]
 variable xdisp equal f_BotHalfShear[7]
 
-thermo_style custom step atoms numbond v_sim_time cpu cpuremain ke v_bulk_den v_zdisp v_zforc v_xdisp v_xforc
+thermo_style custom step atoms numbonds v_sim_time cpu cpuremain ke v_bulk_den v_zdisp v_zforc v_xdisp v_xforc
 thermo ${thermo_step}
 thermo_modify lost ignore norm no
 

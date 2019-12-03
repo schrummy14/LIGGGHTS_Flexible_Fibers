@@ -13,7 +13,7 @@ variable wall_contact_youngs_modulus   equal 180.0e9    # Pa
 variable bond_youngs_modulus           equal 1.4e7      # Pa
 variable particle_poissons_ratio       equal 0.3        # NA
 variable wall_poissons_ratio           equal 0.3        # NA
-variable ke_tol                        equal 1.0e-4     # Energy that we will run the simulation to obtain
+variable ke_tol                        equal 5.0e-5     # Energy that we will run the simulation to obtain
 variable res_tol                       equal 1.0e-6     # Change of height tollerance that must be met
 variable coef_res_pp                   equal 0.500      # particle-particle coefficient of restitution
 variable coef_res_pw                   equal 0.300      # particle-wall coefficient of restitution
@@ -24,8 +24,8 @@ variable coef_fri_ww                   equal 0.200      # wall-wall coefficient 
 
 ### Simulation Independent Parameters
 variable fileprint_time                equal 1.0e-3  # how often we print to the file in seconds
-variable thermo_time                   equal 1.0e-4  # how often we print to the screen in seconds
-variable set_time                      equal 1.0e-3  # initial settiling time before we enter a loop
+variable thermo_time                   equal 1.0e-3  # how often we print to the screen in seconds
+variable set_time                      equal 5.0e-3  # initial settiling time before we enter a loop
 
 ### Material Dependent Properties
 variable particle_radius               equal 0.5*${particle_diameter}
@@ -68,7 +68,7 @@ bond_style gran
 processors * * *
 
 ## Read in the restart file
-read_restart restarts/restart0.liggghts
+read_restart restarts/restart*.liggghts
 
 # Set neighbor bin sizes and update after each run step if needed
 neighbor      0.001 bin
@@ -118,7 +118,7 @@ variable res equal 0.0
 # Set the output to the screen to show the current simulation step, number of atoms, number of bonds, the simulation time,
 # the ammount of time that has passed since the start of the run, the estimated remaining time to finish the current run,
 # the kinetic energy of the domain, and the max height of all particles
-thermo_style custom step atoms numbond v_sim_time cpu cpuremain ke v_max_h v_res
+thermo_style custom step atoms numbonds v_sim_time cpu cpuremain ke v_max_h v_res
 # Set how often the simulation outputs to the screen
 thermo ${thermo_step}
 # Ignore particles that leave the domain and do NOT noramlize the data
@@ -131,7 +131,7 @@ dump dmp all custom ${fileprint_step} post/calm/dump*.liggghts id type x y z ix 
 dump stldrm all mesh/vtk ${fileprint_step} post/calm/stl_drum*.vtk stress stresscomponents Drum
 
 # Run until we get the kinetic energy below our set tolerance
-run 1 # Run once to set/update all geometries and fixes
+run ${set_step} # Run once to set/update all geometries and fixes
 label begin_set_loop # Start of the loop
     variable old_height equal ${max_h}
     run ${set_step} pre no post no # Run so many steps until we check the KE again

@@ -87,7 +87,8 @@ FixBondCreateGran::FixBondCreateGran(LAMMPS *lmp, int narg, char **arg) :
   jmaxbond = 0;
   jnewtype = jatomtype;
   fraction = 1.0;
-  int seed = 86028157;
+  
+  seed = "86028157";
 
   int iarg = 9;
   while (iarg < narg) {
@@ -110,7 +111,7 @@ FixBondCreateGran::FixBondCreateGran(LAMMPS *lmp, int narg, char **arg) :
     } else if (strcmp(arg[iarg],"prob") == 0) {
       if (iarg+3 > narg) error->all(FLERR,"Illegal fix bond/create command");
       fraction = atof(arg[iarg+1]);
-      seed = atoi(arg[iarg+2]);
+      seed = arg[iarg+2];
       if (fraction < 0.0 || fraction > 1.0)
         error->all(FLERR,"Illegal fix bond/create command");
       if (seed <= 0) error->all(FLERR,"Illegal fix bond/create command");
@@ -127,8 +128,7 @@ FixBondCreateGran::FixBondCreateGran(LAMMPS *lmp, int narg, char **arg) :
     error->all(FLERR,"Inconsistent iparam/jparam values in fix bond/create command");
 
   // initialize Marsaglia RNG with processor-unique seed
-
-  random = new RanMars(lmp,seed + me);
+  random = new RanMars(lmp,seed+comm->me,proc_shift,1);
 
   // perform initial allocation of atom-based arrays
   // register with Atom class
@@ -474,7 +474,7 @@ void FixBondCreateGran::post_integrate()
         }
 
         /*NL*///
-        fprintf(screen,"creating bond btw atoms %d and %d (i has now %d bonds) at step %d\n",i,j,num_bond[i]+1,update->ntimestep);
+        // fprintf(screen,"creating bond btw atoms %d and %d (i has now %d bonds) at step %d\n",i,j,num_bond[i]+1,update->ntimestep);
 
         // if newton_bond is set, only store with I or J
         // if not newton_bond, store bond with both I and J
@@ -516,7 +516,7 @@ void FixBondCreateGran::post_integrate()
   // tally stats
 
   MPI_Allreduce(&ncreate,&createcount,1,MPI_INT,MPI_SUM,world);
-  createcounttotal += createcount;
+  createcounttotal += createcount;  me;
   atom->nbonds += createcount;
 
   /*NL*/ if(createcount && comm->me == 0) fprintf(screen,"Created %d bonds at timestep "BIGINT_FORMAT"\n",createcount,update->ntimestep);

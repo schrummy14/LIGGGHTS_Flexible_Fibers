@@ -170,7 +170,7 @@ void BondGran::compute(int eflag, int vflag)
 
   if(breakmode == BREAKSTYLE_STRESS_TEMP)
   {
-    if(!fix_Temp) error->all(FLERR,"Internal error in BondGran");
+    if(!fix_Temp) error->all(FLERR, "Internal error in BondGran");
     Temp = fix_Temp->vector_atom;
   }
   
@@ -232,10 +232,7 @@ void BondGran::compute(int eflag, int vflag)
     rout= ro[type]*fmin(radius[i1],radius[i2]);
 
     A = M_PI * (rout*rout - rin*rin); // Bond Area
-    J = A * 0.5 * (rout*rout - rin*rin);
-
-//    m1 = 4.0/3.0*density[i1]*M_PI*radius[i1]*radius[i1]*radius[i1]; // 4/3 pi r^3 density
-//    m2 = 4.0/3.0*density[i2]*M_PI*radius[i2]*radius[i2]*radius[i2];
+    J = 0.5*M_PI*(rout*rout*rout*rout - rin*rin*rin*rin);
 
     m1 = 4.1887902047863909846168578443*density[i1]*radius[i1]*radius[i1]*radius[i1];
     m2 = 4.1887902047863909846168578443*density[i2]*radius[i2]*radius[i2]*radius[i2];
@@ -268,16 +265,17 @@ void BondGran::compute(int eflag, int vflag)
 
     // Set Bond Length
     bondLength = fabs(bondhistlist[n][12]);
+    double bondLengthInv = 1.0/bondLength;
     if (bondLength < 1.0e-10) {
       fprintf(screen,"BondLength = %g\n",bondLength);
       error->all(FLERR,"bondlength too small\n");
     }
 
     // Set Stiffness Values
-    Kn = Sn[type]*A/bondLength;
-    Kt = St[type]*A/bondLength;
-    K_tor = St[type]*Ip/bondLength;
-    K_ben = Sn[type]*I/bondLength;
+    Kn = Sn[type]*A*bondLengthInv;
+    Kt = St[type]*A*bondLengthInv;
+    K_tor = St[type]*Ip*bondLengthInv;
+    K_ben = Sn[type]*I*bondLengthInv;
 
     // relative translational velocity
     vr1 = v[i1][0] - v[i2][0]; // relative velocity between sphere1 and sphere2 in the x-direction

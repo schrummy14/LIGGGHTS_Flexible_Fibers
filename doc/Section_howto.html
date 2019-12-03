@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>8. How-to discussions &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -83,7 +84,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
@@ -132,8 +136,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -146,24 +152,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>8. How-to discussions</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/Section_howto.txt" rel="nofollow"> View page source</a> 
+      <li>8. How-to discussions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/Section_howto.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
@@ -182,31 +205,32 @@
   <div class="section" id="how-to-discussions">
 <h1>8. How-to discussions<a class="headerlink" href="#how-to-discussions" title="Permalink to this headline">¶</a></h1>
 <p>This section describes how to perform common tasks using LIGGGHTS(R)-PUBLIC.</p>
-<div class="line-block">
-<div class="line">7.1 <a class="reference internal" href="#howto-1"><em>Restarting a simulation</em></a></div>
-<div class="line">7.2 <a class="reference internal" href="#howto-2"><em>2d simulations</em></a></div>
-<div class="line">7.3 <a class="reference internal" href="#howto-3"><em>Running multiple simulations from one input script</em></a></div>
-<div class="line">7.4 <a class="reference internal" href="#howto-4"><em>Granular models</em></a></div>
-<div class="line">7.5 <a class="reference internal" href="#howto-5"><em>Coupling LIGGGHTS(R)-PUBLIC to other codes</em></a></div>
-<div class="line">7.6 <a class="reference internal" href="#howto-6"><em>Visualizing LIGGGHTS(R)-PUBLIC snapshots</em></a></div>
-<div class="line">7.7 <a class="reference internal" href="#howto-7"><em>Triclinic (non-orthogonal) simulation boxes</em></a></div>
-<div class="line">7.8 <a class="reference internal" href="#howto-8"><em>Output from LIGGGHTS(R)-PUBLIC (thermo, dumps, computes, fixes, variables)</em></a></div>
-<div class="line">7.9 <a class="reference internal" href="#howto-9"><em>Walls</em></a></div>
-<div class="line">7.10 <a class="reference internal" href="#howto-10"><em>Library interface to LIGGGHTS(R)-PUBLIC</em></a></div>
-<div class="line"><br /></div>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#restarting-a-simulation" id="id62">Restarting a simulation</a></li>
+<li><a class="reference internal" href="#d-simulations" id="id63">2d simulations</a></li>
+<li><a class="reference internal" href="#running-multiple-simulations-from-one-input-script" id="id64">Running multiple simulations from one input script</a></li>
+<li><a class="reference internal" href="#granular-models" id="id65">Granular models</a></li>
+<li><a class="reference internal" href="#coupling-liggghts-r-public-to-other-codes" id="id66">Coupling LIGGGHTS(R)-PUBLIC to other codes</a></li>
+<li><a class="reference internal" href="#visualizing-liggghts-r-public-snapshots" id="id67">Visualizing LIGGGHTS(R)-PUBLIC snapshots</a></li>
+<li><a class="reference internal" href="#triclinic-non-orthogonal-simulation-boxes" id="id68">Triclinic (non-orthogonal) simulation boxes</a></li>
+<li><a class="reference internal" href="#output-from-liggghts-r-public-thermo-dumps-computes-fixes-variables" id="id69">Output from LIGGGHTS(R)-PUBLIC (thermo, dumps, computes, fixes, variables)</a></li>
+<li><a class="reference internal" href="#walls" id="id70">Walls</a></li>
+<li><a class="reference internal" href="#library-interface-to-liggghts-r-public" id="id71">Library interface to LIGGGHTS(R)-PUBLIC</a></li>
+</ul>
 </div>
 <p>The example input scripts included in the LIGGGHTS(R)-PUBLIC distribution and
-highlighted in <tt class="xref doc docutils literal"><span class="pre">Section_example</span></tt> also show how to
+highlighted in <code class="xref doc docutils literal"><span class="pre">Section_example</span></code> also show how to
 setup and run various kinds of simulations.</p>
 <div class="section" id="restarting-a-simulation">
-<span id="howto-1"></span><h2>8.1. Restarting a simulation<a class="headerlink" href="#restarting-a-simulation" title="Permalink to this headline">¶</a></h2>
+<span id="howto-1"></span><h2><a class="toc-backref" href="#id62">8.1. Restarting a simulation</a><a class="headerlink" href="#restarting-a-simulation" title="Permalink to this headline">¶</a></h2>
 <p>There are 3 ways to continue a long LIGGGHTS(R)-PUBLIC simulation.  Multiple
 <a class="reference internal" href="run.html"><em>run</em></a> commands can be used in the same input script.  Each
 run will continue from where the previous run left off.  Or binary
 restart files can be saved to disk using the <a class="reference internal" href="restart.html"><em>restart</em></a>
 command.  At a later time, these binary files can be read via a
 <a class="reference internal" href="read_restart.html"><em>read_restart</em></a> command in a new script.  Or they can
-be converted to text data files using the <a class="reference internal" href="Section_start.html#start-7"><em>-r command-line switch</em></a> and read by a
+be converted to text data files using the <a class="reference internal" href="Section_start.html#start-7"><span>-r command-line switch</span></a> and read by a
 <a class="reference internal" href="read_data.html"><em>read_data</em></a> command in a new script.</p>
 <p>The <a class="reference internal" href="read_restart.html"><em>read_restart</em></a> command typically replaces
 the &#8220;create_box&#8221;create_box.html command in the input script that restarts
@@ -219,7 +243,8 @@ material parameters when restarting a simulation.</p>
 their settings are included in the restart file: <em>units, atom_style</em>.</p>
 <p>As an alternate approach, the restart file could be converted to a data
 file as follows:</p>
-<div class="highlight-python"><pre>lmp_g++ -r tmp.restart.50 tmp.restart.data</pre>
+<div class="highlight-python"><div class="highlight"><pre>lmp_g++ -r tmp.restart.50 tmp.restart.data
+</pre></div>
 </div>
 <p>Then, the &#8220;read_data&#8221;read_data.html command can be used to restart the
 simulation.</p>
@@ -228,7 +253,7 @@ LIGGGHTS(R)-PUBLIC the current timestep.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="d-simulations">
-<span id="howto-2"></span><h2>8.2. 2d simulations<a class="headerlink" href="#d-simulations" title="Permalink to this headline">¶</a></h2>
+<span id="howto-2"></span><h2><a class="toc-backref" href="#id63">8.2. 2d simulations</a><a class="headerlink" href="#d-simulations" title="Permalink to this headline">¶</a></h2>
 <p>Use the <a class="reference internal" href="dimension.html"><em>dimension</em></a> command to specify a 2d simulation.</p>
 <p>Make the simulation box periodic in z via the <a class="reference internal" href="boundary.html"><em>boundary</em></a>
 command.  This is the default.</p>
@@ -260,27 +285,28 @@ the same as in 3d.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="running-multiple-simulations-from-one-input-script">
-<span id="howto-3"></span><h2>8.3. Running multiple simulations from one input script<a class="headerlink" href="#running-multiple-simulations-from-one-input-script" title="Permalink to this headline">¶</a></h2>
+<span id="howto-3"></span><h2><a class="toc-backref" href="#id64">8.3. Running multiple simulations from one input script</a><a class="headerlink" href="#running-multiple-simulations-from-one-input-script" title="Permalink to this headline">¶</a></h2>
 <p>This can be done in several ways.  See the documentation for
 individual commands for more details on how these examples work.</p>
 <p>If &#8220;multiple simulations&#8221; means continue a previous simulation for
 more timesteps, then you simply use the <a class="reference internal" href="run.html"><em>run</em></a> command
 multiple times.  For example, this script</p>
-<div class="highlight-python"><pre>units lj
+<div class="highlight-python"><div class="highlight"><pre>units lj
 atom_style atomic
 read_data data.lj
 run 10000
 run 10000
 run 10000
 run 10000
-run 10000</pre>
+run 10000
+</pre></div>
 </div>
 <p>would run 5 successive simulations of the same system for a total of
 50,000 timesteps.</p>
 <p>If you wish to run totally different simulations, one after the other,
 the <a class="reference internal" href="clear.html"><em>clear</em></a> command can be used in between them to
 re-initialize LIGGGHTS(R)-PUBLIC.  For example, this script</p>
-<div class="highlight-python"><pre>units lj
+<div class="highlight-python"><div class="highlight"><pre>units lj
 atom_style atomic
 read_data data.lj
 run 10000
@@ -288,7 +314,8 @@ clear
 units lj
 atom_style atomic
 read_data data.lj.new
-run 10000</pre>
+run 10000
+</pre></div>
 </div>
 <p>would run 2 independent simulations, one after the other.</p>
 <p>For large numbers of independent simulations, you can use
@@ -296,20 +323,21 @@ run 10000</pre>
 <a class="reference internal" href="jump.html"><em>jump</em></a> commands to loop over the same input script
 multiple times with different settings.  For example, this
 script, named in.polymer</p>
-<div class="highlight-python"><pre>variable d index run1 run2 run3 run4 run5 run6 run7 run8
+<div class="highlight-python"><div class="highlight"><pre>variable d index run1 run2 run3 run4 run5 run6 run7 run8
 shell cd $d
 read_data data.polymer
 run 10000
 shell cd ..
 clear
 next d
-jump in.polymer</pre>
+jump in.polymer
+</pre></div>
 </div>
 <p>would run 8 simulations in different directories, using a data.polymer
 file in each directory.  The same concept could be used to run the
 same system at 8 different temperatures, using a temperature variable
 and storing the output in different log and dump files, for example</p>
-<div class="highlight-python"><pre>variable a loop 8
+<div class="highlight-python"><div class="highlight"><pre>variable a loop 8
 variable t index 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15
 log log.$a
 read data.polymer
@@ -319,12 +347,13 @@ dump 1 all atom 1000 dump.$a
 run 100000
 next t
 next a
-jump in.polymer</pre>
+jump in.polymer
+</pre></div>
 </div>
 <p>All of the above examples work whether you are running on 1 or
 multiple processors, but assumed you are running LIGGGHTS(R)-PUBLIC on a single
 partition of processors.  LIGGGHTS(R)-PUBLIC can be run on multiple partitions via
-the &#8220;-partition&#8221; command-line switch as described in <a class="reference internal" href="Section_start.html#start-7"><em>this section</em></a> of the manual.</p>
+the &#8220;-partition&#8221; command-line switch as described in <a class="reference internal" href="Section_start.html#start-7"><span>this section</span></a> of the manual.</p>
 <p>In the last 2 examples, if LIGGGHTS(R)-PUBLIC were run on 3 partitions, the same
 scripts could be used if the &#8220;index&#8221; and &#8220;loop&#8221; variables were
 replaced with <em>universe</em>-style variables, as described in the
@@ -338,7 +367,7 @@ the 4th simulation, and so forth, until all 8 were completed.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="granular-models">
-<span id="howto-4"></span><h2>8.4. Granular models<a class="headerlink" href="#granular-models" title="Permalink to this headline">¶</a></h2>
+<span id="howto-4"></span><h2><a class="toc-backref" href="#id65">8.4. Granular models</a><a class="headerlink" href="#granular-models" title="Permalink to this headline">¶</a></h2>
 <p>Granular system are composed of spherical particles with a diameter,
 as opposed to point particles.  This means they have an angular
 velocity and torque can be imparted to them to cause them to rotate.</p>
@@ -353,7 +382,7 @@ the following commands:</p>
 <ul class="simple">
 <li><a class="reference internal" href="compute_erotate_sphere.html"><em>compute erotate/sphere</em></a></li>
 </ul>
-<p>calculates rotational kinetic energy which can be <a class="reference internal" href="#howto-8"><em>output with thermodynamic info</em></a>.</p>
+<p>calculates rotational kinetic energy which can be <a class="reference internal" href="#howto-8"><span>output with thermodynamic info</span></a>.</p>
 <p>Use a number of particle-particle and particle-wall contact models,
 which compute forces and torques between interacting pairs of particles
 and between particles and primitive walls or mesh elements. Details
@@ -365,7 +394,7 @@ can be found here:</p>
 <p>These commands implement fix options specific to granular systems:</p>
 <ul class="simple">
 <li><a class="reference internal" href="fix_freeze.html"><em>fix freeze</em></a></li>
-<li><tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">pour</span></tt></li>
+<li><code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">pour</span></code></li>
 <li><a class="reference internal" href="fix_viscous.html"><em>fix viscous</em></a></li>
 <li><a class="reference internal" href="fix_wall_gran.html"><em>fix wall/gran</em></a></li>
 </ul>
@@ -383,7 +412,7 @@ computations between frozen atoms by using this command:</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="coupling-liggghts-r-public-to-other-codes">
-<span id="howto-5"></span><h2>8.5. Coupling LIGGGHTS(R)-PUBLIC to other codes<a class="headerlink" href="#coupling-liggghts-r-public-to-other-codes" title="Permalink to this headline">¶</a></h2>
+<span id="howto-5"></span><h2><a class="toc-backref" href="#id66">8.5. Coupling LIGGGHTS(R)-PUBLIC to other codes</a><a class="headerlink" href="#coupling-liggghts-r-public-to-other-codes" title="Permalink to this headline">¶</a></h2>
 <p>LIGGGHTS(R)-PUBLIC is designed to allow it to be coupled to other codes.  For
 example, a quantum mechanics code might compute forces on a subset of
 atoms and pass those forces to LIGGGHTS(R)-PUBLIC.  Or a continuum finite element
@@ -397,7 +426,7 @@ context of your application.</p>
 this scenario, LIGGGHTS(R)-PUBLIC is the driver code.  During its timestepping,
 the fix is invoked, and can make library calls to the other code,
 which has been linked to LIGGGHTS(R)-PUBLIC as a library.  This is the way the
-<a class="reference external" href="poems_">POEMS</a> package that performs constrained rigid-body motion on
+<a class="reference external" href="http://www.rpi.edu/~anderk5/lab">POEMS</a> package that performs constrained rigid-body motion on
 groups of atoms is hooked to LIGGGHTS(R)-PUBLIC.  See the
 <a class="reference internal" href="fix_poems.html"><em>fix_poems</em></a> command for more details.  See <a class="reference internal" href="Section_modify.html"><em>this section</em></a> of the documentation for info on how to add
 a new fix to LIGGGHTS(R)-PUBLIC.</p>
@@ -430,13 +459,13 @@ examples/COUPLE/README for more details:</p>
 <ul class="simple">
 <li>simple: simple driver programs in C++ and C which invoke LIGGGHTS(R)-PUBLIC as a
 library</li>
-<li>lammps_quest: coupling of LIGGGHTS(R)-PUBLIC and <a class="reference external" href="quest_">Quest</a>, to run classical
+<li>lammps_quest: coupling of LIGGGHTS(R)-PUBLIC and <a class="reference external" href="http://dft.sandia.gov/Quest">Quest</a>, to run classical
 MD with quantum forces calculated by a density functional code</li>
-<li>lammps_spparks: coupling of LIGGGHTS(R)-PUBLIC and <a class="reference external" href="spparks_">SPPARKS</a>, to couple
+<li>lammps_spparks: coupling of LIGGGHTS(R)-PUBLIC and <a class="reference external" href="http://www.sandia.gov/~sjplimp/spparks.html">SPPARKS</a>, to couple
 a kinetic Monte Carlo model for grain growth using MD to calculate
 strain induced across grain boundaries</li>
 </ul>
-<p><a class="reference internal" href="Section_start.html#start-5"><em>This section</em></a> of the documentation
+<p><a class="reference internal" href="Section_start.html#start-5"><span>This section</span></a> of the documentation
 describes how to build LIGGGHTS(R)-PUBLIC as a library.  Once this is done, you
 can interface with LIGGGHTS(R)-PUBLIC either via C++, C, Fortran, or Python (or
 any other language that supports a vanilla C-like interface).  For
@@ -448,7 +477,7 @@ or Fortran you can make function calls to do the same things.  See
 of the Python wrapper provided with LIGGGHTS(R)-PUBLIC that operates through the
 LIGGGHTS(R)-PUBLIC library interface.</p>
 <p>The files src/library.cpp and library.h contain the C-style interface
-to LIGGGHTS(R)-PUBLIC.  See <em class="xref std std-ref">Section_howto 19</em> of the
+to LIGGGHTS(R)-PUBLIC.  See <span class="xref std std-ref">Section_howto 19</span> of the
 manual for a description of the interface and how to extend it for
 your needs.</p>
 <p>Note that the lammps_open() function that creates an instance of
@@ -464,7 +493,7 @@ instances of LIGGGHTS(R)-PUBLIC to perform different calculations.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="visualizing-liggghts-r-public-snapshots">
-<span id="howto-6"></span><h2>8.6. Visualizing LIGGGHTS(R)-PUBLIC snapshots<a class="headerlink" href="#visualizing-liggghts-r-public-snapshots" title="Permalink to this headline">¶</a></h2>
+<span id="howto-6"></span><h2><a class="toc-backref" href="#id67">8.6. Visualizing LIGGGHTS(R)-PUBLIC snapshots</a><a class="headerlink" href="#visualizing-liggghts-r-public-snapshots" title="Permalink to this headline">¶</a></h2>
 <p>LIGGGHTS(R)-PUBLIC itself does not do visualization, but snapshots from LIGGGHTS(R)-PUBLIC
 simulations can be visualized (and analyzed) in a variety of ways.</p>
 <p>LIGGGHTS(R)-PUBLIC snapshots are created by the <a class="reference internal" href="dump.html"><em>dump</em></a> command which can
@@ -479,7 +508,7 @@ VTK natively.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="triclinic-non-orthogonal-simulation-boxes">
-<span id="howto-7"></span><h2>8.7. Triclinic (non-orthogonal) simulation boxes<a class="headerlink" href="#triclinic-non-orthogonal-simulation-boxes" title="Permalink to this headline">¶</a></h2>
+<span id="howto-7"></span><h2><a class="toc-backref" href="#id68">8.7. Triclinic (non-orthogonal) simulation boxes</a><a class="headerlink" href="#triclinic-non-orthogonal-simulation-boxes" title="Permalink to this headline">¶</a></h2>
 <p>By default, LIGGGHTS(R)-PUBLIC uses an orthogonal simulation box to encompass the
 particles.  The <a class="reference internal" href="boundary.html"><em>boundary</em></a> command sets the boundary
 conditions of the box (periodic, non-periodic, etc).  The orthogonal
@@ -516,7 +545,7 @@ vectors of a general parallelepiped, where there is no restriction on
 <strong>A</strong> x <strong>B</strong> . <strong>C</strong> &gt; 0.  The equivalent LIGGGHTS(R)-PUBLIC <strong>a</strong>,**b**,**c** are a linear
 rotation of <strong>A</strong>, <strong>B</strong>, and <strong>C</strong> and can be computed as follows:</p>
 <img alt="_images/transform.jpg" class="align-center" src="_images/transform.jpg" />
-<p>where A = <a href="#id63"><span class="problematic" id="id64">|**A**|</span></a> indicates the scalar length of <strong>A</strong>. The ^ hat symbol
+<p>where A = <a href="#id60"><span class="problematic" id="id61">|**A**|</span></a> indicates the scalar length of <strong>A</strong>. The ^ hat symbol
 indicates the corresponding unit vector. <em>beta</em> and <em>gamma</em> are angles
 between the vectors described below. Note that by construction,
 <strong>a</strong>, <strong>b</strong>, and <strong>c</strong> have strictly positive x, y, and z components, respectively.
@@ -539,7 +568,7 @@ The transformation is given by the following equation:</p>
 dimension, though it typically should be in at least the 2nd dimension
 of the tilt (y in xy) if you want to enforce a shift in periodic
 boundary conditions across that boundary.  Some commands that work
-with triclinic boxes, e.g. the <a class="reference internal" href="fix_deform.html"><em>fix deform</em></a> and <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">npt</span></tt> commands, require periodicity or non-shrink-wrap
+with triclinic boxes, e.g. the <a class="reference internal" href="fix_deform.html"><em>fix deform</em></a> and <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">npt</span></code> commands, require periodicity or non-shrink-wrap
 boundary conditions in specific dimensions.  See the command doc pages
 for details.</p>
 <p>The 9 parameters (xlo,xhi,ylo,yhi,zlo,zhi,xy,xz,yz) are defined at the
@@ -556,7 +585,7 @@ was written from a simulation using a triclinic box, then a triclinic
 box will be setup for the restarted simulation.</p>
 <p>Note that you can define a triclinic box with all 3 tilt factors =
 0.0, so that it is initially orthogonal.  This is necessary if the box
-will become non-orthogonal, e.g. due to the <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">npt</span></tt> or
+will become non-orthogonal, e.g. due to the <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">npt</span></code> or
 <a class="reference internal" href="fix_deform.html"><em>fix deform</em></a> commands.  Alternatively, you can use the
 <a class="reference internal" href="change_box.html"><em>change_box</em></a> command to convert a simulation box from
 orthogonal to triclinic and vice versa.</p>
@@ -616,10 +645,11 @@ BOUNDS for a snapshot is written to a dump file for a triclinic box,
 an orthogonal bounding box which encloses the triclinic simulation box
 is output, along with the 3 tilt factors (xy, xz, yz) of the triclinic
 box, formatted as follows:</p>
-<div class="highlight-python"><pre>ITEM: BOX BOUNDS xy xz yz
+<div class="highlight-python"><div class="highlight"><pre>ITEM: BOX BOUNDS xy xz yz
 xlo_bound xhi_bound xy
 ylo_bound yhi_bound xz
-zlo_bound zhi_bound yz</pre>
+zlo_bound zhi_bound yz
+</pre></div>
 </div>
 <p>This bounding box is convenient for many visualization programs and is
 calculated from the 9 triclinic box parameters
@@ -638,7 +668,7 @@ MIN(0.0,xy,xz,xy+xz).</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="output-from-liggghts-r-public-thermo-dumps-computes-fixes-variables">
-<span id="howto-8"></span><h2>8.8. Output from LIGGGHTS(R)-PUBLIC (thermo, dumps, computes, fixes, variables)<a class="headerlink" href="#output-from-liggghts-r-public-thermo-dumps-computes-fixes-variables" title="Permalink to this headline">¶</a></h2>
+<span id="howto-8"></span><h2><a class="toc-backref" href="#id69">8.8. Output from LIGGGHTS(R)-PUBLIC (thermo, dumps, computes, fixes, variables)</a><a class="headerlink" href="#output-from-liggghts-r-public-thermo-dumps-computes-fixes-variables" title="Permalink to this headline">¶</a></h2>
 <p>There are four basic kinds of LIGGGHTS(R)-PUBLIC output:</p>
 <ul class="simple">
 <li><a class="reference internal" href="thermo_style.html"><em>Thermodynamic output</em></a>, which is a list
@@ -662,17 +692,17 @@ then be output with these commands.</p>
 <p>The following sub-sections discuss different LIGGGHTS(R)-PUBLIC command related
 to output and the kind of data they operate on and produce:</p>
 <ul class="simple">
-<li><a class="reference internal" href="#global"><em>Global/per-atom/local data</em></a></li>
-<li><a class="reference internal" href="#scalar"><em>Scalar/vector/array data</em></a></li>
-<li><a class="reference internal" href="#thermo"><em>Thermodynamic output</em></a></li>
-<li><a class="reference internal" href="#dump"><em>Dump file output</em></a></li>
-<li><em class="xref std std-ref">Fixes that write output files</em></li>
-<li><a class="reference internal" href="#computeoutput"><em>Computes that process output quantities</em></a></li>
-<li><em class="xref std std-ref">Fixes that process output quantities</em></li>
-<li><a class="reference internal" href="#compute"><em>Computes that generate values to output</em></a></li>
-<li><a class="reference internal" href="#fix"><em>Fixes that generate values to output</em></a></li>
-<li><a class="reference internal" href="#variable"><em>Variables that generate values to output</em></a></li>
-<li><a class="reference internal" href="#table"><em>Summary table of output options and data flow between commands</em></a></li>
+<li><a class="reference internal" href="#global"><span>Global/per-atom/local data</span></a></li>
+<li><a class="reference internal" href="#scalar"><span>Scalar/vector/array data</span></a></li>
+<li><a class="reference internal" href="#thermo"><span>Thermodynamic output</span></a></li>
+<li><a class="reference internal" href="#dump"><span>Dump file output</span></a></li>
+<li><span class="xref std std-ref">Fixes that write output files</span></li>
+<li><a class="reference internal" href="#computeoutput"><span>Computes that process output quantities</span></a></li>
+<li><span class="xref std std-ref">Fixes that process output quantities</span></li>
+<li><a class="reference internal" href="#compute"><span>Computes that generate values to output</span></a></li>
+<li><a class="reference internal" href="#fix"><span>Fixes that generate values to output</span></a></li>
+<li><a class="reference internal" href="#variable"><span>Variables that generate values to output</span></a></li>
+<li><a class="reference internal" href="#table"><span>Summary table of output options and data flow between commands</span></a></li>
 </ul>
 <div class="section" id="global-per-atom-local-data">
 <span id="global"></span><h3>8.8.1. Global/per-atom/local data<a class="headerlink" href="#global-per-atom-local-data" title="Permalink to this headline">¶</a></h3>
@@ -694,7 +724,7 @@ per-atom vector.</p>
 <p>When a quantity is accessed, as in many of the output commands
 discussed below, it can be referenced via the following bracket
 notation, where ID in this case is the ID of a compute.  The leading
-&#8220;<a href="#id65"><span class="problematic" id="id66">c_</span></a>&#8221; would be replaced by &#8220;<a href="#id67"><span class="problematic" id="id68">f_</span></a>&#8221; for a fix, or &#8220;<a href="#id69"><span class="problematic" id="id70">v_</span></a>&#8221; for a variable:</p>
+&#8220;<a href="#id72"><span class="problematic" id="id73">c_</span></a>&#8221; would be replaced by &#8220;<a href="#id74"><span class="problematic" id="id75">f_</span></a>&#8221; for a fix, or &#8220;<a href="#id76"><span class="problematic" id="id77">v_</span></a>&#8221; for a variable:</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="21%" />
@@ -836,7 +866,7 @@ produces a global vector or array as output values which can be used
 as input to other output commands.</p>
 </div>
 <div class="section" id="fixes-that-process-output-quantities">
-<span id="id4"></span><h3>8.8.7. Fixes that process output quantities<a class="headerlink" href="#fixes-that-process-output-quantities" title="Permalink to this headline">¶</a></h3>
+<span id="id1"></span><h3>8.8.7. Fixes that process output quantities<a class="headerlink" href="#fixes-that-process-output-quantities" title="Permalink to this headline">¶</a></h3>
 <p>The <a class="reference internal" href="fix_ave_atom.html"><em>fix ave/atom</em></a> command performs time-averaging
 of per-atom vectors.  The per-atom quantities can be atom attributes
 such as position, velocity, force.  They can also be per-atom
@@ -1014,7 +1044,7 @@ vector input could be a column of an array.</p>
 </div>
 </div>
 <div class="section" id="walls">
-<span id="howto-9"></span><h2>8.9. Walls<a class="headerlink" href="#walls" title="Permalink to this headline">¶</a></h2>
+<span id="howto-9"></span><h2><a class="toc-backref" href="#id70">8.9. Walls</a><a class="headerlink" href="#walls" title="Permalink to this headline">¶</a></h2>
 <p>Walls are typically used to bound particle motion,
 i.e. to serve as a boundary condition.</p>
 <p>Walls in LIGGGHTS(R)-PUBLIC for granular simulations are
@@ -1067,10 +1097,10 @@ rotate.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="library-interface-to-liggghts-r-public">
-<span id="howto-10"></span><h2>8.10. Library interface to LIGGGHTS(R)-PUBLIC<a class="headerlink" href="#library-interface-to-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
-<p>As described in <a class="reference internal" href="Section_start.html#start-5"><em>Section_start 5</em></a>, LIGGGHTS(R)-PUBLIC
+<span id="howto-10"></span><h2><a class="toc-backref" href="#id71">8.10. Library interface to LIGGGHTS(R)-PUBLIC</a><a class="headerlink" href="#library-interface-to-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
+<p>As described in <a class="reference internal" href="Section_start.html#start-5"><span>Section_start 5</span></a>, LIGGGHTS(R)-PUBLIC
 can be built as a library, so that it can be called by another code,
-used in a <a class="reference internal" href="#howto-10"><em>coupled manner</em></a> with other
+used in a <a class="reference internal" href="#howto-10"><span>coupled manner</span></a> with other
 codes, or driven through a <a class="reference internal" href="Section_python.html"><em>Python interface</em></a>.</p>
 <p>All of these methodologies use a C-style interface to LIGGGHTS(R)-PUBLIC that is
 provided in the files src/library.cpp and src/library.h.  The
@@ -1081,13 +1111,14 @@ internal LIGGGHTS(R)-PUBLIC operations.  Note that LIGGGHTS(R)-PUBLIC classes ar
 within a LIGGGHTS(R)-PUBLIC namespace (LAMMPS_NS) if you use them from another C++
 application.</p>
 <p>Library.cpp contains these 4 functions:</p>
-<div class="highlight-python"><pre>void lammps_open(int, char **, MPI_Comm, void **);
+<div class="highlight-python"><div class="highlight"><pre>void lammps_open(int, char **, MPI_Comm, void **);
 void lammps_close(void *);
 void lammps_file(void *, char *);
-char *lammps_command(void *, char *);</pre>
+char *lammps_command(void *, char *);
+</pre></div>
 </div>
 <p>The lammps_open() function is used to initialize LIGGGHTS(R)-PUBLIC, passing in a
-list of strings as if they were <a class="reference internal" href="Section_start.html#start-7"><em>command-line arguments</em></a> when LIGGGHTS(R)-PUBLIC is run in
+list of strings as if they were <a class="reference internal" href="Section_start.html#start-7"><span>command-line arguments</span></a> when LIGGGHTS(R)-PUBLIC is run in
 stand-alone mode from the command line, and a MPI communicator for
 LIGGGHTS(R)-PUBLIC to run under.  It returns a ptr to the LIGGGHTS(R)-PUBLIC object that is
 created, and which is used in subsequent library calls.  The
@@ -1112,14 +1143,15 @@ interleaving the lammps_command() calls with other calls to extract
 information from LIGGGHTS(R)-PUBLIC, perform its own operations, or call another
 code&#8217;s library.</p>
 <p>Other useful functions are also included in library.cpp.  For example:</p>
-<div class="highlight-python"><pre>void *lammps_extract_global(void *, char *)
+<div class="highlight-python"><div class="highlight"><pre>void *lammps_extract_global(void *, char *)
 void *lammps_extract_atom(void *, char *)
 void *lammps_extract_compute(void *, char *, int, int)
 void *lammps_extract_fix(void *, char *, int, int, int, int)
 void *lammps_extract_variable(void *, char *, char *)
 int lammps_get_natoms(void *)
 void lammps_get_coords(void *, double *)
-void lammps_put_coords(void *, double *)</pre>
+void lammps_put_coords(void *, double *)
+</pre></div>
 </div>
 <p>These can extract various global or per-atom quantities from LIGGGHTS(R)-PUBLIC as
 well as values calculated by a compute, fix, or variable.  The &#8220;get&#8221;
@@ -1155,15 +1187,18 @@ Phys, 79, 926 (1983).</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Section_modify.html" class="btn btn-neutral float-right" title="9. Modifying &amp; extending LIGGGHTS(R)-PUBLIC" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Section_modify.html" class="btn btn-neutral float-right" title="9. Modifying &amp; extending LIGGGHTS(R)-PUBLIC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Section_packages.html" class="btn btn-neutral" title="7. Packages" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Section_packages.html" class="btn btn-neutral" title="7. Packages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1193,11 +1228,13 @@ Phys, 79, 926 (1983).</p>
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

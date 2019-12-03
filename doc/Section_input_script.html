@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>3. Input Script &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -83,7 +84,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">3. Input Script</a><ul>
@@ -113,8 +117,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -127,24 +133,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>3. Input Script</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/Section_input_script.txt" rel="nofollow"> View page source</a> 
+      <li>3. Input Script</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/Section_input_script.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
@@ -164,15 +187,16 @@
 <h1>3. Input Script<a class="headerlink" href="#input-script" title="Permalink to this headline">¶</a></h1>
 <p>This section describes how a LIGGGHTS(R)-PUBLIC input script is formatted and the
 input script commands used to define a LIGGGHTS(R)-PUBLIC simulation.</p>
-<div class="line-block">
-<div class="line">3.1 <a class="reference internal" href="#inp-1"><em>LIGGGHTS(R)-PUBLIC input script</em></a></div>
-<div class="line">3.2 <a class="reference internal" href="#inp-2"><em>Parsing rules</em></a></div>
-<div class="line">3.3 <a class="reference internal" href="#inp-3"><em>Input script structure</em></a></div>
-<div class="line">3.4 <em class="xref std std-ref">An example input script</em></div>
-<div class="line"><br /></div>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#liggghts-r-public-input-script" id="id1">LIGGGHTS(R)-PUBLIC input script</a></li>
+<li><a class="reference internal" href="#parsing-rules" id="id2">Parsing rules</a></li>
+<li><a class="reference internal" href="#input-script-structure" id="id3">Input script structure</a></li>
+<li><a class="reference internal" href="#an-example-input-script" id="id4">An example input script</a></li>
+</ul>
 </div>
 <div class="section" id="liggghts-r-public-input-script">
-<span id="inp-1"></span><h2>3.1. LIGGGHTS(R)-PUBLIC input script<a class="headerlink" href="#liggghts-r-public-input-script" title="Permalink to this headline">¶</a></h2>
+<span id="inp-1"></span><h2><a class="toc-backref" href="#id1">3.1. LIGGGHTS(R)-PUBLIC input script</a><a class="headerlink" href="#liggghts-r-public-input-script" title="Permalink to this headline">¶</a></h2>
 <p>LIGGGHTS(R)-PUBLIC executes by reading commands from a input script (text file),
 one line at a time.  When the input script ends, LIGGGHTS(R)-PUBLIC exits.  Each
 command causes LIGGGHTS(R)-PUBLIC to take some action.  It may set an internal
@@ -185,14 +209,16 @@ important.  However the following rules apply:</p>
 simulation with all the settings.  Rather, the input script is read
 one line at a time and each command takes effect when it is read.
 Thus this sequence of commands:</p>
-<div class="highlight-python"><pre>timestep 0.5
+<div class="highlight-python"><div class="highlight"><pre>timestep 0.5
 run      100
-run      100</pre>
+run      100
+</pre></div>
 </div>
 <p>does something different than this sequence:</p>
-<div class="highlight-python"><pre>run      100
+<div class="highlight-python"><div class="highlight"><pre>run      100
 timestep 0.5
-run      100</pre>
+run      100
+</pre></div>
 </div>
 <p>In the first case, the specified timestep (0.5 fmsec) is used for two
 simulations of 100 timesteps each.  In the 2nd case, the default
@@ -217,7 +243,7 @@ command lists restrictions on how the command can be used.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="parsing-rules">
-<span id="inp-2"></span><h2>3.2. Parsing rules<a class="headerlink" href="#parsing-rules" title="Permalink to this headline">¶</a></h2>
+<span id="inp-2"></span><h2><a class="toc-backref" href="#id2">3.2. Parsing rules</a><a class="headerlink" href="#parsing-rules" title="Permalink to this headline">¶</a></h2>
 <p>Each non-blank line in the input script is treated as a command.
 LIGGGHTS(R)-PUBLIC commands are case sensitive.  Command names are lower-case, as
 are specified command arguments.  Upper case letters may be used in
@@ -246,20 +272,23 @@ parenthesis is treated as an &#8220;immediate&#8221; variable and evaluated as a
 <a class="reference internal" href="variable.html"><em>equal-style variable</em></a>.  This is a way to use numeric
 formulas in an input script without having to assign them to variable
 names.  For example, these 3 input script lines:</p>
-<div class="highlight-python"><pre>variable X equal (xlo+xhi)/2+sqrt(v_area)
+<div class="highlight-python"><div class="highlight"><pre>variable X equal (xlo+xhi)/2+sqrt(v_area)
 region 1 block $X 2 INF INF EDGE EDGE
-variable X delete</pre>
+variable X delete
+</pre></div>
 </div>
 <p>can be replaced by</p>
-<div class="highlight-python"><pre>region 1 block $((xlo+xhi)/2+sqrt(v_area)) 2 INF INF EDGE EDGE</pre>
+<div class="highlight-python"><div class="highlight"><pre>region 1 block $((xlo+xhi)/2+sqrt(v_area)) 2 INF INF EDGE EDGE
+</pre></div>
 </div>
 <p>so that you do not have to define (or discard) a temporary variable X.</p>
 <p>Note that neither the curly-bracket or immediate form of variables can
 contain nested $ characters for other variables to substitute for.
 Thus you cannot do this:</p>
-<div class="highlight-python"><pre>variable        a equal 2
+<div class="highlight-python"><div class="highlight"><pre>variable        a equal 2
 variable        b2 equal 4
-print           "B2 = ${b$a}"</pre>
+print           &quot;B2 = ${b$a}&quot;
+</pre></div>
 </div>
 <p>Nor can you specify this $($x-1.0) for an immediate variable, but
 you could use $(v_x-1.0), since the latter is valid syntax for an
@@ -274,9 +303,10 @@ underscores, or punctuation characters.</p>
 line are arguments.</p>
 <p>(6) If you want text with spaces to be treated as a single argument,
 it can be enclosed in either double or single quotes.  E.g.</p>
-<div class="highlight-python"><pre>print "Volume = $v"
-print 'Volume = $v'
-if "$*steps* &gt; 1000" then quit</pre>
+<div class="highlight-python"><div class="highlight"><pre>print &quot;Volume = $v&quot;
+print &#39;Volume = $v&#39;
+if &quot;$*steps* &gt; 1000&quot; then quit
+</pre></div>
 </div>
 <p>The quotes are removed when the single argument is stored internally.
 See the <a class="reference internal" href="dump_modify.html"><em>dump modify format</em></a> or <a class="reference internal" href="print.html"><em>print</em></a> or
@@ -295,11 +325,11 @@ allowed, but that should be sufficient for most use cases.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="input-script-structure">
-<span id="inp-3"></span><h2>3.3. Input script structure<a class="headerlink" href="#input-script-structure" title="Permalink to this headline">¶</a></h2>
+<span id="inp-3"></span><h2><a class="toc-backref" href="#id3">3.3. Input script structure</a><a class="headerlink" href="#input-script-structure" title="Permalink to this headline">¶</a></h2>
 <p>This section describes the structure of a typical LIGGGHTS(R)-PUBLIC input script.
 The &#8220;examples&#8221; directory in the LIGGGHTS(R)-PUBLIC distribution contains many
 sample input scripts; the corresponding problems are discussed in
-<tt class="xref doc docutils literal"><span class="pre">Section_example</span></tt>, and animated on the <a class="reference external" href="liws_">LIGGGHTS(R)-PUBLIC WWW Site</a>.</p>
+<code class="xref doc docutils literal"><span class="pre">Section_example</span></code>, and animated on the <a class="reference external" href="http://www.cfdem.com">LIGGGHTS(R)-PUBLIC WWW Site</a>.</p>
 <p>A LIGGGHTS(R)-PUBLIC input script typically has 4 parts:</p>
 <ol class="arabic simple">
 <li>Initialization</li>
@@ -337,7 +367,7 @@ using these commands: <a class="reference internal" href="lattice.html"><em>latt
 <a class="reference internal" href="create_atoms.html"><em>create_atoms</em></a>.</p>
 <p>However, the most common way to insert granular particles is
 to use one of the fix insert/* commands: <a class="reference internal" href="fix_insert_pack.html"><em>fix insert/pack</em></a>,
-&#8220;fix insert/stream&#8221;stream.html, <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">insert/rate/region</span></tt></p>
+&#8220;fix insert/stream&#8221;stream.html, <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">insert/rate/region</span></code></p>
 <p>Before these insertion commands can be used, particle distributions
 (<a class="reference external" href="fix_particledistribution_discrete.hmtl">fix particledistribution/discrete</a>)
 are built up using particle templates. For spherical particles, such
@@ -369,9 +399,9 @@ and <a class="reference internal" href="restart.html"><em>restart</em></a> comma
 <hr class="docutils" />
 </div>
 <div class="section" id="an-example-input-script">
-<span id="cmd-4"></span><h2>3.4. An example input script<a class="headerlink" href="#an-example-input-script" title="Permalink to this headline">¶</a></h2>
+<span id="cmd-4"></span><h2><a class="toc-backref" href="#id4">3.4. An example input script</a><a class="headerlink" href="#an-example-input-script" title="Permalink to this headline">¶</a></h2>
 <p>This shows an example input script for a LIGGGHTS(R)-PUBLIC simulation.</p>
-<div class="highlight-python"><pre>#Contact model example
+<div class="highlight-python"><div class="highlight"><pre>#Contact model example
 atom_style   granular
 atom_modify  map array
 boundary     m m m
@@ -411,22 +441,26 @@ thermo_modify   lost ignore norm no
 compute_modify  thermo_temp dynamic yes
 dump            dmp all custom 800 post/dump*.newModels id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
 #insert particles and run
-run             5000</pre>
+run             5000
+</pre></div>
 </div>
 </div>
 </div>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Section_commands.html" class="btn btn-neutral float-right" title="4. Commands" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Section_commands.html" class="btn btn-neutral float-right" title="4. Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Section_start.html" class="btn btn-neutral" title="2. Getting Started" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Section_start.html" class="btn btn-neutral" title="2. Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -456,11 +490,13 @@ run             5000</pre>
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>9. Modifying &amp; extending LIGGGHTS(R)-PUBLIC &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -83,7 +84,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
@@ -120,8 +124,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -134,24 +140,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>9. Modifying &amp; extending LIGGGHTS(R)-PUBLIC</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/Section_modify.txt" rel="nofollow"> View page source</a> 
+      <li>9. Modifying &amp; extending LIGGGHTS(R)-PUBLIC</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/Section_modify.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
@@ -171,19 +194,20 @@
 <h1>9. Modifying &amp; extending LIGGGHTS(R)-PUBLIC<a class="headerlink" href="#modifying-extending-liggghts-r-public" title="Permalink to this headline">¶</a></h1>
 <p>This section describes how to customize LIGGGHTS(R)-PUBLIC by modifying
 and extending its source code.</p>
-<div class="line-block">
-<div class="line">8.1 <a class="reference internal" href="#mod-1"><em>Atom styles</em></a></div>
-<div class="line">8.2 <a class="reference internal" href="#mod-2"><em>Compute styles</em></a></div>
-<div class="line">8.4 <a class="reference internal" href="#mod-3"><em>Dump styles</em></a></div>
-<div class="line">8.5 <a class="reference internal" href="#mod-4"><em>Dump custom output options</em></a></div>
-<div class="line">8.6 <a class="reference internal" href="#mod-5"><em>Fix styles</em></a> which include integrators,      temperature and pressure control, force constraints,      boundary conditions, diagnostic output, etc</div>
-<div class="line">8.6 <a class="reference internal" href="#mod-6"><em>Input script commands</em></a></div>
-<div class="line">8.7 <a class="reference internal" href="#mod-7"><em>Pairwise potentials</em></a></div>
-<div class="line">8.8 <a class="reference internal" href="#mod-8"><em>Region styles</em></a></div>
-<div class="line">8.9 <a class="reference internal" href="#mod-9"><em>Thermodynamic output options</em></a></div>
-<div class="line">8.10 <a class="reference internal" href="#mod-10"><em>Variable options</em></a></div>
-<div class="line">8.11 <a class="reference internal" href="#mod-11"><em>Submitting new features for inclusion in LIGGGHTS(R)-PUBLIC</em></a></div>
-<div class="line"><br /></div>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#atom-styles" id="id9">Atom styles</a></li>
+<li><a class="reference internal" href="#compute-styles" id="id10">Compute styles</a></li>
+<li><a class="reference internal" href="#dump-styles" id="id11">Dump styles</a></li>
+<li><a class="reference internal" href="#dump-custom-output-options" id="id12">Dump custom output options</a></li>
+<li><a class="reference internal" href="#fix-styles" id="id13">Fix styles</a></li>
+<li><a class="reference internal" href="#input-script-commands" id="id14">Input script commands</a></li>
+<li><a class="reference internal" href="#pairwise-potentials" id="id15">Pairwise potentials</a></li>
+<li><a class="reference internal" href="#region-styles" id="id16">Region styles</a></li>
+<li><a class="reference internal" href="#thermodynamic-output-options" id="id17">Thermodynamic output options</a></li>
+<li><a class="reference internal" href="#variable-options" id="id18">Variable options</a></li>
+<li><a class="reference internal" href="#submitting-new-features-for-inclusion-in-liggghts-r-public" id="id19">Submitting new features for inclusion in LIGGGHTS(R)-PUBLIC</a></li>
+</ul>
 </div>
 <p>LIGGGHTS(R)-PUBLIC is designed in a modular fashion so as to be easy to modify and
 extend with new functionality.  In fact, about 75% of its source code
@@ -193,7 +217,7 @@ with minimal instructions.  If you add a new feature to LIGGGHTS(R)-PUBLIC and
 think it will be of interest to general users, we encourage you to
 submit it to the developers for inclusion in the released version of
 LIGGGHTS(R)-PUBLIC.  Information about how to do this is provided
-<em class="xref std std-ref">below</em>.</p>
+<span class="xref std std-ref">below</span>.</p>
 <p>The best way to add a new feature is to find a similar feature in
 LIGGGHTS(R)-PUBLIC and look at the corresponding source and header files to figure
 out what it does.  You will need some knowledge of C++ to be able to
@@ -217,19 +241,21 @@ write, and thus shouldn&#8217;t make the rest of LIGGGHTS(R)-PUBLIC more complex
 cause side-effect bugs.</p>
 <p>Here is a concrete example.  Suppose you write 2 files pair_foo.cpp
 and pair_foo.h that define a new class PairFoo that computes pairwise
-potentials described in the classic 1997 <a class="reference internal" href="#foo"><em>paper</em></a> by Foo, et al.
+potentials described in the classic 1997 <a class="reference internal" href="#foo"><span>paper</span></a> by Foo, et al.
 If you wish to invoke those potentials in a LIGGGHTS(R)-PUBLIC input script with a
 command like</p>
-<div class="highlight-python"><pre>pair_style foo 0.1 3.5</pre>
+<div class="highlight-python"><div class="highlight"><pre>pair_style foo 0.1 3.5
+</pre></div>
 </div>
 <p>then your pair_foo.h file should be structured as follows:</p>
-<div class="highlight-python"><pre>#ifdef PAIR_CLASS
+<div class="highlight-python"><div class="highlight"><pre>#ifdef PAIR_CLASS
 PairStyle(foo,PairFoo)
 #else
 ...
 (class definition for PairFoo)
 ...
-#endif</pre>
+#endif
+</pre></div>
 </div>
 <p>where &#8220;foo&#8221; is the style keyword in the pair_style command, and
 PairFoo is the class name defined in your pair_foo.cpp and pair_foo.h
@@ -272,7 +298,7 @@ interested in adding it to the LIGGGHTS(R)-PUBLIC distribution.  See further
 details on this at the bottom of this page.</li>
 </ul>
 <div class="section" id="atom-styles">
-<span id="mod-1"></span><h2>9.1. Atom styles<a class="headerlink" href="#atom-styles" title="Permalink to this headline">¶</a></h2>
+<span id="mod-1"></span><h2><a class="toc-backref" href="#id9">9.1. Atom styles</a><a class="headerlink" href="#atom-styles" title="Permalink to this headline">¶</a></h2>
 <p>Classes that define an <a class="reference internal" href="atom_style.html"><em>atom style</em></a> are derived from
 the AtomVec class and managed by the Atom class.  The atom style
 determines what attributes are associated with an atom.  A new atom
@@ -391,9 +417,9 @@ modify.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">It is possible to add some attributes, such as a
-molecule ID, to atom styles that do not have them via the <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">property/atom</span></tt> command.  This command also
+molecule ID, to atom styles that do not have them via the <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">property/atom</span></code> command.  This command also
 allows new custom attributes consisting of extra integer or
-floating-point values to be added to atoms.  See the <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">property/atom</span></tt> doc page for examples of cases
+floating-point values to be added to atoms.  See the <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">property/atom</span></code> doc page for examples of cases
 where this is useful and details on how to initialize, access, and
 output the custom values.</p>
 </div>
@@ -402,22 +428,24 @@ output the custom values.</p>
 The code for these classes can use the per-atom properties defined by
 fix property/atom.  The Atom class has a find_custom() method that is
 useful in this context:</p>
-<div class="highlight-python"><pre>int index = atom-&gt;find_custom(char *name, int &amp;flag);</pre>
+<div class="highlight-python"><div class="highlight"><pre>int index = atom-&gt;find_custom(char *name, int &amp;flag);
+</pre></div>
 </div>
-<p>The &#8220;name&#8221; of a custom attribute, as specified in the <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">property/atom</span></tt> command, is checked to verify
+<p>The &#8220;name&#8221; of a custom attribute, as specified in the <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">property/atom</span></code> command, is checked to verify
 that it exists and its index is returned.  The method also sets flag =
 0/1 depending on whether it is an integer or floating-point attribute.
 The vector of values associated with the attribute can then be
 accessed using the returned index as</p>
-<div class="highlight-python"><pre>int *ivector = atom-&gt;ivector[index];
-double *dvector = atom-&gt;dvector[index];</pre>
+<div class="highlight-python"><div class="highlight"><pre>int *ivector = atom-&gt;ivector[index];
+double *dvector = atom-&gt;dvector[index];
+</pre></div>
 </div>
 <p>Ivector or dvector are vectors of length Nlocal = # of owned atoms,
 which store the attributes of individual atoms.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="compute-styles">
-<span id="mod-2"></span><h2>9.2. Compute styles<a class="headerlink" href="#compute-styles" title="Permalink to this headline">¶</a></h2>
+<span id="mod-2"></span><h2><a class="toc-backref" href="#id10">9.2. Compute styles</a><a class="headerlink" href="#compute-styles" title="Permalink to this headline">¶</a></h2>
 <p>Classes that compute scalar and vector quantities like temperature
 and the pressure tensor, as well as classes that compute per-atom
 quantities like kinetic energy and the centro-symmetry parameter
@@ -484,10 +512,10 @@ class.  See compute.h for details.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="dump-styles">
-<span id="mod-3"></span><h2>9.3. Dump styles<a class="headerlink" href="#dump-styles" title="Permalink to this headline">¶</a></h2>
+<span id="mod-3"></span><h2><a class="toc-backref" href="#id11">9.3. Dump styles</a><a class="headerlink" href="#dump-styles" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="dump-custom-output-options">
-<span id="mod-4"></span><h2>9.4. Dump custom output options<a class="headerlink" href="#dump-custom-output-options" title="Permalink to this headline">¶</a></h2>
+<span id="mod-4"></span><h2><a class="toc-backref" href="#id12">9.4. Dump custom output options</a><a class="headerlink" href="#dump-custom-output-options" title="Permalink to this headline">¶</a></h2>
 <p>Classes that dump per-atom info to files are derived from the Dump
 class.  To dump new quantities or in a new format, a new derived dump
 class can be added, but it is typically simpler to modify the
@@ -526,7 +554,7 @@ half-dozen or so locations where code will need to be added.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="fix-styles">
-<span id="mod-5"></span><h2>9.5. Fix styles<a class="headerlink" href="#fix-styles" title="Permalink to this headline">¶</a></h2>
+<span id="mod-5"></span><h2><a class="toc-backref" href="#id13">9.5. Fix styles</a><a class="headerlink" href="#fix-styles" title="Permalink to this headline">¶</a></h2>
 <p>In LIGGGHTS(R)-PUBLIC, a &#8220;fix&#8221; is any operation that is computed during
 timestepping that alters some property of the system.  Essentially
 everything that happens during a simulation besides force computation,
@@ -734,7 +762,7 @@ quantities and/or to be summed to the potential energy of the system.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="input-script-commands">
-<span id="mod-6"></span><h2>9.6. Input script commands<a class="headerlink" href="#input-script-commands" title="Permalink to this headline">¶</a></h2>
+<span id="mod-6"></span><h2><a class="toc-backref" href="#id14">9.6. Input script commands</a><a class="headerlink" href="#input-script-commands" title="Permalink to this headline">¶</a></h2>
 <p>New commands can be added to LIGGGHTS(R)-PUBLIC input scripts by adding new
 classes that have a &#8220;command&#8221; method.  For example, the create_atoms,
 read_data, velocity, and run commands are all implemented in this
@@ -760,7 +788,7 @@ needed.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="pairwise-potentials">
-<span id="mod-7"></span><h2>9.7. Pairwise potentials<a class="headerlink" href="#pairwise-potentials" title="Permalink to this headline">¶</a></h2>
+<span id="mod-7"></span><h2><a class="toc-backref" href="#id15">9.7. Pairwise potentials</a><a class="headerlink" href="#pairwise-potentials" title="Permalink to this headline">¶</a></h2>
 <p>Classes that compute pairwise interactions are derived from the Pair
 class.  In LIGGGHTS(R)-PUBLIC, pairwise calculation include manybody potentials
 such as EAM or Tersoff where particles interact without a static bond
@@ -806,7 +834,7 @@ LIGGGHTS(R)-PUBLIC.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="region-styles">
-<span id="mod-8"></span><h2>9.8. Region styles<a class="headerlink" href="#region-styles" title="Permalink to this headline">¶</a></h2>
+<span id="mod-8"></span><h2><a class="toc-backref" href="#id16">9.8. Region styles</a><a class="headerlink" href="#region-styles" title="Permalink to this headline">¶</a></h2>
 <p>Classes that define geometric regions are derived from the Region
 class.  Regions are used elsewhere in LIGGGHTS(R)-PUBLIC to group atoms, delete
 atoms to create a void, insert atoms in a specified region, etc.  New
@@ -828,7 +856,7 @@ class.  See region.h for details.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="thermodynamic-output-options">
-<span id="mod-9"></span><h2>9.9. Thermodynamic output options<a class="headerlink" href="#thermodynamic-output-options" title="Permalink to this headline">¶</a></h2>
+<span id="mod-9"></span><h2><a class="toc-backref" href="#id17">9.9. Thermodynamic output options</a><a class="headerlink" href="#thermodynamic-output-options" title="Permalink to this headline">¶</a></h2>
 <p>There is one class that computes and prints thermodynamic information
 to the screen and log file; see the file thermo.cpp.</p>
 <p>There are two styles defined in thermo.cpp: &#8220;one&#8221; and &#8220;multi&#8221;.  There
@@ -852,7 +880,7 @@ by adding a new keyword to the thermo command.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="variable-options">
-<span id="mod-10"></span><h2>9.10. Variable options<a class="headerlink" href="#variable-options" title="Permalink to this headline">¶</a></h2>
+<span id="mod-10"></span><h2><a class="toc-backref" href="#id18">9.10. Variable options</a><a class="headerlink" href="#variable-options" title="Permalink to this headline">¶</a></h2>
 <p>There is one class that computes and stores <a class="reference internal" href="variable.html"><em>variable</em></a>
 information in LIGGGHTS(R)-PUBLIC; see the file variable.cpp.  The value
 associated with a variable can be periodically printed to the screen
@@ -868,7 +896,7 @@ atom values = x**123**, y**3**, vx**34**, ...
 compute values = c_mytemp**0**, c_thermo_press**3**, ...</p>
 <p>Adding keywords for the <a class="reference internal" href="thermo_style.html"><em>thermo_style custom</em></a> command
 (which can then be accessed by variables) was discussed
-<a class="reference internal" href="Section_howto.html#thermo"><em>here</em></a> on this page.</p>
+<a class="reference internal" href="Section_howto.html#thermo"><span>here</span></a> on this page.</p>
 <p>Adding a new math function of one or two arguments can be done by
 editing one section of the Variable::evaulate() method.  Search for
 the word &#8220;customize&#8221; to find the appropriate location.</p>
@@ -881,10 +909,10 @@ of the Variable::evaulate() method.  Search for the word &#8220;customize&#8221;
 to find the appropriate location.</p>
 <p>Adding new <a class="reference internal" href="compute.html"><em>compute styles</em></a> (whose calculated values can
 then be accessed by variables) was discussed
-<a class="reference internal" href="Section_howto.html#compute"><em>here</em></a> on this page.</p>
+<a class="reference internal" href="Section_howto.html#compute"><span>here</span></a> on this page.</p>
 </div>
 <div class="section" id="submitting-new-features-for-inclusion-in-liggghts-r-public">
-<span id="mod-11"></span><h2>9.11. Submitting new features for inclusion in LIGGGHTS(R)-PUBLIC<a class="headerlink" href="#submitting-new-features-for-inclusion-in-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
+<span id="mod-11"></span><h2><a class="toc-backref" href="#id19">9.11. Submitting new features for inclusion in LIGGGHTS(R)-PUBLIC</a><a class="headerlink" href="#submitting-new-features-for-inclusion-in-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
 <p>We encourage users to submit new features that they add to LIGGGHTS(R)-PUBLIC, especially if
 you think the features will be of interest to other users.  If they
 are broadly useful we may add them as core files to LIGGGHTS(R)-PUBLIC.</p>
@@ -930,15 +958,18 @@ feature.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Section_python.html" class="btn btn-neutral float-right" title="10. Python interface to LIGGGHTS(R)-PUBLIC" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Section_python.html" class="btn btn-neutral float-right" title="10. Python interface to LIGGGHTS(R)-PUBLIC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Section_howto.html" class="btn btn-neutral" title="8. How-to discussions" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Section_howto.html" class="btn btn-neutral" title="8. How-to discussions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -968,11 +999,13 @@ feature.</p>
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

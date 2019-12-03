@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>2. Getting Started &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -83,7 +84,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">2. Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-obtain-liggghts-r-public">2.1. How to obtain LIGGGHTS(R)-PUBLIC</a></li>
@@ -132,8 +136,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -146,24 +152,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>2. Getting Started</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/Section_start.txt" rel="nofollow"> View page source</a> 
+      <li>2. Getting Started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/Section_start.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
@@ -183,23 +206,25 @@
 <h1>2. Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <p>This section describes how to build and run LIGGGHTS(R)-PUBLIC, for both new and
 experienced users.</p>
-<div class="line-block">
-<div class="line">2.1 <a class="reference internal" href="#start-1"><em>How to obtain LIGGGHTS(R)-PUBLIC</em></a></div>
-<div class="line">2.2 <a class="reference internal" href="#start-2"><em>Making LIGGGHTS(R)-PUBLIC</em></a></div>
-<div class="line">2.3 <a class="reference internal" href="#start-3"><em>Making LIGGGHTS(R)-PUBLIC with optional packages</em></a></div>
-<div class="line">2.4 <a class="reference internal" href="#start-4"><em>Building LIGGGHTS(R)-PUBLIC via the Make.py script</em></a></div>
-<div class="line">2.5 <a class="reference internal" href="#start-5"><em>Building LIGGGHTS(R)-PUBLIC as a library</em></a></div>
-<div class="line">2.6 <a class="reference internal" href="#start-6"><em>Running LIGGGHTS(R)-PUBLIC</em></a></div>
-<div class="line">2.7 <a class="reference internal" href="#start-7"><em>Command-line options</em></a></div>
-<div class="line">2.8 <a class="reference internal" href="#start-8"><em>Screen output</em></a></div>
-<div class="line"><br /></div>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#how-to-obtain-liggghts-r-public" id="id11">How to obtain LIGGGHTS(R)-PUBLIC</a></li>
+<li><a class="reference internal" href="#making-liggghts-r-public" id="id12">Making LIGGGHTS(R)-PUBLIC</a></li>
+<li><a class="reference internal" href="#making-liggghts-r-public-with-optional-packages" id="id13">Making LIGGGHTS(R)-PUBLIC with optional packages</a></li>
+<li><a class="reference internal" href="#building-liggghts-r-public-via-the-make-py-script" id="id14">Building LIGGGHTS(R)-PUBLIC via the Make.py script</a></li>
+<li><a class="reference internal" href="#building-liggghts-r-public-as-a-library" id="id15">Building LIGGGHTS(R)-PUBLIC as a library</a></li>
+<li><a class="reference internal" href="#running-liggghts-r-public" id="id16">Running LIGGGHTS(R)-PUBLIC</a></li>
+<li><a class="reference internal" href="#command-line-options" id="id17">Command-line options</a></li>
+<li><a class="reference internal" href="#liggghts-r-public-screen-output" id="id18">LIGGGHTS(R)-PUBLIC screen output</a></li>
+</ul>
 </div>
 <div class="section" id="how-to-obtain-liggghts-r-public">
-<span id="start-1"></span><h2>2.1. How to obtain LIGGGHTS(R)-PUBLIC<a class="headerlink" href="#how-to-obtain-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
+<span id="start-1"></span><h2><a class="toc-backref" href="#id11">2.1. How to obtain LIGGGHTS(R)-PUBLIC</a><a class="headerlink" href="#how-to-obtain-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
 <p>We recommend to use git to download the LIGGGHTS(R)-PUBLIC package. Make sure that the
 <em>git</em> command is available on your system. On a Ubuntu/Debian box this can be
 achieved by</p>
-<div class="highlight-python"><pre>sudo apt-get install git</pre>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install git
+</pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -208,15 +233,18 @@ LIGGGHTS-PUBLIC strings shown below by their respective version string. This
 string is equal to LIGGGHTS(R)-PUBLIC without the &#8220;(R)&#8221;.</p>
 </div>
 <p>LIGGGHTS(R)-PUBLIC can then be downloaded by typing</p>
-<div class="highlight-python"><pre>git clone git@github.com:CFDEMproject/LIGGGHTS-PUBLIC.git</pre>
+<div class="highlight-python"><div class="highlight"><pre>git clone git@github.com:CFDEMproject/LIGGGHTS-PUBLIC.git
+</pre></div>
 </div>
 <p>Under certain circumstances (e.g. company firewall) this might fail and instead
 you can use</p>
-<div class="highlight-python"><pre>git clone https://github.com/CFDEMproject/LIGGGHTS-PUBLIC.git</pre>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/CFDEMproject/LIGGGHTS-PUBLIC.git
+</pre></div>
 </div>
 <p>to obtain LIGGGHTS(R)-PUBLIC. The advantage of using one of these two commands is that
 you can use</p>
-<div class="highlight-python"><pre>git pull</pre>
+<div class="highlight-python"><div class="highlight"><pre>git pull
+</pre></div>
 </div>
 <p>to easily fetch the latest version of the code when we release a new version.
 Note that this command needs to be executed in your LIGGGHTS-PUBLIC folder.</p>
@@ -257,16 +285,16 @@ instead you will have to download the full zip file again.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="making-liggghts-r-public">
-<span id="start-2"></span><h2>2.2. Making LIGGGHTS(R)-PUBLIC<a class="headerlink" href="#making-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
+<span id="start-2"></span><h2><a class="toc-backref" href="#id12">2.2. Making LIGGGHTS(R)-PUBLIC</a><a class="headerlink" href="#making-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
 <p>This section has the following sub-sections:</p>
 <ul class="simple">
-<li><a class="reference internal" href="#start-2-1"><em>Read this first</em></a></li>
-<li><a class="reference internal" href="#start-2-2"><em>Steps to build a LIGGGHTS(R)-PUBLIC executable</em></a></li>
-<li><a class="reference internal" href="#start-2-2-expert"><em>Advanced building using custom makefiles</em></a></li>
-<li><a class="reference internal" href="#start-2-3"><em>Common errors that can occur when making LIGGGHTS(R)-PUBLIC</em></a></li>
-<li><a class="reference internal" href="#start-2-4"><em>Additional build tips</em></a></li>
-<li><a class="reference internal" href="#start-2-5"><em>Building for a Mac</em></a></li>
-<li><a class="reference internal" href="#start-2-6"><em>Building for Windows</em></a></li>
+<li><a class="reference internal" href="#start-2-1"><span>Read this first</span></a></li>
+<li><a class="reference internal" href="#start-2-2"><span>Steps to build a LIGGGHTS(R)-PUBLIC executable</span></a></li>
+<li><a class="reference internal" href="#start-2-2-expert"><span>Advanced building using custom makefiles</span></a></li>
+<li><a class="reference internal" href="#start-2-3"><span>Common errors that can occur when making LIGGGHTS(R)-PUBLIC</span></a></li>
+<li><a class="reference internal" href="#start-2-4"><span>Additional build tips</span></a></li>
+<li><a class="reference internal" href="#start-2-5"><span>Building for a Mac</span></a></li>
+<li><a class="reference internal" href="#start-2-6"><span>Building for Windows</span></a></li>
 </ul>
 <hr class="docutils" />
 <div class="section" id="read-this-first">
@@ -297,10 +325,10 @@ that we can improve its performance.</p>
 <p>With LIGGGHTS version 3.5.1 we have rolled out a all new and magic
 Makefile.auto which hopefully will make building LIGGGHTS as simple as
 possible. If the following steps do not work for you please see the advanced
-building description <a class="reference internal" href="#start-2-2-expert"><em>here</em></a>.</p>
+building description <a class="reference internal" href="#start-2-2-expert"><span>here</span></a>.</p>
 <p>Before attempting a build ensure that your system has all required prerequisites
 installed. A solid basis for several popular operating systems are listed below:</p>
-<div class="highlight-python"><pre>Ubuntu 16.04LTS:
+<div class="highlight-python"><div class="highlight"><pre>Ubuntu 16.04LTS:
   sudo apt-get install openmpi-bin libopenmpi-dev libvtk6.2 libvtk6-dev
 -----
 Ubuntu 17.10:
@@ -310,11 +338,12 @@ Fedora 25:
   su -
   dnf install openmpi openmpi-devel paraview-openmpi paraview-openmpi-devel gcc-c++
   exit
-  echo "export PATH=$PATH:/usr/lib64/openmpi/bin" &gt;&gt; ~/.bashrc
-  echo "export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview" &gt;&gt; ~/.bashrc
-  echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview" &gt;&gt; ~/.bashrc
-  echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" &gt;&gt; ~/.bashrc
-  echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" &gt;&gt; ~/.bashrc</pre>
+  echo &quot;export PATH=$PATH:/usr/lib64/openmpi/bin&quot; &gt;&gt; ~/.bashrc
+  echo &quot;export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview&quot; &gt;&gt; ~/.bashrc
+  echo &quot;export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview&quot; &gt;&gt; ~/.bashrc
+  echo &quot;export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview&quot; &gt;&gt; ~/.bashrc
+  echo &quot;export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview&quot; &gt;&gt; ~/.bashrc
+</pre></div>
 </div>
 <p><strong>Step 0</strong></p>
 <p>The src directory contains the C++ source and header files for LIGGGHTS(R)-PUBLIC.
@@ -323,7 +352,8 @@ several Makefile.* files for many machines.  From within the src
 directory, type &#8220;make&#8221; or &#8220;gmake&#8221;.  You should see a list of available
 choices. Of particular interest is the auto option, as it should do all the
 heavy lifting for us. So start by typing</p>
-<div class="highlight-python"><pre>make auto</pre>
+<div class="highlight-python"><div class="highlight"><pre>make auto
+</pre></div>
 </div>
 <p>into the command line. If you are running this for the first time you will see
 the following message:</p>
@@ -335,7 +365,7 @@ the following message:</p>
 <p>That is perfectly normal as <em>MAKE/Makefile.user</em> does not exist by default
 and contains some default options. The compilation will continue and if you are
 lucky enough it will actually produce an executable called <em>lmp_auto</em> in your
-<em>src/</em> folder. If this is the case you are done and can move on to <a class="reference internal" href="#start-6"><em>Running LIGGGHTS(R)-PUBLIC</em></a></p>
+<em>src/</em> folder. If this is the case you are done and can move on to <a class="reference internal" href="#start-6"><span>Running LIGGGHTS(R)-PUBLIC</span></a></p>
 <p>Should the compilation interupt please carefully study the error message. The
 following procedure will explain how to set compilation variables for <em>make
 auto</em>.</p>
@@ -344,9 +374,9 @@ auto</em>.</p>
 text editor. There are two sections in this file. The first one specifies
 which options and features in LIGGGHTS(R)-PUBLIC you would like to activate. The first
 three lines are related to MPI and read:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># MPI: &quot;ON&quot; or &quot;OFF&quot;</span>
-<span class="c"># Description: Use the message passing interface for parallel execution</span>
-<span class="n">USE_MPI</span> <span class="o">=</span> <span class="s">&quot;ON&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># MPI: &quot;ON&quot; or &quot;OFF&quot;</span>
+<span class="c1"># Description: Use the message passing interface for parallel execution</span>
+<span class="n">USE_MPI</span> <span class="o">=</span> <span class="s2">&quot;ON&quot;</span>
 </pre></div>
 </div>
 <p>The first, commented line indicates that either &#8220;ON&#8221; or &#8220;OFF&#8221; are valid
@@ -358,26 +388,26 @@ might not need to change anything at all.</p>
 user and machine specific paths. Say that <em>USE_VTK</em> is set to &#8220;ON&#8221; and your
 VTK installation is not in your <em>/usr</em> path, but in <em>/home/liggghts/vtk</em>. In
 that case have a look at the following lines:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># VTK specific variables</span>
-<span class="c">#</span>
-<span class="c"># Path that contains the includes (vtkVersion.h)</span>
-<span class="c">#VTK_INC_USR=-I/path/to/vtk/include</span>
-<span class="c"># Path that contains the VTK libraries</span>
-<span class="c">#VTK_LIB_USR=-L/path/to/vtk/lib</span>
-<span class="c"># Additional VTK libraries to include</span>
-<span class="c">#VTK_ADDLIBS_USR=</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># VTK specific variables</span>
+<span class="c1">#</span>
+<span class="c1"># Path that contains the includes (vtkVersion.h)</span>
+<span class="c1">#VTK_INC_USR=-I/path/to/vtk/include</span>
+<span class="c1"># Path that contains the VTK libraries</span>
+<span class="c1">#VTK_LIB_USR=-L/path/to/vtk/lib</span>
+<span class="c1"># Additional VTK libraries to include</span>
+<span class="c1">#VTK_ADDLIBS_USR=</span>
 </pre></div>
 </div>
 <p>In this case you would want to change <em>VTK_INC_USR</em> and <em>VTK_LIB_USR</em> so
 that they become</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># VTK specific variables</span>
-<span class="c">#</span>
-<span class="c"># Path that contains the includes (vtkVersion.h)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># VTK specific variables</span>
+<span class="c1">#</span>
+<span class="c1"># Path that contains the includes (vtkVersion.h)</span>
 <span class="n">VTK_INC_USR</span><span class="o">=-</span><span class="n">I</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">liggghts</span><span class="o">/</span><span class="n">vtk</span><span class="o">/</span><span class="n">include</span>
-<span class="c"># Path that contains the VTK libraries</span>
+<span class="c1"># Path that contains the VTK libraries</span>
 <span class="n">VTK_LIB_USR</span><span class="o">=-</span><span class="n">L</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">liggghts</span><span class="o">/</span><span class="n">vtk</span><span class="o">/</span><span class="n">lib</span>
-<span class="c"># Additional VTK libraries to include</span>
-<span class="c">#VTK_ADDLIBS_USR=</span>
+<span class="c1"># Additional VTK libraries to include</span>
+<span class="c1">#VTK_ADDLIBS_USR=</span>
 </pre></div>
 </div>
 <p>Note that the two lines were uncommented and their values were changed as
@@ -404,11 +434,12 @@ perform a <em>make clean-auto</em> to do a full recompilation of the code.</p>
 </div>
 <p><strong>Step 2</strong></p>
 <p>After all options are set to your satisfaction. Simply run</p>
-<div class="highlight-python"><pre>make auto</pre>
+<div class="highlight-python"><div class="highlight"><pre>make auto
+</pre></div>
 </div>
 <p>again to test the options and compile LIGGGHTS(R)-PUBLIC. After the compilation is
 finished you will obtain a executable name <em>lmp_auto</em> and you can continue
-<a class="reference internal" href="#start-6"><em>here</em></a>.</p>
+<a class="reference internal" href="#start-6"><span>here</span></a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Should the compilation not work due to some deficiency of the
@@ -418,22 +449,59 @@ If you want to help us, then please send us your finished Makefile via the
 <a class="reference external" href="http://www.cfdem.com/forum">forums</a> so that we can improve it for future
 use.</p>
 </div>
+<hr class="docutils" />
+<p>For most users it will be convenient if they are able to run LIGGGHTS(R)-PUBLIC by
+simply typing <em>liggghts</em> on the command line. To make this possible we need to
+create a symbolic link. So after the compilation is complete and your lmp_auto
+executable was created you can run the following command to create a system-wide
+link:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo ln -s lmp_auto /usr/local/bin
+</pre></div>
+</div>
+<p>Since <em>sudo</em> is not available on all systems (e.g. Fedora) you can alternatively
+try:</p>
+<div class="highlight-python"><div class="highlight"><pre>su -c &quot;ln -s lmp_auto /usr/local/bin&quot;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You need administrator access to run the two commands listed above.</p>
+</div>
 <p><strong>Step 3 (Advanced usage)</strong></p>
-<p>Makefile.auto accepts one variable as additional input which is called
-<em>postfix</em> which can be used by typing</p>
-<div class="highlight-python"><pre>make auto postifx=myString</pre>
+<p>Makefile.auto accepts up to two variables as additional input which are called
+<em>debug</em> and <em>postfix</em>. The former variable can be useful when debugging
+LIGGGHTS(R)-PUBLIC and can be used by typing</p>
+<div class="highlight-python"><div class="highlight"><pre>make auto debug=ON
+</pre></div>
+</div>
+<p>The arguments that can be passed to the debug variable are &#8220;ON&#8221; and &#8220;FULL&#8221;.
+This has the same effect as changing the <em>USE_DEBUG</em> variable inside your
+<em>Makefile.user</em> to &#8220;ON&#8221; and &#8220;FULL&#8221;, respectively. I.e. with &#8220;ON&#8221; a optimized
+debug version of the code is produced, whereas with &#8220;FULL&#8221; a unoptimized
+version of the is compiled. The latter can be quite useful when using a debugger
+to look at the local variables inside a code fragment.</p>
+<p>When using a debug variable the executables will be called either
+<em>lmp_auto-debug</em> or <em>lmp_auto-fulldebug</em> for &#8220;ON&#8221; and &#8220;FULL&#8221;, respectively.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you want to clean this particular compilation <em>make clean-auto</em>
+also needs to have <em>debug=ON</em> or <em>debug=FULL</em> appended.</p>
+</div>
+<p>The latter variable <em>postfix</em> can be used by typing</p>
+<div class="highlight-python"><div class="highlight"><pre>make auto postifx=myString
+</pre></div>
 </div>
 <p>In this case Makefile.auto will not look for the <em>MAKE/Makefile.user</em> file,
 but <em>MAKE/Makefile.user_myString</em>. If it does not exist it will clone
 <em>MAKE/Makefile.user</em> (instead of a default template). The resulting
 executable will be called <em>lmp_auto_myString</em> (instead of <em>lmp_auto</em>).</p>
-<p>The prime use case would be a <em>MAKE/Makefile.user_debug</em> that has
-<em>USE_DEBUG</em> switched to &#8220;ON&#8221;, whereas the default <em>MAKE/Makefile.user</em>
-compiles the optimized version of the code.</p>
+<p>The use of the postfix variable should not be required under normal development.
+It allows advanced developers to have executables with different features
+enabled or disabled and based upon the default <em>Makefile.user</em>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you want to clean this particular compilation <em>make clean-auto</em>
-also needs to have the <em>postfix=myString</em> appended.</p>
+also needs to have <em>postfix=myString</em> appended.</p>
 </div>
 <p>All model combination of LIGGGHTS(R)-PUBLIC are automatically available starting with
 version 3.7. However, only a subset of them are compiled in an optimized manner.
@@ -452,8 +520,9 @@ combinations specified in this file.</p>
 LIGGGHTS(R)-PUBLIC input scripts and search them for their used contact model.
 With this list an addition to the whitelist is automatically created.
 Running the following commands within the LIGGGHTS(R)-PUBLIC src directory</p>
-<div class="highlight-python"><pre>./genAutoExamplesWhitelist.sh -h
-./genAutoExamplesWhitelist.sh ../examples</pre>
+<div class="highlight-python"><div class="highlight"><pre>./genAutoExamplesWhitelist.sh -h
+./genAutoExamplesWhitelist.sh ../examples
+</pre></div>
 </div>
 <p>The first will display the help message for genAutoExamplesWhitelist.sh.
 The second will recursively search the examples folder of your LIGGGHTS(R)-PUBLIC
@@ -464,8 +533,9 @@ the unique used models in the whitelist format.</p>
 stored in <em>style_contact_model.whitelist</em> . If this file exists, the next
 compilation will NOT change this file. You can manually delete it and
 recreate it with</p>
-<div class="highlight-python"><pre>sh Make.sh models
-sh Make.sh models_full</pre>
+<div class="highlight-python"><div class="highlight"><pre>sh Make.sh models
+sh Make.sh models_full
+</pre></div>
 </div>
 <p>During every compilation the three whitelist files <em>style_contact_model_user.whitelist</em> ,
 <em>style_contact_model_autoExamples.whitelist</em> and <em>style_contact_model.whitelist</em> are
@@ -480,9 +550,10 @@ also contains a top-level Makefile and a MAKE sub-directory with low-level
 Makefile.* files for a few selected platforms.  From within the src directory,
 type &#8220;make&#8221; or &#8220;gmake&#8221;.  You should see a list of available choices.  If one of
 those is the machine and options you want, you can type a command like:</p>
-<div class="highlight-python"><pre>make mpi
+<div class="highlight-python"><div class="highlight"><pre>make mpi
 or
-gmake serial</pre>
+gmake serial
+</pre></div>
 </div>
 <p>NOTE On a multi-processor or multi-core platform you can launch a
 parallel make, by using the &#8220;-j <em>nprocessors</em>&#8221; switch with the make command, which
@@ -490,7 +561,7 @@ will build LIGGGHTS(R)-PUBLIC more quickly.</p>
 <p>If you get no errors and an executable like lmp_mpi or lmp_serial is produced,
 you&#8217;re done; it&#8217;s your lucky day.</p>
 <p>Note that by default only a few of LIGGGHTS(R)-PUBLIC optional packages are
-installed.  To build LIGGGHTS(R)-PUBLIC with optional packages, see <a class="reference internal" href="#start-3"><em>this section</em></a> below.</p>
+installed.  To build LIGGGHTS(R)-PUBLIC with optional packages, see <a class="reference internal" href="#start-3"><span>this section</span></a> below.</p>
 <p><strong>Step 1</strong></p>
 <p>If Step 0 did not work, you will need to create a low-level Makefile
 for your machine, like Makefile.foo.  You should make a copy of an
@@ -514,7 +585,7 @@ systems.  You can also use mpicc which will typically be available if
 MPI is installed on your system, though you should check which actual
 compiler it wraps.  Vendor compilers often produce faster code.  On
 boxes with Intel CPUs, we suggest using the commercial Intel icc
-compiler, which can be downloaded from <a class="reference external" href="intel_">Intel&#8217;s compiler site</a>.</p>
+compiler, which can be downloaded from <a class="reference external" href="http://www.intel.com/software/products/noncom">Intel&#8217;s compiler site</a>.</p>
 <p>If building a C++ code on your machine requires additional libraries,
 then you should list them as part of the LIB variable.</p>
 <p>The DEPFLAGS setting is what triggers the C++ compiler to create a
@@ -586,7 +657,7 @@ the BIGBIG setting is to enable simulation of huge molecular systems
 with more than 2 billion atoms or to allow moving atoms to wrap back
 through a periodic box more than 512 times.  The only reason to use
 the SMALLSMALL setting is if your machine does not support 64-bit
-integers.  See the <a class="reference internal" href="#start-2-4"><em>Additional build tips</em></a> section below
+integers.  See the <a class="reference internal" href="#start-2-4"><span>Additional build tips</span></a> section below
 for more details.</p>
 <p>The -DLAMMPS_LONGLONG_TO_LONG setting may be needed if your system or
 MPI version does not recognize &#8220;long long&#8221; data types.  In this case a
@@ -595,7 +666,7 @@ will convert to that data type.</p>
 <p>Using one of the -DPACK_ARRAY, -DPACK_POINTER, and -DPACK_MEMCPY
 options can make for faster parallel FFTs (in the PPPM solver) on some
 platforms.  The -DPACK_ARRAY setting is the default.  See the
-<tt class="xref doc docutils literal"><span class="pre">kspace_style</span></tt> command for info about PPPM.  See
+<code class="xref doc docutils literal"><span class="pre">kspace_style</span></code> command for info about PPPM.  See
 Step 6 below for info about building LIGGGHTS(R)-PUBLIC with an FFT library.</p>
 <p><strong>Step 5</strong></p>
 <p>The 3 MPI variables are used to specify an MPI library to build LAMMPS
@@ -645,7 +716,7 @@ simulations.</p>
 <p>The 3 FFT variables allow you to specify an FFT library which LIGGGHTS(R)-PUBLIC
 uses (for performing 1d FFTs) when running the particle-particle
 particle-mesh (PPPM) option for long-range Coulombics via the
-<tt class="xref doc docutils literal"><span class="pre">kspace_style</span></tt> command.</p>
+<code class="xref doc docutils literal"><span class="pre">kspace_style</span></code> command.</p>
 <p>LIGGGHTS(R)-PUBLIC supports various open-source or vendor-supplied FFT libraries
 for this purpose.  If you leave these 3 variables blank, LIGGGHTS(R)-PUBLIC will
 use the open-source <a class="reference external" href="http://kissfft.sf.net">KISS FFT library</a>, which is
@@ -706,16 +777,17 @@ find it.</p>
 your machine, you may not need to set these variables.</p>
 <p><strong>Step 8</strong></p>
 <p>Note that by default only a few of LIGGGHTS(R)-PUBLIC optional packages are
-installed.  To build LIGGGHTS(R)-PUBLIC with optional packages, see <a class="reference internal" href="#start-3"><em>this section</em></a> below, before proceeding to Step 9.</p>
+installed.  To build LIGGGHTS(R)-PUBLIC with optional packages, see <a class="reference internal" href="#start-3"><span>this section</span></a> below, before proceeding to Step 9.</p>
 <p><strong>Step 9</strong></p>
 <p>That&#8217;s it.  Once you have a correct Makefile.foo, you have installed
 the optional LIGGGHTS(R)-PUBLIC packages you want to include in your build, and
 you have pre-built any other needed libraries (e.g. MPI, FFT, package
 libraries), all you need to do from the src directory is type
 something like this:</p>
-<div class="highlight-python"><pre>make foo
+<div class="highlight-python"><div class="highlight"><pre>make foo
 or
-gmake foo</pre>
+gmake foo
+</pre></div>
 </div>
 <p>You should get the executable lmp_foo when the build is complete.</p>
 <hr class="docutils" />
@@ -741,9 +813,10 @@ your machine&#8217;s native make doesn&#8217;t support wildcard expansion in a
 makefile.  Try gmake instead of make.  If that doesn&#8217;t work, try using
 a -f switch with your make command to use a pre-generated
 Makefile.list which explicitly lists all the needed files, e.g.</p>
-<div class="highlight-python"><pre>make makelist
+<div class="highlight-python"><div class="highlight"><pre>make makelist
 make -f Makefile.list linux
-gmake -f Makefile.list mac</pre>
+gmake -f Makefile.list mac
+</pre></div>
 </div>
 <p>The first &#8220;make&#8221; command will create a current Makefile.list with all
 the file names in your src dir.  The 2nd &#8220;make&#8221; command (make or
@@ -839,13 +912,13 @@ only be used by advanced users.</p>
 </div>
 </div>
 <div class="section" id="making-liggghts-r-public-with-optional-packages">
-<span id="start-3"></span><h2>2.3. Making LIGGGHTS(R)-PUBLIC with optional packages<a class="headerlink" href="#making-liggghts-r-public-with-optional-packages" title="Permalink to this headline">¶</a></h2>
+<span id="start-3"></span><h2><a class="toc-backref" href="#id13">2.3. Making LIGGGHTS(R)-PUBLIC with optional packages</a><a class="headerlink" href="#making-liggghts-r-public-with-optional-packages" title="Permalink to this headline">¶</a></h2>
 <p>This section has the following sub-sections:</p>
 <ul class="simple">
-<li><a class="reference internal" href="#start-3-1"><em>Package basics</em></a></li>
-<li><a class="reference internal" href="#start-3-2"><em>Including/excluding packages</em></a></li>
-<li><a class="reference internal" href="#start-3-3"><em>Packages that require extra libraries</em></a></li>
-<li><em class="xref std std-ref">Additional Makefile settings for extra libraries</em></li>
+<li><a class="reference internal" href="#start-3-1"><span>Package basics</span></a></li>
+<li><a class="reference internal" href="#start-3-2"><span>Including/excluding packages</span></a></li>
+<li><a class="reference internal" href="#start-3-3"><span>Packages that require extra libraries</span></a></li>
+<li><span class="xref std std-ref">Additional Makefile settings for extra libraries</span></li>
 </ul>
 <hr class="docutils" />
 <p id="start-3-1"><strong>Package basics:</strong></p>
@@ -863,7 +936,7 @@ package.  You can also type</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">lmp_machine</span> <span class="o">-</span><span class="n">h</span>
 </pre></div>
 </div>
-<p>to run your executable with the optional <a class="reference internal" href="#start-7"><em>-h command-line switch</em></a> for &#8220;help&#8221;, which will list the styles and commands
+<p>to run your executable with the optional <a class="reference internal" href="#start-7"><span>-h command-line switch</span></a> for &#8220;help&#8221;, which will list the styles and commands
 known to your executable.</p>
 <p>There are two kinds of packages in LIGGGHTS(R)-PUBLIC, standard and user packages.
 More information about the contents of standard and user packages is
@@ -884,13 +957,15 @@ See more details below.</p>
 <p>To use or not use a package you must include or exclude it before
 building LIGGGHTS(R)-PUBLIC.  From the src directory, this is typically as simple
 as:</p>
-<div class="highlight-python"><pre>make yes-asphere
-make g++</pre>
-</div>
+<pre class="literal-block">
+make yes-<strong>package-name</strong>
+make g++
+</pre>
 <p>or</p>
-<div class="highlight-python"><pre>make no-asphere
-make g++</pre>
-</div>
+<pre class="literal-block">
+make no-<strong>package-name</strong>
+make g++
+</pre>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">You should NOT include/exclude packages and build
@@ -913,8 +988,8 @@ in the src directory: KSPACE, MANYBODY,MOLECULE.  When you download
 LIGGGHTS(R)-PUBLIC source files from the SVN or Git repositories, no packages are
 pre-installed.</p>
 <p>Packages are included or excluded by typing &#8220;make yes-name&#8221; or &#8220;make
-no-name&#8221;, where &#8220;name&#8221; is the name of the package in lower-case, e.g.
-name = asphere for the ASPHERE package. You can also type &#8220;make yes-all&#8221;
+no-name&#8221;, where &#8220;name&#8221; is the name of the package in lower-case.
+You can also type &#8220;make yes-all&#8221;
 or &#8220;make no-all&#8221; to include/exclude various sets of packages.  Type &#8220;make
 package&#8221; to see the all of the package-related make options.</p>
 <div class="admonition warning">
@@ -955,7 +1030,8 @@ auxiliary library yourself.  Example is the VORONOI packages.</p>
 <p>For libraries with provided source code, each lib directory has a
 README file (e.g. lib/reax/README) with instructions on how to build
 that library.  Typically this is done by typing something like:</p>
-<div class="highlight-python"><pre>make -f Makefile.g++</pre>
+<div class="highlight-python"><div class="highlight"><pre>make -f Makefile.g++
+</pre></div>
 </div>
 <p>If one of the provided Makefiles is not
 appropriate for your system you will need to edit or add one.
@@ -991,18 +1067,20 @@ not, the LIGGGHTS(R)-PUBLIC build will fail.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="building-liggghts-r-public-via-the-make-py-script">
-<span id="start-4"></span><h2>2.4. Building LIGGGHTS(R)-PUBLIC via the Make.py script<a class="headerlink" href="#building-liggghts-r-public-via-the-make-py-script" title="Permalink to this headline">¶</a></h2>
+<span id="start-4"></span><h2><a class="toc-backref" href="#id14">2.4. Building LIGGGHTS(R)-PUBLIC via the Make.py script</a><a class="headerlink" href="#building-liggghts-r-public-via-the-make-py-script" title="Permalink to this headline">¶</a></h2>
 <p>The src directory includes a Make.py script, written
 in Python, which can be used to automate various steps
 of the build process.</p>
 <p>You can run the script from the src directory by typing either:</p>
-<div class="highlight-python"><pre>Make.py
-python Make.py</pre>
+<div class="highlight-python"><div class="highlight"><pre>Make.py
+python Make.py
+</pre></div>
 </div>
 <p>which will give you info about the tool.  For the former to work, you
 may need to edit the 1st line of the script to point to your local
 Python.  And you may need to insure the script is executable:</p>
-<div class="highlight-python"><pre>chmod +x Make.py</pre>
+<div class="highlight-python"><div class="highlight"><pre>chmod +x Make.py
+</pre></div>
 </div>
 <p>The following options are supported as switches:</p>
 <ul class="simple">
@@ -1043,17 +1121,18 @@ input scripts.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="building-liggghts-r-public-as-a-library">
-<span id="start-5"></span><h2>2.5. Building LIGGGHTS(R)-PUBLIC as a library<a class="headerlink" href="#building-liggghts-r-public-as-a-library" title="Permalink to this headline">¶</a></h2>
+<span id="start-5"></span><h2><a class="toc-backref" href="#id15">2.5. Building LIGGGHTS(R)-PUBLIC as a library</a><a class="headerlink" href="#building-liggghts-r-public-as-a-library" title="Permalink to this headline">¶</a></h2>
 <p>LIGGGHTS(R)-PUBLIC can be built as either a static or shared library, which can
 then be called from another application or a scripting language.  See
-<a class="reference internal" href="Section_howto.html#howto-10"><em>this section</em></a> for more info on coupling
+<a class="reference internal" href="Section_howto.html#howto-10"><span>this section</span></a> for more info on coupling
 LIGGGHTS(R)-PUBLIC to other codes.  See <a class="reference internal" href="Section_python.html"><em>this section</em></a> for
 more info on wrapping and running LIGGGHTS(R)-PUBLIC from Python.</p>
 <div class="section" id="static-library">
 <h3>2.5.1. <strong>Static library:</strong><a class="headerlink" href="#static-library" title="Permalink to this headline">¶</a></h3>
 <p>To build LIGGGHTS(R)-PUBLIC as a static library (<a href="#id7"><span class="problematic" id="id8">*</span></a>.a file on Linux), type</p>
-<div class="highlight-python"><pre>make makelib
-make -f Makefile.lib foo</pre>
+<div class="highlight-python"><div class="highlight"><pre>make makelib
+make -f Makefile.lib foo
+</pre></div>
 </div>
 <p>where foo is the machine name (if you normally compile with <em>auto</em> then use
 this option).  This kind of library is typically used to statically link a
@@ -1070,8 +1149,9 @@ another application can link to.</p>
 <h3>2.5.2. <strong>Shared library:</strong><a class="headerlink" href="#shared-library" title="Permalink to this headline">¶</a></h3>
 <p>To build LIGGGHTS(R)-PUBLIC as a shared library (<a href="#id9"><span class="problematic" id="id10">*</span></a>.so file on Linux), which can be
 dynamically loaded, e.g. from Python, type</p>
-<div class="highlight-python"><pre>make makeshlib
-make -f Makefile.shlib foo</pre>
+<div class="highlight-python"><div class="highlight"><pre>make makeshlib
+make -f Makefile.shlib foo
+</pre></div>
 </div>
 <p>where foo is the machine name (if you normally compile with <em>auto</em> then use
 this option). This kind of library is required when wrapping LIGGGHTS(R)-PUBLIC
@@ -1094,12 +1174,13 @@ as a shared library, the second make command will generate an error.
 This means you will need to install a shared library version of the
 package.  The build instructions for the library should tell you how
 to do this.</p>
-<p>As an example, here is how to build and install the <a class="reference external" href="mpich_">MPICH library</a>, a popular open-source version of MPI, distributed by
+<p>As an example, here is how to build and install the <a class="reference external" href="http://www-unix.mcs.anl.gov/mpi">MPICH library</a>, a popular open-source version of MPI, distributed by
 Argonne National Labs, as a shared library in the default
 /usr/local/lib location:</p>
-<div class="highlight-python"><pre>./configure --enable-shared
+<div class="highlight-python"><div class="highlight"><pre>./configure --enable-shared
 make
-make install</pre>
+make install
+</pre></div>
 </div>
 <p>You may need to use &#8220;sudo make install&#8221; in place of the last line if
 you do not have write privileges for /usr/local/lib.  The end result
@@ -1116,7 +1197,8 @@ current version of the shared library is always available to programs
 that use it.</p>
 <p>For the csh or tcsh shells, you would add something like this to your
 ~/.cshrc file:</p>
-<div class="highlight-python"><pre>setenv LD_LIBRARY_PATH $*LD_LIBRARY_PATH*:/home/sjplimp/lammps/src</pre>
+<div class="highlight-python"><div class="highlight"><pre>setenv LD_LIBRARY_PATH $*LD_LIBRARY_PATH*:/home/sjplimp/lammps/src
+</pre></div>
 </div>
 </div>
 <div class="section" id="calling-the-liggghts-r-public-library">
@@ -1132,18 +1214,18 @@ src/library.cpp and src/library.h.</p>
 <p>See the sample codes in examples/COUPLE/simple for examples of C++ and
 C and Fortran codes that invoke LIGGGHTS(R)-PUBLIC thru its library interface.
 There are other examples as well in the COUPLE directory which are
-discussed in <a class="reference internal" href="Section_howto.html#howto-10"><em>Section_howto 10</em></a> of the
+discussed in <a class="reference internal" href="Section_howto.html#howto-10"><span>Section_howto 10</span></a> of the
 manual.  See <a class="reference internal" href="Section_python.html"><em>Section_python</em></a> of the manual for a
 description of the Python wrapper provided with LIGGGHTS(R)-PUBLIC that operates
 through the LIGGGHTS(R)-PUBLIC library interface.</p>
 <p>The files src/library.cpp and library.h define the C-style API for
-using LIGGGHTS(R)-PUBLIC as a library.  See <em class="xref std std-ref">Section_howto 19</em> of the manual for a description of the
+using LIGGGHTS(R)-PUBLIC as a library.  See <span class="xref std std-ref">Section_howto 19</span> of the manual for a description of the
 interface and how to extend it for your needs.</p>
 <hr class="docutils" />
 </div>
 </div>
 <div class="section" id="running-liggghts-r-public">
-<span id="start-6"></span><h2>2.6. Running LIGGGHTS(R)-PUBLIC<a class="headerlink" href="#running-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
+<span id="start-6"></span><h2><a class="toc-backref" href="#id16">2.6. Running LIGGGHTS(R)-PUBLIC</a><a class="headerlink" href="#running-liggghts-r-public" title="Permalink to this headline">¶</a></h2>
 <p>By default, LIGGGHTS(R)-PUBLIC runs by reading commands from stdin; e.g. lmp_auto
 &lt; in.file.  This means you first create an input script (e.g. in.file)
 containing the desired commands.  <a class="reference internal" href="Section_commands.html"><em>This section</em></a>
@@ -1153,13 +1235,14 @@ contain.</p>
 examples or bench directory.  Input scripts are named in.* and sample
 outputs are named log.*.name.P where name is a machine and P is the
 number of processors it was run on.</p>
-<p>Here is how you might run a standard Lennard-Jones benchmark on a
+<p>Here is how you might run a standard chute wear benchmark on a
 Linux box, using mpirun to launch a parallel job:</p>
-<div class="highlight-python"><pre>cd src
-make linux
-cp lmp_auto ../bench
-cd ../bench
-mpirun -np 4 lmp_auto &lt; in.lj</pre>
+<div class="highlight-python"><div class="highlight"><pre>cd src
+make auto
+cp lmp_auto ../examples/LIGGGHTS/Tutorials_public/chute_wear
+cd ../examples/LIGGGHTS/Tutorials_public/chute_wear
+mpirun -np 4 lmp_auto &lt; in.chute_wear
+</pre></div>
 </div>
 <hr class="docutils" />
 <p>On a Windows box, you can skip making LIGGGHTS(R)-PUBLIC and simply download an
@@ -1227,7 +1310,7 @@ more processors or setup a smaller problem.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="command-line-options">
-<span id="start-7"></span><h2>2.7. Command-line options<a class="headerlink" href="#command-line-options" title="Permalink to this headline">¶</a></h2>
+<span id="start-7"></span><h2><a class="toc-backref" href="#id17">2.7. Command-line options</a><a class="headerlink" href="#command-line-options" title="Permalink to this headline">¶</a></h2>
 <p>At run time, LIGGGHTS(R)-PUBLIC recognizes several optional command-line switches
 which may be used in any order.  Either the full word or a one-or-two
 letter abbreviation can be used:</p>
@@ -1247,11 +1330,13 @@ letter abbreviation can be used:</p>
 <li>-v or -var</li>
 </ul>
 <p>For example, lmp_auto might be launched as follows:</p>
-<div class="highlight-python"><pre>mpirun -np 16 lmp_auto -v f tmp.out -l my.log -sc none &lt; in.alloy
-mpirun -np 16 lmp_auto -var f tmp.out -log my.log -screen none &lt; in.alloy</pre>
+<div class="highlight-python"><div class="highlight"><pre>mpirun -np 16 lmp_auto -v f tmp.out -l my.log -sc none &lt; in.alloy
+mpirun -np 16 lmp_auto -var f tmp.out -log my.log -screen none &lt; in.alloy
+</pre></div>
 </div>
 <p>Here are the details on the options:</p>
-<div class="highlight-python"><pre>-echo style</pre>
+<div class="highlight-python"><div class="highlight"><pre>-echo style
+</pre></div>
 </div>
 <p>Set the style of command echoing.  The style can be <em>none</em> or <em>screen</em>
 or <em>log</em> or <em>both</em>.  Depending on the style, each command read from
@@ -1259,7 +1344,8 @@ the input script will be echoed to the screen and/or logfile.  This
 can be useful to figure out which line of your script is causing an
 input error.  The default value is <em>log</em>.  The echo style can also be
 set by using the <a class="reference internal" href="echo.html"><em>echo</em></a> command in the input script itself.</p>
-<div class="highlight-python"><pre>-in file</pre>
+<div class="highlight-python"><div class="highlight"><pre>-in file
+</pre></div>
 </div>
 <p>Specify a file to use as an input script.  This is an optional switch
 when running LIGGGHTS(R)-PUBLIC in one-partition mode.  If it is not specified,
@@ -1274,7 +1360,8 @@ style (atom_style, fix, compute, pair_style, bond_style, etc).  This
 can help you know if the command you want to use was included via the
 appropriate package.  LIGGGHTS(R)-PUBLIC will print the info and immediately exit
 if this switch is used.</p>
-<div class="highlight-python"><pre>-log file</pre>
+<div class="highlight-python"><div class="highlight"><pre>-log file
+</pre></div>
 </div>
 <p>Specify a log file for LIGGGHTS(R)-PUBLIC to write status information to.  In
 one-partition mode, if the switch is not used, LIGGGHTS(R)-PUBLIC writes to the
@@ -1295,7 +1382,8 @@ Option -plog will override the name of the partition log files file.N.</p>
 references for specific cite-able features used during a LIGGGHTS(R)-PUBLIC run.
 See the <a class="reference external" href="http://lammps.sandia.gov/cite.html">citation page</a> for more
 details.</p>
-<div class="highlight-python"><pre>-partition 8x2 4 5 ...</pre>
+<div class="highlight-python"><div class="highlight"><pre>-partition 8x2 4 5 ...
+</pre></div>
 </div>
 <p>Invoke LIGGGHTS(R)-PUBLIC in multi-partition mode.  When LIGGGHTS(R)-PUBLIC is run on P
 processors and this switch is not used, LIGGGHTS(R)-PUBLIC runs in one partition,
@@ -1309,10 +1397,11 @@ processors in all partitions must equal P.  Thus the command
 &#8220;-partition 8x2 4 5&#8221; has 10 partitions and runs on a total of 25
 processors.</p>
 <p>To run multiple independent simulatoins from one input script, using
-multiple partitions, see <a class="reference internal" href="Section_howto.html#howto-4"><em>Section_howto 4</em></a>
+multiple partitions, see <a class="reference internal" href="Section_howto.html#howto-4"><span>Section_howto 4</span></a>
 of the manual.  World- and universe-style <a class="reference internal" href="variable.html"><em>variables</em></a>
 are useful in this context.</p>
-<div class="highlight-python"><pre>-plog file</pre>
+<div class="highlight-python"><div class="highlight"><pre>-plog file
+</pre></div>
 </div>
 <p>Specify the base name for the partition log files, so partition N
 writes log information to file.N. If file is none, then no partition
@@ -1323,7 +1412,8 @@ suppressed (-plog none) or placed in a sub-directory (-plog
 replica_files/log.lammps) If this option is not used the log file for
 partition N is log.lammps.N or whatever is specified by the -log
 command-line option.</p>
-<div class="highlight-python"><pre>-pscreen file</pre>
+<div class="highlight-python"><div class="highlight"><pre>-pscreen file
+</pre></div>
 </div>
 <p>Specify the base name for the partition screen file, so partition N
 writes screen information to file.N. If file is none, then no
@@ -1334,21 +1424,24 @@ screen files to be suppressed (-pscreen none) or placed in a
 sub-directory (-pscreen replica_files/screen).  If this option is not
 used the screen file for partition N is screen.N or whatever is
 specified by the -screen command-line option.</p>
-<div class="highlight-python"><pre>-restart restartfile datafile</pre>
+<div class="highlight-python"><div class="highlight"><pre>-restart restartfile datafile
+</pre></div>
 </div>
 <p>Convert the restart file into a data file and immediately exit.  This
 is the same operation as if the following 2-line input script were
 run:</p>
-<div class="highlight-python"><pre>read_restart restartfile
-write_data datafile</pre>
+<div class="highlight-python"><div class="highlight"><pre>read_restart restartfile
+write_data datafile
+</pre></div>
 </div>
 <p>Note that the specified restartfile and datafile can have wild-card
 characters (&#8220;*&#8221;,%&#8221;) as described by the
 <a class="reference internal" href="read_restart.html"><em>read_restart</em></a> and <a class="reference internal" href="write_data.html"><em>write_data</em></a>
 commands.  But a filename such as file.* will need to be enclosed in
 quotes to avoid shell expansion of the &#8220;*&#8221; character.</p>
-<div class="highlight-python"><pre>-reorder nth N
--reorder custom filename</pre>
+<div class="highlight-python"><div class="highlight"><pre>-reorder nth N
+-reorder custom filename
+</pre></div>
 </div>
 <p>Reorder the processors in the MPI communicator used to instantiate
 LIGGGHTS(R)-PUBLIC, in one of several ways.  The original MPI communicator ranks
@@ -1359,7 +1452,7 @@ cores within each node are ranked in a desired order.  Or when using
 the <a class="reference internal" href="run_style.html"><em>run_style verlet/split</em></a> command with 2 partitions
 to insure that a specific Kspace processor (in the 2nd partition) is
 matched up with a specific set of processors in the 1st partition.
-See the <tt class="xref doc docutils literal"><span class="pre">Section_accelerate</span></tt> doc pages for
+See the <code class="xref doc docutils literal"><span class="pre">Section_accelerate</span></code> doc pages for
 more details.</p>
 <p>If the keyword <em>nth</em> is used with a setting <em>N</em>, then it means every
 Nth processor will be moved to the end of the ranking.  This is useful
@@ -1372,14 +1465,17 @@ will be ordered consecutively, e.g. as the cores on one physical node.
 This can boost performance.  For example, if you use &#8220;-reorder nth 4&#8221;
 and &#8220;-partition 9 3&#8221; and you are running on 12 processors, the
 processors will be reordered from</p>
-<div class="highlight-python"><pre>0 1 2 3 4 5 6 7 8 9 10 11</pre>
+<div class="highlight-python"><div class="highlight"><pre>0 1 2 3 4 5 6 7 8 9 10 11
+</pre></div>
 </div>
 <p>to</p>
-<div class="highlight-python"><pre>0 1 2 4 5 6 8 9 10 3 7 11</pre>
+<div class="highlight-python"><div class="highlight"><pre>0 1 2 4 5 6 8 9 10 3 7 11
+</pre></div>
 </div>
 <p>so that the processors in each partition will be</p>
-<div class="highlight-python"><pre>0 1 2 4 5 6 8 9 10
-3 7 11</pre>
+<div class="highlight-python"><div class="highlight"><pre>0 1 2 4 5 6 8 9 10
+3 7 11
+</pre></div>
 </div>
 <p>See the &#8220;processors&#8221; command for how to insure processors from each
 partition could then be grouped optimally for quad-core nodes.</p>
@@ -1388,7 +1484,8 @@ of the processor ranks is also specified.  The format of the reorder
 file is as follows.  Any number of initial blank or comment lines
 (starting with a &#8220;#&#8221; character) can be present.  These should be
 followed by P lines of the form:</p>
-<div class="highlight-python"><pre>I J</pre>
+<div class="highlight-python"><div class="highlight"><pre>I J
+</pre></div>
 </div>
 <p>where P is the number of processors LIGGGHTS(R)-PUBLIC was launched with.  Note
 that if running in multi-partition mode (see the -partition switch
@@ -1407,7 +1504,8 @@ simply gives you a portable way to do this without relying on MPI
 itself.  See the <a class="reference external" href="processors">processors out</a> command for how to output
 info on the final assignment of physical processors to the LIGGGHTS(R)-PUBLIC
 simulation domain.</p>
-<div class="highlight-python"><pre>-screen file</pre>
+<div class="highlight-python"><div class="highlight"><pre>-screen file
+</pre></div>
 </div>
 <p>Specify a file for LIGGGHTS(R)-PUBLIC to write its screen information to.  In
 one-partition mode, if the switch is not used, LIGGGHTS(R)-PUBLIC writes to the
@@ -1421,7 +1519,8 @@ writes screen information to a file.N.  For both one-partition and
 multi-partition mode, if the specified file is &#8220;none&#8221;, then no screen
 output is performed. Option -pscreen will override the name of the
 partition screen files file.N.</p>
-<div class="highlight-python"><pre>-var name value1 value2 ...</pre>
+<div class="highlight-python"><div class="highlight"><pre>-var name value1 value2 ...
+</pre></div>
 </div>
 <p>Specify a variable that will be defined for substitution purposes when
 the input script is read.  &#8220;Name&#8221; is the variable name which can be a
@@ -1433,7 +1532,7 @@ value2 ...&#8221;  at the beginning of the input script.  Defining an index
 variable as a command-line argument overrides any setting for the same
 index variable in the input script, since index variables cannot be
 re-defined.  See the <a class="reference internal" href="variable.html"><em>variable</em></a> command for more info on
-defining index and other kinds of variables and <em class="xref std std-ref">this section</em> for more info on using variables
+defining index and other kinds of variables and <span class="xref std std-ref">this section</span> for more info on using variables
 in input scripts.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -1446,7 +1545,7 @@ negative numeric value.  It is OK if the first value1 starts with a
 <hr class="docutils" />
 </div>
 <div class="section" id="liggghts-r-public-screen-output">
-<span id="start-8"></span><h2>2.8. LIGGGHTS(R)-PUBLIC screen output<a class="headerlink" href="#liggghts-r-public-screen-output" title="Permalink to this headline">¶</a></h2>
+<span id="start-8"></span><h2><a class="toc-backref" href="#id18">2.8. LIGGGHTS(R)-PUBLIC screen output</a><a class="headerlink" href="#liggghts-r-public-screen-output" title="Permalink to this headline">¶</a></h2>
 <p>As LIGGGHTS(R)-PUBLIC reads an input script, it prints information to both the
 screen and a log file about significant actions it takes to setup a
 simulation.  When the simulation is ready to begin, LIGGGHTS(R)-PUBLIC performs
@@ -1458,28 +1557,32 @@ timesteps.  When the run concludes, LIGGGHTS(R)-PUBLIC prints the final
 thermodynamic state and a total run time for the simulation.  It then
 appends statistics about the CPU time and storage requirements for the
 simulation.  An example set of statistics is shown here:</p>
-<div class="highlight-python"><pre>Loop time of 49.002 on 2 procs for 2004 atoms</pre>
+<div class="highlight-python"><div class="highlight"><pre>Loop time of 49.002 on 2 procs for 2004 atoms
+</pre></div>
 </div>
-<div class="highlight-python"><pre>Pair   time (%) = 35.0495 (71.5267)
+<div class="highlight-python"><div class="highlight"><pre>Pair   time (%) = 35.0495 (71.5267)
 Bond   time (%) = 0.092046 (0.187841)
 Kspce  time (%) = 6.42073 (13.103)
 Neigh  time (%) = 2.73485 (5.5811)
 Comm   time (%) = 1.50291 (3.06703)
 Outpt  time (%) = 0.013799 (0.0281601)
-Other  time (%) = 2.13669 (4.36041)</pre>
+Other  time (%) = 2.13669 (4.36041)
+</pre></div>
 </div>
-<div class="highlight-python"><pre>Nlocal:    1002 ave, 1015 max, 989 min
+<div class="highlight-python"><div class="highlight"><pre>Nlocal:    1002 ave, 1015 max, 989 min
 Histogram: 1 0 0 0 0 0 0 0 0 1
 Nghost:    8720 ave, 8724 max, 8716 min
 Histogram: 1 0 0 0 0 0 0 0 0 1
 Neighs:    354141 ave, 361422 max, 346860 min
-Histogram: 1 0 0 0 0 0 0 0 0 1</pre>
+Histogram: 1 0 0 0 0 0 0 0 0 1
+</pre></div>
 </div>
-<div class="highlight-python"><pre>Total # of neighbors = 708282
+<div class="highlight-python"><div class="highlight"><pre>Total # of neighbors = 708282
 Ave neighs/atom = 353.434
 Ave special neighs/atom = 2.34032
 Number of reneighborings = 42
-Dangerous reneighborings = 2</pre>
+Dangerous reneighborings = 2
+</pre></div>
 </div>
 <p>The first section gives the breakdown of the CPU run time (in seconds)
 into major categories.  The second section lists the number of owned
@@ -1490,7 +1593,7 @@ The total number of histogram counts is equal to the number of
 processors.</p>
 <p>The last section gives aggregate statistics for pair-wise neighbors
 and special neighbors that LIGGGHTS(R)-PUBLIC keeps track of (see the
-<tt class="xref doc docutils literal"><span class="pre">special_bonds</span></tt> command).  The number of times
+<code class="xref doc docutils literal"><span class="pre">special_bonds</span></code> command).  The number of times
 neighbor lists were rebuilt during the run is given as well as the
 number of potentially &#8220;dangerous&#8221; rebuilds.  If atom movement
 triggered neighbor list rebuilding (see the
@@ -1513,15 +1616,18 @@ in the search direction.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Section_input_script.html" class="btn btn-neutral float-right" title="3. Input Script" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Section_input_script.html" class="btn btn-neutral float-right" title="3. Input Script" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Section_intro.html" class="btn btn-neutral" title="1. Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Section_intro.html" class="btn btn-neutral" title="1. Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1551,11 +1657,13 @@ in the search direction.</p>
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
