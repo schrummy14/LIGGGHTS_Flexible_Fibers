@@ -19,7 +19,7 @@
    See the README file in the top-level directory.
 ------------------------------------------------------------------------- */
 
-#include "math.h"
+#include <cmath>
 #include "stdlib.h"
 #include "bond_gran.h"
 #include "atom.h"
