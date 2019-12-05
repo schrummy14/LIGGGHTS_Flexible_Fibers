@@ -353,9 +353,9 @@ void FixScalarTransportEquation::init()
       fix_capacity = static_cast<FixPropertyGlobal*>(modify->find_fix_property(capacity_name,"property/global","peratomtype",max_type,0,style));
 
       //pre-calculate parameters for possible contact material combinations
-      for(int i=1;i< max_type+1; i++)
-          for(int j=1;j<max_type+1;j++)
-              capacity[i] = fix_capacity->compute_vector(i-1);
+      fprintf(screen,"Is this called?\n");
+      for(int i=1;i< max_type+1; i++) // for(int j=1;j<max_type+1;j++)
+          capacity[i] = fix_capacity->compute_vector(i-1);
   }
 }
 
