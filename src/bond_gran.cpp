@@ -61,7 +61,10 @@ enum{
     };
 enum {
   DAMPSTYLE_NONE = 0,
-  DAMPSTYLE_YU_GUO
+  DAMPSTYLE_YU_GUO,
+  DAMPSTYLE_NON_LINEAR,
+  DAMPSTYLE_NON_LINEAR_REDUCED,
+  DAMPSTYLE_NON_LINEAR_REDUCED_SIMPLIFIED
 };
 /* ---------------------------------------------------------------------- */
 
@@ -101,6 +104,8 @@ BondGran::~BondGran()
     memory->destroy(Sn);
     memory->destroy(St);
     memory->destroy(damp);
+    memory->destroy(beta0);
+    memory->destroy(beta1);
     memory->destroy(r_break);
     memory->destroy(sigma_break);
     memory->destroy(tau_break);
@@ -117,7 +122,7 @@ void  BondGran::init_style()
 }
 
 /* ---------------------------------------------------------------------- */
-
+#define SIGNUM_DOUBLE(x) (((x) > 0.0) ? 1.0 : (((x) < 0.0) ? -1.0 : 0.0))
 void BondGran::compute(int eflag, int vflag)
 {
 
@@ -412,6 +417,13 @@ void BondGran::compute(int eflag, int vflag)
     bondhistlist[n][10] = bondhistlist[n][10] + dttorque[1] ;
     bondhistlist[n][11] = bondhistlist[n][11] + dttorque[2] ;
 
+    double tot_force_x = bondhistlist[n][ 0] + bondhistlist[n][ 3];
+    double tot_force_y = bondhistlist[n][ 1] + bondhistlist[n][ 4];
+    double tot_force_z = bondhistlist[n][ 2] + bondhistlist[n][ 5];
+    double tot_torqu_x = bondhistlist[n][ 6] + bondhistlist[n][ 9];
+    double tot_torqu_y = bondhistlist[n][ 7] + bondhistlist[n][10];
+    double tot_torqu_z = bondhistlist[n][ 8] + bondhistlist[n][11];
+
 //---torque due to tangential bond force 
     ft_bond_total[0] = bondhistlist[n][3];
     ft_bond_total[1] = bondhistlist[n][4];
@@ -452,11 +464,152 @@ void BondGran::compute(int eflag, int vflag)
         torque_damp_t[1] = d_mt_sqrt_2_Js_Kben*wt2;
         torque_damp_t[2] = d_mt_sqrt_2_Js_Kben*wt3;
 
+    } else if (dampmode == DAMPSTYLE_NON_LINEAR) {
+      // Get energy in bond F(gamma) = c*(2.0*E/k)^gamma
+      double I_n = 0.5*Me*(rout*rout+rin*rin);
+      double I_t = Me*(3.0*(rout*rout+rin*rin)+bondLength*bondLength)/12.0;
+      double Kn_inv = 1.0/Kn;
+      double Kt_inv = 1.0/Kt;
+      double K_tor_inv = 1.0/K_tor;
+      double K_ben_inv = 1.0/K_ben;
+
+      // Get 2E/k for each dirrection
+      // E = 0.5*Kx^2 + 0.5*mv^2
+      // E = 0.5(K^2x^2/K + mv^2)
+      // E = 0.5(bondhist^2/K + mv^2)
+      // 2E/k == (bondhist^2/k)/k == bondhist^2/K^2
+      double E_force_norm_x = Kn_inv*(Kn_inv*bondhistlist[n][ 0]*bondhistlist[n][ 0] + Me*vn1*vn1);
+      double E_force_norm_y = Kn_inv*(Kn_inv*bondhistlist[n][ 1]*bondhistlist[n][ 1] + Me*vn2*vn2);
+      double E_force_norm_z = Kn_inv*(Kn_inv*bondhistlist[n][ 2]*bondhistlist[n][ 2] + Me*vn3*vn3);
+
+      double E_force_tang_x = Kt_inv*(Kt_inv*bondhistlist[n][ 3]*bondhistlist[n][ 3] + Me*vtr1*vtr1);
+      double E_force_tang_y = Kt_inv*(Kt_inv*bondhistlist[n][ 4]*bondhistlist[n][ 4] + Me*vtr2*vtr2);
+      double E_force_tang_z = Kt_inv*(Kt_inv*bondhistlist[n][ 5]*bondhistlist[n][ 5] + Me*vtr3*vtr3);
+
+      double E_torqu_norm_x = K_tor_inv*(K_tor_inv*bondhistlist[n][ 6]*bondhistlist[n][ 6] + I_n*wn1*wn1);
+      double E_torqu_norm_y = K_tor_inv*(K_tor_inv*bondhistlist[n][ 7]*bondhistlist[n][ 7] + I_n*wn2*wn2);
+      double E_torqu_norm_z = K_tor_inv*(K_tor_inv*bondhistlist[n][ 8]*bondhistlist[n][ 8] + I_n*wn3*wn3);
+
+      double E_torqu_tang_x = K_ben_inv*(K_ben_inv*bondhistlist[n][ 9]*bondhistlist[n][ 9] + I_t*wt1*wt1);
+      double E_torqu_tang_y = K_ben_inv*(K_ben_inv*bondhistlist[n][10]*bondhistlist[n][10] + I_t*wt2*wt2);
+      double E_torqu_tang_z = K_ben_inv*(K_ben_inv*bondhistlist[n][11]*bondhistlist[n][11] + I_t*wt3*wt3);
+
+      force_damp_n[0] = -Kn*(beta0[type] + beta1[type]*Me*sqrt(E_force_norm_x) + damp[type]*Me*E_force_norm_x)/Me;
+      force_damp_n[1] = -Kn*(beta0[type] + beta1[type]*Me*sqrt(E_force_norm_y) + damp[type]*Me*E_force_norm_y)/Me;
+      force_damp_n[2] = -Kn*(beta0[type] + beta1[type]*Me*sqrt(E_force_norm_z) + damp[type]*Me*E_force_norm_z)/Me;
+
+      force_damp_t[0] = -Kt*(beta0[type] + beta1[type]*Me*sqrt(E_force_tang_x) + damp[type]*Me*E_force_tang_x)/Me;
+      force_damp_t[1] = -Kt*(beta0[type] + beta1[type]*Me*sqrt(E_force_tang_y) + damp[type]*Me*E_force_tang_y)/Me;
+      force_damp_t[2] = -Kt*(beta0[type] + beta1[type]*Me*sqrt(E_force_tang_z) + damp[type]*Me*E_force_tang_z)/Me;
+
+      torque_damp_n[0] = -K_tor*(beta0[type] + beta1[type]*Js*sqrt(E_torqu_norm_x) + damp[type]*Js*E_torqu_norm_x)/Js;
+      torque_damp_n[1] = -K_tor*(beta0[type] + beta1[type]*Js*sqrt(E_torqu_norm_y) + damp[type]*Js*E_torqu_norm_y)/Js;
+      torque_damp_n[2] = -K_tor*(beta0[type] + beta1[type]*Js*sqrt(E_torqu_norm_z) + damp[type]*Js*E_torqu_norm_z)/Js;
+
+      torque_damp_t[0] = -K_ben*(beta0[type] + beta1[type]*Js*sqrt(E_torqu_tang_x) + damp[type]*Js*E_torqu_tang_x)/Js;
+      torque_damp_t[1] = -K_ben*(beta0[type] + beta1[type]*Js*sqrt(E_torqu_tang_y) + damp[type]*Js*E_torqu_tang_y)/Js;
+      torque_damp_t[2] = -K_ben*(beta0[type] + beta1[type]*Js*sqrt(E_torqu_tang_z) + damp[type]*Js*E_torqu_tang_z)/Js;
+
+    } else if (dampmode == DAMPSTYLE_NON_LINEAR_REDUCED) {
+
+      // Get energy in bond F(gamma) = c*(2.0*E/k)^gamma
+      double I_n = 0.5*Me*(rout*rout+rin*rin);
+      double I_t = Me*(3.0*(rout*rout+rin*rin)+bondLength*bondLength)/12.0;
+      double Kn_inv = 1.0/Kn;
+      double Kt_inv = 1.0/Kt;
+      double K_tor_inv = 1.0/K_tor;
+      double K_ben_inv = 1.0/K_ben;
+
+      // Get 2E/k for each dirrection
+      // E = 0.5*Kx^2 + 0.5*mv^2
+      // E = 0.5(K^2x^2/K + mv^2)
+      // E = 0.5(bondhist^2/K + mv^2)
+      // 2E/k == (bondhist^2/k)/k == bondhist^2/K^2
+      double E_force_norm_x = Kn_inv*(Kn_inv*bondhistlist[n][ 0]*bondhistlist[n][ 0] + Me*vn1*vn1);
+      double E_force_norm_y = Kn_inv*(Kn_inv*bondhistlist[n][ 1]*bondhistlist[n][ 1] + Me*vn2*vn2);
+      double E_force_norm_z = Kn_inv*(Kn_inv*bondhistlist[n][ 2]*bondhistlist[n][ 2] + Me*vn3*vn3);
+
+      double E_force_tang_x = Kt_inv*(Kt_inv*bondhistlist[n][ 3]*bondhistlist[n][ 3] + Me*vtr1*vtr1);
+      double E_force_tang_y = Kt_inv*(Kt_inv*bondhistlist[n][ 4]*bondhistlist[n][ 4] + Me*vtr2*vtr2);
+      double E_force_tang_z = Kt_inv*(Kt_inv*bondhistlist[n][ 5]*bondhistlist[n][ 5] + Me*vtr3*vtr3);
+
+      double E_torqu_norm_x = K_tor_inv*(K_tor_inv*bondhistlist[n][ 6]*bondhistlist[n][ 6] + I_n*wn1*wn1);
+      double E_torqu_norm_y = K_tor_inv*(K_tor_inv*bondhistlist[n][ 7]*bondhistlist[n][ 7] + I_n*wn2*wn2);
+      double E_torqu_norm_z = K_tor_inv*(K_tor_inv*bondhistlist[n][ 8]*bondhistlist[n][ 8] + I_n*wn3*wn3);
+
+      double E_torqu_tang_x = K_ben_inv*(K_ben_inv*bondhistlist[n][ 9]*bondhistlist[n][ 9] + I_t*wt1*wt1);
+      double E_torqu_tang_y = K_ben_inv*(K_ben_inv*bondhistlist[n][10]*bondhistlist[n][10] + I_t*wt2*wt2);
+      double E_torqu_tang_z = K_ben_inv*(K_ben_inv*bondhistlist[n][11]*bondhistlist[n][11] + I_t*wt3*wt3);
+
+      force_damp_n[0] = -Kn*damp[type]*sqrt(E_force_norm_x);
+      force_damp_n[1] = -Kn*damp[type]*sqrt(E_force_norm_y);
+      force_damp_n[2] = -Kn*damp[type]*sqrt(E_force_norm_z);
+
+      force_damp_t[0] = -Kt*damp[type]*sqrt(E_force_tang_x);
+      force_damp_t[1] = -Kt*damp[type]*sqrt(E_force_tang_y);
+      force_damp_t[2] = -Kt*damp[type]*sqrt(E_force_tang_z);
+
+      torque_damp_n[0] = -K_tor*damp[type]*sqrt(E_torqu_norm_x);
+      torque_damp_n[1] = -K_tor*damp[type]*sqrt(E_torqu_norm_y);
+      torque_damp_n[2] = -K_tor*damp[type]*sqrt(E_torqu_norm_z);
+
+      torque_damp_t[0] = -K_ben*damp[type]*sqrt(E_torqu_tang_x);
+      torque_damp_t[1] = -K_ben*damp[type]*sqrt(E_torqu_tang_y);
+      torque_damp_t[2] = -K_ben*damp[type]*sqrt(E_torqu_tang_z);
+
+    } else if (dampmode == DAMPSTYLE_NON_LINEAR_REDUCED_SIMPLIFIED) {
+
+      // Get energy in bond F(gamma) = c*(2.0*E/k)^gamma
+      // Get 2E/k for each dirrection
+      // E = 0.5*Kx^2 + 0.5*mv^2
+      // E = 0.5(K^2x^2/K + mv^2)
+      // E = 0.5(bondhist^2/K + mv^2)
+      // 2E/k == (bondhist^2/k)/k == bondhist^2/K^2
+      double E_force_norm_x = fabs(bondhistlist[n][ 0]);
+      double E_force_norm_y = fabs(bondhistlist[n][ 1]);
+      double E_force_norm_z = fabs(bondhistlist[n][ 2]);
+
+      double E_force_tang_x = fabs(bondhistlist[n][ 3]);
+      double E_force_tang_y = fabs(bondhistlist[n][ 4]);
+      double E_force_tang_z = fabs(bondhistlist[n][ 5]);
+
+      double E_torqu_norm_x = fabs(bondhistlist[n][ 6]);
+      double E_torqu_norm_y = fabs(bondhistlist[n][ 7]);
+      double E_torqu_norm_z = fabs(bondhistlist[n][ 8]);
+
+      double E_torqu_tang_x = fabs(bondhistlist[n][ 9]);
+      double E_torqu_tang_y = fabs(bondhistlist[n][10]);
+      double E_torqu_tang_z = fabs(bondhistlist[n][11]);
+
+      force_damp_n[0] = -damp[type]*E_force_norm_x;
+      force_damp_n[1] = -damp[type]*E_force_norm_y;
+      force_damp_n[2] = -damp[type]*E_force_norm_z;
+
+      force_damp_t[0] = -damp[type]*E_force_tang_x;
+      force_damp_t[1] = -damp[type]*E_force_tang_y;
+      force_damp_t[2] = -damp[type]*E_force_tang_z;
+
+      torque_damp_n[0] = -damp[type]*E_torqu_norm_x;
+      torque_damp_n[1] = -damp[type]*E_torqu_norm_y;
+      torque_damp_n[2] = -damp[type]*E_torqu_norm_z;
+
+      torque_damp_t[0] = -damp[type]*E_torqu_tang_x;
+      torque_damp_t[1] = -damp[type]*E_torqu_tang_y;
+      torque_damp_t[2] = -damp[type]*E_torqu_tang_z;
+
     } else {
 
         error->all(FLERR,"Damp style does not exist\n");
 
     }
+
+    double tot_force_damp_x = force_damp_n[0]+force_damp_t[0];
+    double tot_force_damp_y = force_damp_n[1]+force_damp_t[1];
+    double tot_force_damp_z = force_damp_n[2]+force_damp_t[2];
+
+    double tot_torqu_damp_x = torque_damp_n[0]+torque_damp_t[0];
+    double tot_torqu_damp_y = torque_damp_n[1]+torque_damp_t[1];
+    double tot_torqu_damp_z = torque_damp_n[2]+torque_damp_t[2];
 
     tor1 = - rinv * (dely*ft_bond_total[2] - delz*ft_bond_total[1]);
     tor2 = - rinv * (delz*ft_bond_total[0] - delx*ft_bond_total[2]);
@@ -505,28 +658,45 @@ void BondGran::compute(int eflag, int vflag)
     }
 
     // apply force to each of 2 atoms
+    // apply force to each of 2 atoms
     if (newton_bond || i1 < nlocal) {
-    
-      f[i1][0] += (fn_bond[0] + bondhistlist[n][3]) + (force_damp_n[0] + force_damp_t[0]);
-      f[i1][1] += (fn_bond[1] + bondhistlist[n][4]) + (force_damp_n[1] + force_damp_t[1]);
-      f[i1][2] += (fn_bond[2] + bondhistlist[n][5]) + (force_damp_n[2] + force_damp_t[2]);
-      
-      torque[i1][0] += radius[i1]*tor1 + (bondhistlist[n][6] + bondhistlist[n][ 9])+(torque_damp_n[0]+torque_damp_t[0]);
-      torque[i1][1] += radius[i1]*tor2 + (bondhistlist[n][7] + bondhistlist[n][10])+(torque_damp_n[1]+torque_damp_t[1]);
-      torque[i1][2] += radius[i1]*tor3 + (bondhistlist[n][8] + bondhistlist[n][11])+(torque_damp_n[2]+torque_damp_t[2]);
-      
+      if (!isSymmetricUpdate) {
+        f[i1][0] += (tot_force_x) + (tot_force_damp_x*SIGNUM_DOUBLE(v[i1][0]));
+        f[i1][1] += (tot_force_y) + (tot_force_damp_y*SIGNUM_DOUBLE(v[i1][1]));
+        f[i1][2] += (tot_force_z) + (tot_force_damp_z*SIGNUM_DOUBLE(v[i1][2]));
+
+        torque[i1][0] += radius[i1]*tor1 + (tot_torqu_x)+(tot_torqu_damp_x*SIGNUM_DOUBLE(omega[i1][0]));
+        torque[i1][1] += radius[i1]*tor2 + (tot_torqu_y)+(tot_torqu_damp_y*SIGNUM_DOUBLE(omega[i1][1]));
+        torque[i1][2] += radius[i1]*tor3 + (tot_torqu_z)+(tot_torqu_damp_z*SIGNUM_DOUBLE(omega[i1][2]));
+      } else {
+        f[i1][0] += (tot_force_x) + (tot_force_damp_x);
+        f[i1][1] += (tot_force_y) + (tot_force_damp_y);
+        f[i1][2] += (tot_force_z) + (tot_force_damp_z);
+
+        torque[i1][0] += radius[i1]*tor1 + (tot_torqu_x)+(tot_torqu_damp_x);
+        torque[i1][1] += radius[i1]*tor2 + (tot_torqu_y)+(tot_torqu_damp_y);
+        torque[i1][2] += radius[i1]*tor3 + (tot_torqu_z)+(tot_torqu_damp_z);
+      }
     }
 
     if (newton_bond || i2 < nlocal) {
-    
-      f[i2][0] -= (fn_bond[0] + bondhistlist[n][3]) + (force_damp_n[0] + force_damp_t[0]);
-      f[i2][1] -= (fn_bond[1] + bondhistlist[n][4]) + (force_damp_n[1] + force_damp_t[1]);
-      f[i2][2] -= (fn_bond[2] + bondhistlist[n][5]) + (force_damp_n[2] + force_damp_t[2]);
-      
-      torque[i2][0] += radius[i2]*tor1 - (bondhistlist[n][6]+bondhistlist[n][ 9]) - (torque_damp_n[0]+torque_damp_t[0]);
-      torque[i2][1] += radius[i2]*tor2 - (bondhistlist[n][7]+bondhistlist[n][10]) - (torque_damp_n[1]+torque_damp_t[1]);
-      torque[i2][2] += radius[i2]*tor3 - (bondhistlist[n][8]+bondhistlist[n][11]) - (torque_damp_n[2]+torque_damp_t[2]);
-    
+      if (!isSymmetricUpdate) {
+        f[i2][0] += -(tot_force_x) + (tot_force_damp_x*SIGNUM_DOUBLE(v[i2][0]));
+        f[i2][1] += -(tot_force_y) + (tot_force_damp_y*SIGNUM_DOUBLE(v[i2][1]));
+        f[i2][2] += -(tot_force_z) + (tot_force_damp_z*SIGNUM_DOUBLE(v[i2][2]));
+
+        torque[i2][0] += radius[i2]*tor1 - (tot_torqu_x) + (tot_torqu_damp_x*SIGNUM_DOUBLE(omega[i2][0]));
+        torque[i2][1] += radius[i2]*tor2 - (tot_torqu_y) + (tot_torqu_damp_y*SIGNUM_DOUBLE(omega[i2][1]));
+        torque[i2][2] += radius[i2]*tor3 - (tot_torqu_z) + (tot_torqu_damp_z*SIGNUM_DOUBLE(omega[i2][2]));
+      } else {
+        f[i2][0] -= (tot_force_x) + (tot_force_damp_x);
+        f[i2][1] -= (tot_force_y) + (tot_force_damp_y);
+        f[i2][2] -= (tot_force_z) + (tot_force_damp_z);
+
+        torque[i2][0] += radius[i2]*tor1 - (tot_torqu_x) - (tot_torqu_damp_x);
+        torque[i2][1] += radius[i2]*tor2 - (tot_torqu_y) - (tot_torqu_damp_y);
+        torque[i2][2] += radius[i2]*tor3 - (tot_torqu_z) - (tot_torqu_damp_z);
+      }
     }
   }
 }
@@ -544,6 +714,8 @@ void BondGran::allocate()
   memory->create(Sn,n+1,"bond:Sn");
   memory->create(St,n+1,"bond:St");
   memory->create(damp,n+1,"bond:damp");
+  memory->create(beta0,n+1,"bond:beta0");
+  memory->create(beta1,n+1,"bond:beta1");
   
   // Create bond break variables
   memory->create(r_break,n+1,"bond:r_break");
@@ -562,41 +734,62 @@ void BondGran::allocate()
 
 void BondGran::coeff(int narg, char **arg)
 {
-
   if(narg < 8) error->all(FLERR,"Incorrect args for bond coefficients (ro, ri, sn, st, damp_style, damp_perams, break_style, break_perams)"); // Matt Schramm
 
-  double ro_one = force->numeric(FLERR,arg[1]);
-  double ri_one = force->numeric(FLERR,arg[2]);
-  double Sn_one = force->numeric(FLERR,arg[3]);
-  double St_one = force->numeric(FLERR,arg[4]);
+  int arg_id = 1;
+  int extra_args = 0;
+  double ro_one = force->numeric(FLERR,arg[arg_id++]);
+  double ri_one = force->numeric(FLERR,arg[arg_id++]);
+  double Sn_one = force->numeric(FLERR,arg[arg_id++]);
+  double St_one = force->numeric(FLERR,arg[arg_id++]);
   double damp_one = 0.0;
+  double beta0_one = 0.0;
+  double beta1_one = 0.0;
+
+  isSymmetricUpdate = true;
 
   if (ro_one <= ri_one)
     error->all(FLERR,"ro must be greater than ri");
 
-  if(force->numeric(FLERR,arg[5]) == 0.0) {
+  // Get damping style options
+  if(force->numeric(FLERR,arg[arg_id]) == 0.0) {
     dampmode = DAMPSTYLE_NONE;
     damp_one = 0.0;
-  } else if (force->numeric(FLERR,arg[5]) == 1.0) {
+    ++arg_id;
+  } else if (force->numeric(FLERR,arg[arg_id]) == 1.0) {
     dampmode = DAMPSTYLE_YU_GUO;
-    damp_one = force->numeric(FLERR,arg[6]);
+    damp_one = force->numeric(FLERR,arg[++arg_id]);
+  } else if (force->numeric(FLERR, arg[arg_id]) == 2.0) { 
+    dampmode = DAMPSTYLE_NON_LINEAR;
+    isSymmetricUpdate = false;
+    beta0_one = force->numeric(FLERR, arg[++arg_id]);
+    beta1_one = force->numeric(FLERR, arg[++arg_id]);
+    damp_one = force->numeric(FLERR, arg[++arg_id]);
+    extra_args = 2;
+  } else if (force->numeric(FLERR, arg[arg_id]) == 3.0) { 
+    dampmode = DAMPSTYLE_NON_LINEAR_REDUCED;
+    isSymmetricUpdate = false;
+    damp_one = force->numeric(FLERR, arg[++arg_id]);
+  } else if (force->numeric(FLERR, arg[arg_id]) == 4.0) {
+    dampmode = DAMPSTYLE_NON_LINEAR_REDUCED_SIMPLIFIED;
+    isSymmetricUpdate = false;
+    damp_one = force->numeric(FLERR, arg[++arg_id]);
   } else {
     error->all(FLERR,"Damping style does not exist");
   }
 
-  if(force->numeric(FLERR,arg[7]) == 0.0) {
+  // Get break style options
+  if(force->numeric(FLERR,arg[++arg_id]) == 0.0) { // arg_id == 7 for extra == 0
     breakmode = BREAKSTYLE_SIMPLE;
-    if (narg != 9)
+    if (narg != 9+extra_args)
       error->all(FLERR,"Incorrect args for bond coefficients");
-  }
-  else if(force->numeric(FLERR,arg[7]) == 1.0) {
+  } else if(force->numeric(FLERR,arg[arg_id]) == 1.0) {
     breakmode = BREAKSTYLE_STRESS;
-    if (narg != 10)
+    if (narg != 10+extra_args)
       error->all(FLERR,"Incorrect args for bond coefficients");
-  }
-  else if(force->numeric(FLERR,arg[7]) == 2. ) {
+  } else if(force->numeric(FLERR,arg[arg_id]) == 2.0) {
     breakmode = BREAKSTYLE_STRESS_TEMP;
-    if (narg != 11)
+    if (narg != 11+extra_args)
       error->all(FLERR,"Incorrect args for bond coefficients");
   }
   else
@@ -611,13 +804,13 @@ void BondGran::coeff(int narg, char **arg)
   double T_break_one = 0.0;
 
   if(breakmode == BREAKSTYLE_SIMPLE)
-    r_break_one = force->numeric(FLERR,arg[8]);
+    r_break_one = force->numeric(FLERR,arg[++arg_id]);
   else {
-    sigma_break_one = force->numeric(FLERR,arg[8]);
-    tau_break_one = force->numeric(FLERR,arg[9]);
+    sigma_break_one = force->numeric(FLERR,arg[++arg_id]);
+    tau_break_one = force->numeric(FLERR,arg[++arg_id]);
 
     if(breakmode == BREAKSTYLE_STRESS_TEMP)
-      T_break_one = force->numeric(FLERR,arg[10]);
+      T_break_one = force->numeric(FLERR,arg[++arg_id]);
   }
 
   if(comm->me == 0) {
@@ -627,7 +820,11 @@ void BondGran::coeff(int narg, char **arg)
     fprintf(screen,"   Sn == %g\n",Sn_one);
     fprintf(screen,"   St == %g\n",St_one);
     fprintf(screen,"   damp_type == %i\n",dampmode);
-    fprintf(screen,"   damp_val == %g\n",damp_one);
+    if (extra_args > 0) {
+      fprintf(screen,"   beta0 = %g\n   beta1 = %g\n   beta2 = %g\n",beta0_one, beta1_one, damp_one);
+    } else {
+      fprintf(screen,"   damp_val == %g\n",damp_one);
+    }
     fprintf(screen,"   breakmode == %i\n",breakmode);
     if(breakmode == BREAKSTYLE_SIMPLE)
       fprintf(screen,"   r_break == %g\n\n",r_break_one);
@@ -649,6 +846,8 @@ void BondGran::coeff(int narg, char **arg)
     Sn[i] = Sn_one;
     St[i] = St_one;
     damp[i] = damp_one;
+    beta0[i] = beta0_one;
+    beta1[i] = beta1_one;
 
     if(breakmode == BREAKSTYLE_SIMPLE)
       r_break[i] = r_break_one;
@@ -689,6 +888,8 @@ void BondGran::write_restart(FILE *fp)
   fwrite(&Sn[1],sizeof(double),atom->nbondtypes,fp);
   fwrite(&St[1],sizeof(double),atom->nbondtypes,fp);
   fwrite(&damp[1],sizeof(double),atom->nbondtypes,fp);
+  fwrite(&beta0[1],sizeof(double),atom->nbondtypes,fp);
+  fwrite(&beta1[1],sizeof(double),atom->nbondtypes,fp);
 }
 
 /* ----------------------------------------------------------------------
@@ -705,12 +906,17 @@ void BondGran::read_restart(FILE *fp)
     fread(&Sn[1],sizeof(double),atom->nbondtypes,fp);
     fread(&St[1],sizeof(double),atom->nbondtypes,fp);
     fread(&damp[1],sizeof(double),atom->nbondtypes,fp); //MS
+    fread(&beta0[1],sizeof(double),atom->nbondtypes,fp); //MS
+    fread(&beta1[1],sizeof(double),atom->nbondtypes,fp); //MS
   }
   MPI_Bcast(&ro[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&ri[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&Sn[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&St[1],atom->nbondtypes,MPI_DOUBLE,0,world);
   MPI_Bcast(&damp[1],atom->nbondtypes,MPI_DOUBLE,0,world); //MS
+  MPI_Bcast(&beta0[1],atom->nbondtypes,MPI_DOUBLE,0,world); //MS
+  MPI_Bcast(&beta1[1],atom->nbondtypes,MPI_DOUBLE,0,world); //MS
+
 
   for (int i = 1; i <= atom->nbondtypes; i++) setflag[i] = 1;
 }
