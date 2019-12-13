@@ -430,7 +430,7 @@ void BondGran::compute(int eflag, int vflag)
     ft_bond_total[2] = bondhistlist[n][5];
 
     // Apply Damping
-    if (dampmode == DAMPSTYLE_NONE || damp[type] == 0.0) {
+    if (dampmode == DAMPSTYLE_NONE) {
 
         force_damp_n[0] = force_damp_n[1] = force_damp_n[2] = 0.0;
         force_damp_t[0] = force_damp_t[1] = force_damp_t[2] = 0.0;
