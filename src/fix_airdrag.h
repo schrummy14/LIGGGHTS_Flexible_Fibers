@@ -69,7 +69,8 @@ class FixAirDrag : public Fix {
   void min_post_force(int);
 
  protected:
-  double *air_viscosity, *air_density;
+  double air_viscosity, air_density; // Fluid Properties
+  double wx, wy, wz; // Fluid Flow Properties
   int nlevels_respa;
 };
 

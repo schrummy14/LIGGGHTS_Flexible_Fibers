@@ -61,26 +61,21 @@ using namespace FixConst;
 FixAirDrag::FixAirDrag(LAMMPS *lmp, int narg, char **arg) :
   Fix(lmp, narg, arg)
 {
-  if (narg != 5) error->all(FLERR,"Illegal fix air drag command");
+  if (narg != 8) error->all(FLERR,"Illegal fix air drag command\nair_viscosity, air_density, wx, wy, wz");
 
-  double air_viscosity_one = force->numeric(FLERR,arg[3]);
-  double air_density_one   = force->numeric(FLERR,arg[4]);
+  air_viscosity = force->numeric(FLERR,arg[3]);
+  air_density   = force->numeric(FLERR,arg[4]);
+  wx =  force->numeric(FLERR,arg[5]);
+  wy =  force->numeric(FLERR,arg[6]);
+  wz =  force->numeric(FLERR,arg[7]);
   
-  air_viscosity = new double[atom->ntypes+1];
-  air_density   = new double[atom->ntypes+1];
-  
-  for (int i = 1; i <= atom->ntypes; i++){
-      air_viscosity[i] = air_viscosity_one;
-      air_density[i] = air_density_one;
-  }
 }
 
 /* ---------------------------------------------------------------------- */
 
 FixAirDrag::~FixAirDrag()
 {
-  delete [] air_viscosity;
-  delete [] air_density;
+  
 }
 
 /* ---------------------------------------------------------------------- */
@@ -140,39 +135,40 @@ void FixAirDrag::post_force(int vflag)
   double **T = atom->torque;
   double *radius = atom->radius;
   int *mask = atom->mask;
-  int *type = atom->type;
   int nlocal = atom->nlocal;
   
   const double drag_PI = 3.14159265358979323846264338328;
 
   double b,c,d; // Coefficients for Drag
-  double D; // The Sphere's diameter
   double temp;
   
+  double vrx, vry, vrz;
   double vel_norm; // norm of the velocity
 
   for (int i = 0; i < nlocal; i++)
     if (mask[i] & groupbit) {
     
-      D = 2.0 * radius[i];
-    
       // FORCES ----------------------------------------------------------
       // Calculate b and c coefficients for forces
       // Equations from "Classical Mechanics" by John R. Taylor
       // Linear term b = 3*pi*nu*D
-      b = 3.0 * drag_PI *air_viscosity[type[i]] * D;
+      b = 6.0 * drag_PI * air_viscosity * radius[i];
       // Quadratic term c = k*p*A
-      c = 0.25 * air_density[type[i]] * drag_PI*radius[i]*radius[i];
-      vel_norm = sqrt(v[i][0]*v[i][0] + v[i][1]*v[i][1] + v[i][2]*v[i][2]);
+      c = 0.25 * air_density * drag_PI*radius[i]*radius[i];
+
+      vrx = wx - v[i][0];
+      vry = wy - v[i][1];
+      vrz = wz - v[i][2];
+      vel_norm = sqrt(vrx*vrx + vry*vry + vrz*vrz);
       
       temp = b + c*vel_norm;
-      f[i][0] -= v[i][0]*temp;
-      f[i][1] -= v[i][1]*temp;
-      f[i][2] -= v[i][2]*temp;
+      f[i][0] += vrx*temp;
+      f[i][1] += vry*temp;
+      f[i][2] += vrz*temp;
       
       // TORQUES ---------------------------------------------------------
       // Equations from "Viscous torque on a sphere under arbitrary rotation" by U. Lei et all
-      d = 8.0*drag_PI*air_viscosity[type[i]]*radius[i]*radius[i]*radius[i];
+      d = 8.0*drag_PI*air_viscosity*radius[i]*radius[i]*radius[i];
       T[i][0] -= d*omega[i][0];
       T[i][1] -= d*omega[i][1];
       T[i][2] -= d*omega[i][2];
