@@ -186,18 +186,25 @@ bond_coeff 1 1.0 0.0 1.5e9 1.0e9 2 0.1 1.0 0.5 1 1.5e6 1.0e6
 </div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>The <em>gran</em> bond style uses the following force equations</p>
-<img alt="_images/bond_gran.jpg" class="align-center" src="_images/bond_gran.jpg" />
-<p>THIS NEEDS UPDATED.</p>
+<p>The <em>gran</em> bond style uses the following force and moment equations</p>
+<img alt="_images/bond_gran_1.jpg" class="align-center" src="_images/bond_gran_1.jpg" />
+<p>The granular bond is adopted from blah blah blah. The model currently utilizes two differnt
+  damping styles one given by Yu Guo (Guo et al 2013)</p>
+  <img alt="_images/bond_gran_2.jpg" class="align-center" src="_images/bond_gran_2.jpg" />
+<p>
+  and a modified damping type with three versions. The first version is a full method with the
+  following two versions being simplifications of the full method.
+</p>
+<img alt="_images/bond_gran_2.jpg" class="align-center" src="_images/bond_gran_2.jpg" />
 <p>The following coefficients must be defined for each bond type via the
 <a class="reference internal" href="bond_coeff.html"><em>bond_coeff</em></a> command as in the example above, or in
 the data file or restart files read by the <a class="reference internal" href="read_data.html"><em>read_data</em></a>
 or <a class="reference internal" href="read_restart.html"><em>read_restart</em></a> commands:</p>
 <ul class="simple">
-<li>r0 (distance)</li>
-<li>ri (distance)</li>
-<li>Kn (energy/distance^2)</li>
-<li>Kt (energy/distance^2)</li>
+<li>r_bo (distance)</li>
+<li>r_bi (distance)</li>
+<li>Yb (Pa)</li>
+<li>Gt (Pa)</li>
 <li>Damp_Style</li>
 <li>Damp_Coefficients (1 to 3 values)</li>
 <li>Break_Style</li>
