@@ -12,13 +12,14 @@ bond_style command :h3
 
 bond_style style args :pre
 
-style = {none} or {hybrid} or {class2} or {fene} or {fene/expand} or \
+style = {none} or {gran} or {hybrid} or {class2} or {fene} or {fene/expand} or \
         {harmonic} or {morse} or {nonlinear} or {quartic} :ul
   args = none for any style except {hybrid}
   {hybrid} args = list of one or more styles :pre
 
 [Examples:]
 
+bond_style gran
 bond_style harmonic
 bond_style fene
 bond_style hybrid harmonic fene :pre
@@ -71,6 +72,7 @@ links to the individual styles are given in the bond section of "this
 page"_Section_commands.html#cmd_5.
 
 "bond_style none"_bond_none.html - turn off bonded interactions
+"bond_style gran" bond_gran.html - granular bond
 "bond_style hybrid"_bond_hybrid.html - define multiple styles of bond interactions :ul
 
 "bond_style harmonic"_bond_harmonic.html - harmonic bond  :ul

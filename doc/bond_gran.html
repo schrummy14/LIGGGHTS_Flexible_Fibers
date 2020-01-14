@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bond_coeff command &mdash; LIGGGHTS v3.X documentation</title>
+  <title>bond_style gran command &mdash; LIGGGHTS v3.X documentation</title>
   
 
   
@@ -141,13 +141,13 @@
     
       <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-      <li>bond_coeff command</li>
+      <li>bond_style gran command</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bond_coeff.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bond_gran.txt" rel="nofollow"> View page source</a>
           
           <a href="http://www.cfdem.com"> Website</a>
           
@@ -166,83 +166,52 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="bond-coeff-command">
-<span id="index-0"></span><h1>bond_coeff command<a class="headerlink" href="#bond-coeff-command" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="bond-style-gran-command">
+<span id="index-0"></span><h1>bond_style gran command<a class="headerlink" href="#bond-style-gran-command" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre>bond_coeff N args
+<div class="highlight-python"><div class="highlight"><pre>bond_style gran
 </pre></div>
 </div>
-<ul class="simple">
-<li>N = bond type (see asterisk form below)</li>
-<li>args = coefficients for one or more bond types</li>
-</ul>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre>bond_coeff 5 80.0 1.2
-bond_coeff * 30.0 1.5 1.0 1.0
-bond_coeff 1*4 30.0 1.5 1.0 1.0
-bond_coeff 1 harmonic 200.0 1.0
+<div class="highlight-python"><div class="highlight"><pre>bond_style gran
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 0 0.01
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 1 1.5e6 1.0e6
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 2 1.5e6 1.0e6 330.0
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 2 0.1 1.0 0.5 1 1.5e6 1.0e6
 </pre></div>
 </div>
 </div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Specify the bond force field coefficients for one or more bond types.
-The number and meaning of the coefficients depends on the bond style.
-Bond coefficients can also be set in the data file read by the
-<a class="reference internal" href="read_data.html"><em>read_data</em></a> command or in a restart file.</p>
-<p>N can be specified in one of two ways.  An explicit numeric value can
-be used, as in the 1st example above.  Or a wild-card asterisk can be
-used to set the coefficients for multiple bond types.  This takes the
-form &#8220;*&#8221; or &#8220;<em>n&#8221; or &#8220;n</em>&#8221; or &#8220;m*n&#8221;.  If N = the number of bond types,
-then an asterisk with no numeric values means all types from 1 to N.  A
-leading asterisk means all types from 1 to n (inclusive).  A trailing
-asterisk means all types from n to N (inclusive).  A middle asterisk
-means all types from m to n (inclusive).</p>
-<p>Note that using a bond_coeff command can override a previous setting
-for the same bond type.  For example, these commands set the coeffs
-for all bond types, then overwrite the coeffs for just bond type 2:</p>
-<div class="highlight-python"><div class="highlight"><pre>bond_coeff * 100.0 1.2
-bond_coeff 2 200.0 1.2
-</pre></div>
-</div>
-<p>A line in a data file that specifies bond coefficients uses the exact
-same format as the arguments of the bond_coeff command in an input
-script, except that wild-card asterisks should not be used since
-coefficients for all N types must be listed in the file.  For example,
-under the &#8220;Bond Coeffs&#8221; section of a data file, the line that
-corresponds to the 1st example above would be listed as</p>
-<div class="highlight-python"><div class="highlight"><pre>5 80.0 1.2
-</pre></div>
-</div>
-<hr class="docutils" />
-<p>Here is an alphabetic list of bond styles defined in LIGGGHTS(R)-PUBLIC.  Click on
-the style to display the formula it computes and coefficients
-specified by the associated <a class="reference internal" href=""><em>bond_coeff</em></a> command.</p>
-<p>Note that here are also additional bond styles submitted by users
-which are included in the LIGGGHTS(R)-PUBLIC distribution.  The list of these with
-links to the individual styles are given in the bond section of <span class="xref std std-ref">this page</span>.</p>
+<p>The <em>gran</em> bond style uses the following force equations</p>
+<img alt="_images/bond_gran.jpg" class="align-center" src="_images/bond_gran.jpg" />
+<p>THIS NEEDS UPDATED.</p>
+<p>The following coefficients must be defined for each bond type via the
+<a class="reference internal" href="bond_coeff.html"><em>bond_coeff</em></a> command as in the example above, or in
+the data file or restart files read by the <a class="reference internal" href="read_data.html"><em>read_data</em></a>
+or <a class="reference internal" href="read_restart.html"><em>read_restart</em></a> commands:</p>
 <ul class="simple">
-<li><a class="reference internal" href="bond_none.html"><em>bond_style none</em></a> - turn off bonded interactions</li>
-<li><a class="reference internal" href="bond_hybrid.html"><em>bond_style hybrid</em></a> - define multiple styles of bond interactions</li>
-<li><a class="reference internal" href="bond_gran.html"><em>bond_style gran</em></a> - granular bond</li>
-<li><a class="reference internal" href="bond_harmonic.html"><em>bond_style harmonic</em></a> - harmonic bond</li>
+<li>r0 (distance)</li>
+<li>ri (distance)</li>
+<li>Kn (energy/distance^2)</li>
+<li>Kt (energy/distance^2)</li>
+<li>Damp_Style</li>
+<li>Damp_Coefficients (1 to 3 values)</li>
+<li>Break_Style</li>
+<li>Break_Coefficients (1 to 3 values)</li>
 </ul>
 </div>
-<hr class="docutils" />
 <div class="section" id="restrictions">
 <h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
-<p>This command must come after the simulation box is defined by a
-<a class="reference internal" href="read_data.html"><em>read_data</em></a>, <a class="reference internal" href="read_restart.html"><em>read_restart</em></a>, or
-<a class="reference internal" href="create_box.html"><em>create_box</em></a> command.</p>
-<p>A bond style must be defined before any bond coefficients are set,
-either in the input script or in a data file.</p>
+<p>This bond style can only be used if LIGGGHTS(R)-PUBLIC was built with the
+MOLECULAR package (which it is by default).  See the <a class="reference internal" href="Section_start.html#start-3"><span>Making LIGGGHTS(R)-PUBLIC</span></a> section for more info on packages.</p>
 </div>
 <div class="section" id="related-commands">
 <h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="bond_style.html"><em>bond_style</em></a></p>
+<p><a class="reference internal" href="bond_coeff.html"><em>bond_coeff</em></a>, <a class="reference internal" href="delete_bonds.html"><em>delete_bonds</em></a></p>
 <p><strong>Default:</strong> none</p>
 </div>
 </div>

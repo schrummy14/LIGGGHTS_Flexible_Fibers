@@ -67,7 +67,7 @@ page"_Section_commands.html#cmd_5.
 
 "bond_style none"_bond_none.html - turn off bonded interactions
 "bond_style hybrid"_bond_hybrid.html - define multiple styles of bond interactions :ul
-
+"bond_style gran"_bond_gran.html - granular bond :ul
 "bond_style harmonic"_bond_harmonic.html - harmonic bond :ul
 
 :line
