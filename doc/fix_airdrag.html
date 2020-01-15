@@ -189,7 +189,12 @@
 </div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Add a fluid to the simulation.</p>
+<p>
+  Add a fluid to the simulation. No region commands are currently accepted. The fluid interacts
+  with the particles by the following equations outlined by "Classical Mechanics" by John R. Taylor
+  for forces and "Viscous torque on a sphere under arbitrary rotation" by U. Lei et all for tourques.
+</p>
+<img alt="_images/fix_airdrag.jpg" class="align-center" src="_images/fix_airdrag.jpg" />
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">The units for the coefficients are currently static and the user must make
