@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bond_style gran command &mdash; LIGGGHTS v3.X documentation</title>
+  <title>fix airdrag command &mdash; LIGGGHTS v3.X documentation</title>
   
 
   
@@ -141,13 +141,13 @@
     
       <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-      <li>bond_style gran command</li>
+      <li>fix airdrag command</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bond_gran.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/fix_airdrag.txt" rel="nofollow"> View page source</a>
           
           <a href="http://www.cfdem.com"> Website</a>
           
@@ -166,94 +166,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="bond-style-gran-command">
-<span id="index-0"></span><h1>bond_style gran command<a class="headerlink" href="#bond-style-gran-command" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="fix-airdrag-command">
+<span id="index-0"></span><h1>fix airdrag command<a class="headerlink" href="#fix-airdrag-command" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre>bond_style gran
+<div class="highlight-python"><div class="highlight"><pre>fix ID group-ID airdrag fluid_viscocity fluid_density wx wy wz
 </pre></div>
 </div>
+<ul class="simple">
+<li>ID, group-ID are documented in <a class="reference internal" href="fix.html"><em>fix</em></a> command</li>
+<li>airdrag = style name of this fix command</li>
+<li>fluid_viscocity = Viscocity of fluid (Pa s)</li>
+<li>fluid_density = Density of fluid (Kg/m3</li>
+<li>wx, wy, wz = fluid velocty in the x, y, and z directions</li>
+</ul>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre>bond_style gran
-bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 0 0.01
-bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 1 1.5e6 1.0e6
-bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 2 1.5e6 1.0e6 330.0
-bond_coeff 1 1.0 0.0 1.5e9 1.0e9 2 0.1 1.0 0.5 1 1.5e6 1.0e6
+<div class="highlight-python"><div class="highlight"><pre>fix 1 damp airdrag 1.5e-8 1.23 0.0 0.0 0.0
 </pre></div>
 </div>
 </div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>The <em>gran</em> bond style uses the following force and moment equations</p>
-<img alt="_images/bond_gran_1.jpg" class="align-center" src="_images/bond_gran_1.jpg" />
-<p>
-  The granular bond is adopted from blah blah blah. The model currently utilizes two differnt
-  damping styles, one inspired by Yu Guo et al (2013) and slightly modified by Schramm et al (2019)
-   (damp style 1)
+<p>Add a fluid to the simulation.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The units for the coefficients are currently static and the user must make
+  sure that they are following what is laid out in this document.
 </p>
-  <img alt="_images/bond_gran_2.jpg" class="align-center" src="_images/bond_gran_2.jpg" />
-<p>
-  and a modified damping type with three versions. The first version is a full method with the
-  following two versions being simplifications of the full method (damp style 2). 
-  WARNING: This damping style has not been fully tested for dynamic use.
-</p>
-<img alt="_images/bond_gran_3.jpg" class="align-center" src="_images/bond_gran_3.jpg" />
-<p>
-  damp style 3 simplifies the above equation by assuming that &beta;_0 and &beta;_2 are set to 0.0
-</p>
-<img alt="_images/bond_gran_4.jpg" class="align-center" src="_images/bond_gran_4.jpg" />
-<p>
-  while damp style 4 also assumes that the velocity and angular velocity in the bond is near 0.0
-</p>
-<img alt="_images/bond_gran_5.jpg" class="align-center" src="_images/bond_gran_5.jpg" />
-<p>
-  The bond <em>gran</em> model offers three break styles. The simple break style (Break_Style 1)
-  looks at the distance between two spheres and if the distance is greater than 2 r_break,
-  the bond is considered to be broken. The next method (Break_Style 2) checks the maximum stress
-  inside the bond. If the stress is greater than a critical stress, the bond is broken. The user
-  needs to supply the critical normal stress (Pa) and the critical tangential stress (Pa). 
-  The maximum stress is calculated as follows.
-</p>
-<img alt="_images/bond_gran_6.jpg" class="align-center" src="_images/bond_gran_6.jpg" />
-<p>
-  The third break style (Break_Style 3) expands on the stress dependent method by looking at the
-  average temperature between two spheres and comparing the temperature to a crtical temp value.
-  The user must supply the following fixes.
-</p>
-<div class="highlight-python">
-  <div class="highlight">
-    <pre>
-      fix ftco all property/global thermalConductivity peratomtype 5.
-      fix ftca all property/global thermalCapacity peratomtype 10.
-      fix heattransfer all heat/gran initial_temperature 300.
-    </pre>
-  </div>
 </div>
-<p>The following coefficients must be defined for each bond type via the
-<a class="reference internal" href="bond_coeff.html"><em>bond_coeff</em></a> command as in the example above, or in
-the data file or restart files read by the <a class="reference internal" href="read_data.html"><em>read_data</em></a>
-or <a class="reference internal" href="read_restart.html"><em>read_restart</em></a> commands:</p>
-<ul class="simple">
-<li>r_bo (distance)</li>
-<li>r_bi (distance)</li>
-<li>Yb (Pa)</li>
-<li>Gt (Pa)</li>
-<li>Damp_Style</li>
-<li>Damp_Coefficients (1 or 3 values, <em>&beta;</em> or <em>&beta;_0 &beta;_1 &beta;_2</em>)</li>
-<li>Break_Style</li>
-<li>Break_Coefficients (1 or 2 or 3 values, r_break or &sigma;_crit &tau;_crit, or &sigma;_crit &tau;_crit temp_crit)</li>
-</ul>
+</div>
+<hr class="docutils" />
+<div class="section" id="restart-fix-modify-output-run-start-stop-minimize-info">
+<h2>Restart, fix_modify, output, run start/stop, minimize info<a class="headerlink" href="#restart-fix-modify-output-run-start-stop-minimize-info" title="Permalink to this headline">¶</a></h2>
+<p>No information about this fix is written to <a class="reference internal" href="restart.html"><em>binary restart files</em></a>.  None of the <a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a> options
+are relevant to this fix.  No global or per-atom quantities are stored
+by this fix for access by various <a class="reference internal" href="Section_howto.html#howto-8"><span>output commands</span></a>.  No parameter of this fix can
+be used with the <em>start/stop</em> keywords of the <a class="reference internal" href="run.html"><em>run</em></a> command.</p>
+<p>The forces due to this fix are imposed during an energy minimization,
+invoked by the <code class="xref doc docutils literal"><span class="pre">minimize</span></code> command.  This fix should only
+be used with damped dynamics minimizers that allow for
+non-conservative forces.  See the <code class="xref doc docutils literal"><span class="pre">min_style</span></code> command
+for details.</p>
 </div>
 <div class="section" id="restrictions">
 <h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
-<p>This bond style can only be used if LIGGGHTS(R)-PUBLIC was built with the
-MOLECULAR package (which it is by default).  See the <a class="reference internal" href="Section_start.html#start-3"><span>Making LIGGGHTS(R)-PUBLIC</span></a> section for more info on packages.</p>
+<blockquote>
+<div>none</div></blockquote>
 </div>
 <div class="section" id="related-commands">
 <h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="bond_coeff.html"><em>bond_coeff</em></a>, <a class="reference internal" href="delete_bonds.html"><em>delete_bonds</em></a></p>
+<a class="reference internal" href="fix_viscous.html"><em>fix viscous</em></a>
+<p><code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">langevin</span></code></p>
 <p><strong>Default:</strong> none</p>
 </div>
 </div>

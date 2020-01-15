@@ -6,20 +6,23 @@
 
 :line
 
-bond_style harmonic command :h3
+bond_style gran command :h3
 
 [Syntax:]
 
-bond_style harmonic :pre
+bond_style gran :pre
 
 [Examples:]
 
-bond_style harmonic
-bond_coeff 5 80.0 1.2 :pre
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 0 0.01 :pre
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 1 1.5e6 1.0e6 :pre
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 1 1.0 2 1.5e6 1.0e6 330.0 :pre
+bond_coeff 1 1.0 0.0 1.5e9 1.0e9 2 0.1 1.0 0.5 1 1.5e6 1.0e6 :pre
 
 [Description:]
 
-The {harmonic} bond style uses the potential
+The {gran} model currently utilizes two differnt damping styles, one inspired by 
+Yu Guo et al (2013) and slightly modified by Schramm et al (2019)(damp style 1)
 
 :c,image(Eqs/bond_harmonic.jpg)
 
