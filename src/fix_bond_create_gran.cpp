@@ -19,6 +19,7 @@
    See the README file in the top-level directory.
 ------------------------------------------------------------------------- */
 
+#include "lmptype.h"
 #include "math.h"
 #include "mpi.h"
 #include "string.h"
@@ -114,7 +115,7 @@ FixBondCreateGran::FixBondCreateGran(LAMMPS *lmp, int narg, char **arg) :
       seed = arg[iarg+2];
       if (fraction < 0.0 || fraction > 1.0)
         error->all(FLERR,"Illegal fix bond/create command");
-      if (seed <= 0) error->all(FLERR,"Illegal fix bond/create command");
+      if (atoi(seed) <= 0) error->all(FLERR,"Illegal fix bond/create command");
       iarg += 3;
     } else error->all(FLERR,"Illegal fix bond/create command");
   }
@@ -519,7 +520,7 @@ void FixBondCreateGran::post_integrate()
   createcounttotal += createcount;  me;
   atom->nbonds += createcount;
 
-  /*NL*/ if(createcount && comm->me == 0) fprintf(screen,"Created %d bonds at timestep "BIGINT_FORMAT"\n",createcount,update->ntimestep);
+  /*NL*/ if(createcount && comm->me == 0) fprintf(screen,"Created %d bonds at timestep " BIGINT_FORMAT "\n",createcount,update->ntimestep);
 
   // trigger reneighboring if any bonds were formed
 
