@@ -184,20 +184,26 @@ bond_coeff 1 1.0 0.0 1.5e9 1.0e9 2 0.1 1.0 0.5 1 1.5e6 1.0e6
 </pre></div>
 </div>
 </div>
+<div class="admonition warning">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">
+    This is a beta version... Be carefull...
+  </p>
+</div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>The <em>gran</em> bond style uses the following force and moment equations</p>
 <img alt="_images/bond_gran_1.jpg" class="align-center" src="_images/bond_gran_1.jpg" />
 <p>
-  The granular bond is adopted from blah blah blah. The model currently utilizes two differnt
-  damping styles, one inspired by Yu Guo et al (2013) and slightly modified by Schramm et al (2019)
-   (damp style 1)
+  The granular bond is adopted from D.O.Potyondy P.A.Cundall's original paper, "A Bonded-Particle
+  for Rock". The model currently utilizes two differnt damping styles, one inspired by Yu Guo et 
+  al (2013) and slightly modified by Schramm et al (2019) (damp style 1)
 </p>
   <img alt="_images/bond_gran_2.jpg" class="align-center" src="_images/bond_gran_2.jpg" />
 <p>
   and a modified damping type with three versions. The first version is a full method with the
-  following two versions being simplifications of the full method (damp style 2). 
-  WARNING: This damping style has not been fully tested for dynamic use.
+  following two versions being simplifications of the full method (damp style 2). This model
+  has allowed large damping coefficents without the need of utilizing very small time steps.
 </p>
 <img alt="_images/bond_gran_3.jpg" class="align-center" src="_images/bond_gran_3.jpg" />
 <p>
@@ -208,6 +214,13 @@ bond_coeff 1 1.0 0.0 1.5e9 1.0e9 2 0.1 1.0 0.5 1 1.5e6 1.0e6
   while damp style 4 also assumes that the velocity and angular velocity in the bond is near 0.0
 </p>
 <img alt="_images/bond_gran_5.jpg" class="align-center" src="_images/bond_gran_5.jpg" />
+<div class="admonition warning">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">
+    These modified damping styles have not been fully tested for dynamic use
+    and users should be skeptical of all results...
+  </p>
+</div>
 <p>
   The bond <em>gran</em> model offers three break styles. The simple break style (Break_Style 1)
   looks at the distance between two spheres and if the distance is greater than 2 r_break,
