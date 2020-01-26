@@ -72,6 +72,8 @@ class FixAirDrag : public Fix {
   double air_viscosity, air_density; // Fluid Properties
   double wx, wy, wz; // Fluid Flow Properties
   int nlevels_respa;
+  char *idregion;
+  int varflag,iregion;
 };
 
 }

@@ -170,21 +170,29 @@
 <span id="index-0"></span><h1>fix airdrag command<a class="headerlink" href="#fix-airdrag-command" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre>fix ID group-ID airdrag fluid_viscocity fluid_density wx wy wz
+<div class="highlight-python"><div class="highlight"><pre>fix ID group-ID airdrag fluid_viscocity fluid_density wx wy wz region
 </pre></div>
 </div>
 <ul class="simple">
 <li>ID, group-ID are documented in <a class="reference internal" href="fix.html"><em>fix</em></a> command</li>
 <li>airdrag = style name of this fix command</li>
-<li>fluid_viscocity = Viscocity of fluid (Pa s)</li>
-<li>fluid_density = Density of fluid (Kg/m3</li>
-<li>wx, wy, wz = fluid velocty in the x, y, and z directions</li>
+<li>fluid_viscocity = viscocity of fluid (Pa s)</li>
+<li>fluid_density = density of fluid (Kg/m3)</li>
+</ul>
+<ul class="simple">
+(Optional Inputs)
+<li>wx, wy, wz = fluid velocty in the x, y, and z directions (m/s) (default: wx = wy = wz = 0.0)</li>
+<li>region = region name for the fix to interact with (default: simulation domain)</li>
 </ul>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre>fix 1 damp airdrag 1.5e-8 1.23 0.0 0.0 0.0
-</pre></div>
+<div class="highlight-python">
+  <div class="highlight">
+    <pre>fix 1 all airdrag 1.8e-5 1.23</pre>
+    <pre>fix 1 all airdrag 1.8e-5 1.23 0.0 0.0 1.0</pre>
+    <pre>fix 1 all airdrag 1.8e-5 1.23 0.0 0.0 1.0 vertChamber</pre>
+  </div>
 </div>
 </div>
 <div class="section" id="description">
@@ -198,7 +206,9 @@
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">The units for the coefficients are currently static and the user must make
-  sure that they are following what is laid out in this document.
+  sure that they are following what is laid out in this document. No options for variable
+  input are allowed at this time (v_wx). Currently to change flow properties, one must unfix
+  and then apply a new fix.
 </p>
 </div>
 </div>

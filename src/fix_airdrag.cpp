@@ -52,6 +52,8 @@
 #include "respa.h"
 #include "error.h"
 #include "force.h"
+#include "domain.h"
+#include "region.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
@@ -61,13 +63,35 @@ using namespace FixConst;
 FixAirDrag::FixAirDrag(LAMMPS *lmp, int narg, char **arg) :
   Fix(lmp, narg, arg)
 {
-  if (narg != 8) error->all(FLERR,"Illegal fix air drag command\nair_viscosity, air_density, wx, wy, wz");
+  if (narg < 5) 
+    error->all(FLERR,"Illegal fix air drag command\nMust have air_viscosity and air_density");
 
   air_viscosity = force->numeric(FLERR,arg[3]);
   air_density   = force->numeric(FLERR,arg[4]);
-  wx =  force->numeric(FLERR,arg[5]);
-  wy =  force->numeric(FLERR,arg[6]);
-  wz =  force->numeric(FLERR,arg[7]);
+
+  iregion = -1;
+  idregion = NULL;
+  wx = 0.0;
+  wy = 0.0;
+  wz = 0.0;
+
+  if (narg > 5) {
+    if (narg < 8)
+      error->all(FLERR,"Illegal fix air drag command\nMissing wx, wy, and wz"); // region
+    wx =  force->numeric(FLERR,arg[5]);
+    wy =  force->numeric(FLERR,arg[6]);
+    wz =  force->numeric(FLERR,arg[7]);
+  }
+
+  if (narg > 8) {
+    if (narg > 9)error->all(FLERR,"Illegal fix air drag command\nRegion variable name error");
+    iregion = domain->find_region(arg[8]);
+    if (iregion == -1)
+      error->all(FLERR,"Region ID for fix setforce does not exist");
+    int n = strlen(arg[8]) + 1;
+    idregion = new char[n];
+    strcpy(idregion,arg[8]);
+  }
   
 }
 
@@ -75,7 +99,7 @@ FixAirDrag::FixAirDrag(LAMMPS *lmp, int narg, char **arg) :
 
 FixAirDrag::~FixAirDrag()
 {
-  
+  delete [] idregion;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -122,13 +146,15 @@ void FixAirDrag::min_setup(int vflag)
 }
 
 /* ---------------------------------------------------------------------- */
-
+// Needed constants
+#define M_6_PI 18.8495559215387594307758602
+#define M_8_PI 25.1327412287183459077011471
 void FixAirDrag::post_force(int vflag)
 {
   // apply drag force to atoms in group
   // direction is opposed to velocity vector
   // magnitude depends on atom type
-
+  double **x = atom->x;
   double **v = atom->v;
   double **f = atom->f;
   double **omega = atom->omega;
@@ -136,8 +162,6 @@ void FixAirDrag::post_force(int vflag)
   double *radius = atom->radius;
   int *mask = atom->mask;
   int nlocal = atom->nlocal;
-  
-  const double drag_PI = 3.14159265358979323846264338328;
 
   double b,c,d; // Coefficients for Drag
   double temp;
@@ -147,14 +171,17 @@ void FixAirDrag::post_force(int vflag)
 
   for (int i = 0; i < nlocal; i++)
     if (mask[i] & groupbit) {
+      if (iregion >= 0 &&
+            !domain->regions[iregion]->match(x[i][0],x[i][1],x[i][2]))
+          continue;
     
       // FORCES ----------------------------------------------------------
       // Calculate b and c coefficients for forces
       // Equations from "Classical Mechanics" by John R. Taylor
       // Linear term b = 3*pi*nu*D
-      b = 6.0 * drag_PI * air_viscosity * radius[i];
+      b = M_6_PI * air_viscosity * radius[i]; // 6 * pi * vu * r
       // Quadratic term c = k*p*A
-      c = 0.25 * air_density * drag_PI*radius[i]*radius[i];
+      c = M_PI_4 * air_density *radius[i]*radius[i]; // 0.25 * rho * pi*r*r
 
       vrx = wx - v[i][0];
       vry = wy - v[i][1];
@@ -168,11 +195,10 @@ void FixAirDrag::post_force(int vflag)
       
       // TORQUES ---------------------------------------------------------
       // Equations from "Viscous torque on a sphere under arbitrary rotation" by U. Lei et all
-      d = 8.0*drag_PI*air_viscosity*radius[i]*radius[i]*radius[i];
+      d = M_8_PI*air_viscosity*radius[i]*radius[i]*radius[i]; // 8 * pi * nu * r*r*r
       T[i][0] -= d*omega[i][0];
       T[i][1] -= d*omega[i][1];
       T[i][2] -= d*omega[i][2];
-
     }
 }
 
