@@ -71,7 +71,7 @@ enum {
 
 BondGran::BondGran(LAMMPS *lmp) : Bond(lmp)
 {
-    // we need 12 history values - the 6 for the forces, 6 for torques from the last time-step
+    // we need 13 history values - the 6 for the forces, 6 for torques from the last time-step and 1 for initial bond length
     n_granhistory(13);
     /*	NP
        number of entries in bondhistlist. bondhistlist[number of bond][number of value (from 0 to number given here)]
