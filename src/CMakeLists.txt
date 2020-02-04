@@ -1,252 +1,138 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.7.1)
+PROJECT(LIGGGHTS C CXX)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-PROJECT(liggghts)
+SET(LIGGGHTS_MAJOR_VERSION 3)
+SET(LIGGGHTS_MINOR_VERSION 7)
+SET(LIGGGHTS_PATCH_VERSION 0)
+SET(LIGGGHTS_VERSION ${LIGGGHTS_MAJOR_VERSION}.${LIGGGHTS_MINOR_VERSION}.${LIGGGHTS_PATCH_VERSION})
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cMake)
-
-SET(ENABLE_SQ OFF CACHE BOOL "Disable Superquadrics by Default")
-
-# 9 normal models
-SET(ENABLE_HERTZ ON CACHE BOOL "HERTZ Model")
-SET(ENABLE_HOOKE OFF CACHE BOOL "HOOKE Model")
-SET(ENABLE_HOOKE_HYSTERESIS OFF CACHE BOOL "HOOKE_HYSTERESIS Model")
-SET(ENABLE_HOOKE_STIFFNESS OFF CACHE BOOL "HOOKE_STIFFNESS Model")
-SET(ENABLE_EDINBURGH OFF CACHE BOOL "EDINBURGH Model")
-SET(ENABLE_EDINBURGH_STIFFNESS OFF CACHE BOOL "EDINBURGH_STIFFNESS Model")
-SET(ENABLE_HERTZ_STIFFNESS OFF CACHE BOOL "HERTZ_STIFFNESS Model")
-SET(ENABLE_LUDING OFF CACHE BOOL "LUDING Model")
-SET(ENABLE_THORNTON_NING OFF CACHE BOOL "THORNTON_NING Model")
-
-# 4 tangential models
-SET(ENABLE_TANGENTIAL_OFF OFF CACHE BOOL "Tangential Model OFF")
-SET(ENABLE_TANGENTIAL_HISTORY ON CACHE BOOL "Tangential Model history")
-SET(ENABLE_TANGENTIAL_NO_HISTORY ON CACHE BOOL "Tangential Model no_history")
-SET(ENABLE_TANGENTIAL_LUDING OFF CACHE BOOL "Tangential Model luding")
-
-# 5 cohesion models
-SET(ENABLE_COHESION_OFF OFF CACHE BOOL "Cohesion Model OFF")
-SET(ENABLE_COHESION_SJKR ON CACHE BOOL "Cohesion Model SJKR")
-SET(ENABLE_COHESION_SJKR2 ON CACHE BOOL "Cohesion Model SJKR2")
-SET(ENABLE_COHESION_WASHINO_CAPILLARY_VISCOUS OFF CACHE BOOL "Cohesion Model washino")
-SET(ENABLE_COHESION_EASO_CAPILLARY_VISCOUS OFF CACHE BOOL "Cohesion Model easo")
-
-# 6 rolling models
-SET(ENABLE_ROLLING_OFF OFF CACHE BOOL "Rolling Model off")
-SET(ENABLE_ROLLING_CDT OFF CACHE BOOL "Rolling Model cdt")
-SET(ENABLE_ROLLING_EPSD OFF CACHE BOOL "Rolling Model epsd")
-SET(ENABLE_ROLLING_EPSD2 ON CACHE BOOL "Rolling Model epsd2")
-SET(ENABLE_ROLLING_EPSD3 OFF CACHE BOOL "Rolling Model espd3")
-SET(ENABLE_ROLLING_LUDING OFF CACHE BOOL "Rolling Model luding")
-
-
-# 3 surface models
-SET(ENABLE_SURFACE_DEFAULT ON CACHE BOOL "Surface Model default")
-SET(ENABLE_SURFACE_SUPERQUADRIC OFF CACHE BOOL "Surface Model Superquadric")
-SET(ENABLE_SURFACE_MULTICONTACT OFF CACHE BOOL "Surface Model Multicontact")
-
-SET(USE_VTK OFF CACHE BOOL "Disable dump_vtk by Default")
-
-# Add Compiler Specific Options
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  # using Clang
-  MESSAGE(STATUS "Compiler: CLANG")
-	SET(OPT_CXX_FLAGS "")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  #############
-  # using GCC #
-  #############
-  MESSAGE(STATUS "Compiler: GCC")
-	SET(OPT_CXX_FLAGS "-ffast-math -funroll-loops -march=native")
-
-    # If no BUILD_TYPE is given, choose release for best speed
-    IF (NOT CMAKE_BUILD_TYPE)
- 		MESSAGE(STATUS "No build type selected, default to Release")
- 		SET(CMAKE_BUILD_TYPE "Release")
- 	ENDIF()    
-
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-  ###################
-  # using Intel C++ #
-  ###################
-  MESSAGE(STATUS "Compiler: Intel")
-    # fast math is on by default
-	SET(OPT_CXX_FLAGS "-O3 -funroll-loops -fstrict-aliasing -W -Wno-uninitialized -march=native -xHost")
-
-    # If no BUILD_TYPE is given, choose release for best speed
-    IF (NOT CMAKE_BUILD_TYPE)
- 		MESSAGE(STATUS "No build type selected, default to Release")
- 		SET(CMAKE_BUILD_TYPE "Release")
- 	ENDIF()    
-
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  # using Visual Studio C++
-  MESSAGE(STATUS "Compiler: MSVC")
-	SET(OPT_CXX_FLAGS "")
-endif()
-
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_CXX_FLAGS}")
-
-SET(CMAKE_VERBOSE_MAKEFILE 1)
-IF(NOT CMAKE_MODULE_PATH)
-	SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cMake")
+IF (NOT CMAKE_CXX_FLAGS)
+  IF(CMAKE_COMPILER_IS_GNUCXX)
+    SET(CMAKE_CXX_FLAGS "-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++11 -Wno-literal-suffix -fPIC")
+  ENDIF()
 ENDIF()
 
-Include(Macros)
-Include(LiggghtsModule)
-INCLUDE(Liggghts)
+FILE(GLOB SOURCES *.cpp)
+FILE(GLOB HEADERS *.h)
 
-# Assume all *.cpp files are source files
-FILE(GLOB liggghts_src "." "*.cpp")
+#LIST(REMOVE_ITEM SOURCES main.cpp)
 
-# Write Version.h before every build
-ADD_CUSTOM_TARGET(VERSION_H
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+IF(WIN32)
+  #include (GenerateExportHeader)
+  INCLUDE_DIRECTORIES(WINDOWS/extra)
+  ADD_DEFINITIONS(-D_USE_MATH_DEFINES -DNOMINMAX)
 
-# Main Program
-ADD_EXECUTABLE(liggghts ${liggghts_src})
-ADD_DEPENDENCIES(liggghts VERSION_H)
+  IF(MSVC)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+  ENDIF()
 
-# Add Styles
-SCAN_STYLES()
+  FIND_PACKAGE(Cygwin REQUIRED)
 
-# Generate Contact models
-if (ENABLE_HERTZ)
- ADD_CONTACT_MODEL("HERTZ" "" "" "" "" "")
-endif()
-if (ENABLE_HOOKE)
- ADD_CONTACT_MODEL("HOOKE" "" "" "" "" "")
-endif()
-if (ENABLE_HOOKE_HYSTERESIS)
- ADD_CONTACT_MODEL("HOOKE_HYSTERESIS" "" "" "" "" "")
-endif()
-if (ENABLE_HOOKE_STIFFNESS)
- ADD_CONTACT_MODEL("HOOKE_STIFFNESS" "" "" "" "" "")
-endif()
-if (ENABLE_EDINBURGH)
- ADD_CONTACT_MODEL("EDINBURGH" "" "" "" "" "")
-endif()
-if (ENABLE_EDINBURGH_STIFFNESS)
- ADD_CONTACT_MODEL("EDINBURGH_STIFFNESS" "" "" "" "" "")
-endif()
-if (ENABLE_HERTZ_STIFFNESS)
- ADD_CONTACT_MODEL("HERTZ_STIFFNESS" "" "" "" "" "")
-endif()
-if (ENABLE_LUDING)
- ADD_CONTACT_MODEL("LUDING" "" "" "" "" "")
-endif()
-if (ENABLE_THORNTON_NING)
- ADD_CONTACT_MODEL("THORNTON_NING" "" "" "" "" "")
-endif()
-
-# 4 tangential models
-if (ENABLE_TANGENTIAL_OFF)
- ADD_CONTACT_MODEL("" "TANGENTIAL_OFF" "" "" "" "")
-endif()
-if (ENABLE_TANGENTIAL_HISTORY)
- ADD_CONTACT_MODEL("" "TANGENTIAL_HISTORY" "" "" "" "")
-endif()
-if (ENABLE_TANGENTIAL_NO_HISTORY)
- ADD_CONTACT_MODEL("" "TANGENTIAL_NO_HISTORY" "" "" "" "")
-endif()
-if (ENABLE_TANGENTIAL_LUDING)
- ADD_CONTACT_MODEL("" "TANGENTIAL_LUDING" "" "" "" "")
-endif()
-
-# 5 cohesion models
-if (ENABLE_COHESION_OFF)
- ADD_CONTACT_MODEL("" "" "COHESION_OFF" "" "")
-endif()
-if (ENABLE_COHESION_SJKR)
- ADD_CONTACT_MODEL("" "" "COHESION_SJKR" "" "")
-endif()
-if (ENABLE_COHESION_SJKR2)
- ADD_CONTACT_MODEL("" "" "COHESION_SJKR2" "" "")
-endif()
-if (ENABLE_COHESION_WASHINO_CAPILLARY_VISCOUS)
-  ADD_CONTACT_MODEL("" "" "COHESION_WASHINO_CAPILLARY_VISCOUS" "" "")
-endif()
-if (ENABLE_COHESION_EASO_CAPILLARY_VISCOUS)
-  ADD_CONTACT_MODEL("" "" "COHESION_EASO_CAPILLARY_VISCOUS" "" "")
-endif()
-
-# 6 rolling models
-if (ENABLE_ROLLING_OFF)
- ADD_CONTACT_MODEL("" "" "" "ROLLING_OFF" "")
-endif()
-if (ENABLE_ROLLING_CDT)
- ADD_CONTACT_MODEL("" "" "" "ROLLING_CDT" "")
-endif()
-if (ENABLE_ROLLING_EPSD)
- ADD_CONTACT_MODEL("" "" "" "ROLLING_EPSD" "")
-endif()
-if (ENABLE_ROLLING_EPSD2)
- ADD_CONTACT_MODEL("" "" "" "ROLLING_EPSD2" "")
-endif()
-if (ENABLE_ROLLING_EPSD3)
- ADD_CONTACT_MODEL("" "" "" "ROLLING_EPSD3" "")
-endif()
-if (ENABLE_ROLLING_LUDING)
- ADD_CONTACT_MODEL("" "" "" "ROLLING_LUDING" "")
-endif()
-
-# 3 surface models
-if (ENABLE_SURFACE_DEFAULT)
- ADD_CONTACT_MODEL("" "" "" "" "SURFACE_DEFAULT")
-endif()
-if (ENABLE_SURFACE_SUPERQUADRIC)
-  ADD_CONTACT_MODEL("" "" "" "" "SURFACE_SUPERQUADRIC")
-endif()
-if (ENABLE_SURFACE_MULTICONTACT)
- ADD_CONTACT_MODEL("" "" "" "" "SURFACE_MULTICONTACT")
-endif()
-
-WRITE_WHITELIST()
-
-# Link to MPI
-TARGET_LINK_LIBRARIES(liggghts ${MPI_CXX_LIBRARIES})
-#TARGET_LINK_LIBRARIES(libDEM ${MPI_CXX_LIBRARIES})
-
-
-# If JPEG Library has been defined
-IF(JPEG_LIBRARY)
-	TARGET_LINK_LIBRARIES(liggghts ${JPEG_LIBRARY})
-	#TARGET_LINK_LIBRARIES(libDEM ${JPEG_LIBRARY})
+  ADD_CUSTOM_TARGET(GenerateHeaders
+           COMMAND GenerateHeaders.bat ${CYGWIN_INSTALL_PATH}
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/WINDOWS)
+  # enable parallelization
+  foreach(flag_var
+          CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+          CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+            set(${flag_var} "${${flag_var}} /MP4")
+  endforeach()
+ELSE()
+  ADD_CUSTOM_TARGET(GenerateHeaders
+           COMMAND sh Make.sh style
+           COMMAND sh Make.sh models
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 ENDIF()
 
-# If VTK Library has been defined
-IF(VTK_LIBRARIES)
-	TARGET_LINK_LIBRARIES(liggghts ${VTK_LIBRARIES})
-	#TARGET_LINK_LIBRARIES(libDEM ${VTK_LIBRARIES})
+ADD_LIBRARY(liggghts_obj OBJECT ${SOURCES})
+ADD_DEPENDENCIES(liggghts_obj GenerateHeaders)
+
+ADD_LIBRARY(liggghts_static STATIC $<TARGET_OBJECTS:liggghts_obj>)
+SET_TARGET_PROPERTIES(liggghts_static PROPERTIES OUTPUT_NAME liggghts)
+SET_PROPERTY(TARGET liggghts_static PROPERTY PUBLIC_HEADER ${HEADERS})
+
+ADD_LIBRARY(liggghts_shared SHARED $<TARGET_OBJECTS:liggghts_obj>)
+SET_TARGET_PROPERTIES(liggghts_shared PROPERTIES OUTPUT_NAME liggghts)
+SET_PROPERTY(TARGET liggghts_shared PROPERTY PUBLIC_HEADER ${HEADERS})
+
+#ADD_EXECUTABLE(liggghts_bin main.cpp)
+#TARGET_LINK_LIBRARIES(liggghts_bin liggghts)
+ADD_EXECUTABLE(liggghts_bin $<TARGET_OBJECTS:liggghts_obj>)
+SET_TARGET_PROPERTIES(liggghts_bin PROPERTIES OUTPUT_NAME liggghts)
+
+#=======================================
+
+FIND_PACKAGE(VTK NO_MODULE)
+
+IF(VTK_FOUND)
+  INCLUDE(${VTK_USE_FILE})
+  ADD_DEFINITIONS(-DLAMMPS_VTK)
+  TARGET_LINK_LIBRARIES(liggghts_static ${VTK_LIBRARIES})
+  TARGET_LINK_LIBRARIES(liggghts_shared ${VTK_LIBRARIES})
+  TARGET_LINK_LIBRARIES(liggghts_bin ${VTK_LIBRARIES})
+  MESSAGE(STATUS "Found VTK")
+ELSE(VTK_FOUND)
+  MESSAGE(STATUS "VTK NOT found!")
+ENDIF(VTK_FOUND)
+
+#=======================================
+
+FIND_PACKAGE(JPEG)
+
+IF(JPEG_FOUND)
+  INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
+  ADD_DEFINITIONS(-DLAMMPS_JPEG)
+  TARGET_LINK_LIBRARIES(liggghts_static jpeg)
+  TARGET_LINK_LIBRARIES(liggghts_shared jpeg)
+  TARGET_LINK_LIBRARIES(liggghts_bin jpeg)
+ELSE(JPEG_FOUND)
+  MESSAGE(STATUS "JPEG NOT found!")
+ENDIF(JPEG_FOUND)
+
+#=======================================
+
+FIND_PACKAGE(MPI)
+
+IF(MPI_FOUND)
+  INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+  TARGET_LINK_LIBRARIES(liggghts_static ${MPI_LIBRARIES})
+  TARGET_LINK_LIBRARIES(liggghts_shared ${MPI_LIBRARIES})
+  TARGET_LINK_LIBRARIES(liggghts_bin ${MPI_LIBRARIES})
+
+  IF(MPI_COMPILE_FLAGS)
+    SET_TARGET_PROPERTIES(liggghts_static PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+    SET_TARGET_PROPERTIES(liggghts_shared PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+    SET_TARGET_PROPERTIES(liggghts_bin PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  ENDIF()
+
+  IF(MPI_LINK_FLAGS)
+    SET_TARGET_PROPERTIES(liggghts_static PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+    SET_TARGET_PROPERTIES(liggghts_shared PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+    SET_TARGET_PROPERTIES(liggghts_bin PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+  ENDIF()
+ELSE(MPI_FOUND)
+  MESSAGE(STATUS "MPI NOT found! Using MPI Stubs instead.")
+  ADD_SUBDIRECTORY(STUBS)
+  TARGET_LINK_LIBRARIES(liggghts_static mpi_stubs)
+  TARGET_LINK_LIBRARIES(liggghts_shared mpi_stubs)
+  TARGET_LINK_LIBRARIES(liggghts_bin mpi_stubs)
+ENDIF(MPI_FOUND)
+
+#=======================================
+
+#install(TARGETS liggghts liggghts_bin
+#        RUNTIME DESTINATION bin
+#        LIBRARY DESTINATION lib)
+
+#install(TARGETS liggghts_bin
+#        RUNTIME DESTINATION bin
+#        LIBRARY DESTINATION lib)
+
+install(TARGETS liggghts_bin liggghts_static liggghts_shared
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include)
+IF (WIN32)
+    install(DIRECTORY WINDOWS DESTINATION include)
 ENDIF()
-
-# Include Subdirectories, that contain a CMakeLists.txt
-GET_SUBDIRS(dirList CMakeLists.txt)
-FOREACH(dir ${dirList})
-	ADD_SUBDIRECTORY(${dir})
-ENDFOREACH()
-
-# Add Additional Includes
-GET_PROPERTY(additional_includes_local GLOBAL PROPERTY additional_includes)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${additional_includes_local})
-
-# Generate style files
-GEN_STYLES()
-
-# Link to modules
-GET_PROPERTY(active_liggghts_modules_local GLOBAL PROPERTY active_liggghts_modules)
-TARGET_LINK_LIBRARIES(liggghts ${active_liggghts_modules_local})
-#TARGET_LINK_LIBRARIES(libDEM ${active_liggghts_modules_local})
-
-SET(LIGGGHTS_TARGET_LIBRARIES_LINKED 1)
-
-#define Application static
-SET_TARGET_PROPERTIES(liggghts PROPERTIES COMPILE_FLAGS "-DLIBDEM_STATIC_DEFINE -MP")
-IF(ENABLE_SQ)
- SET_TARGET_PROPERTIES(liggghts PROPERTIES COMPILE_FLAGS "-DSUPERQUADRIC_ACTIVE_FLAG -DNONSPHERICAL_ACTIVE_FLAG")
- find_package(Boost)
- INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${additional_includes_local} ${Boost_INCLUDE_DIRS})
-ENDIF()
-
-# Install binary to destination path
-INSTALL(TARGETS liggghts RUNTIME DESTINATION "." COMPONENT runtime)
