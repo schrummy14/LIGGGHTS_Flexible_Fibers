@@ -197,13 +197,16 @@ dump dmp all custom ${fileprint_step} post/dump*.liggghts id type x y z vx vy vz
 #    c_bc[1] c_bc[2] c_bc[3] c_bc[4] c_bc[5] c_bc[6] c_bc[7] c_bc[8] c_bc[9] c_bc[10] c_bc[11] c_bc[12] c_bc[13] c_bc[14] c_bc[15] c_bc[16]
 
 # Dumps geometry positions to file
-dump stlplung all mesh/gran/VTK ${fileprint_step} post/plung*.vtk stress plung rod_1 rod_2
+# dump stlplung all mesh/gran/VTK ${fileprint_step} post/plung*.vtk stress plung rod_1 rod_2
 
 # Dumps information to the csv file for matlab
 fix outfile all print ${output_step} "${sim_time},${pz},${pfz}" file post/3-point.csv screen no title "t,z,fz"
 
 # Run simulation to completion
 run ${run_to_deflect} upto
+
+unfix m4
+fix m4 all property/global coefficientFriction peratomtypepair 1 0.002
 
 ## Have the plunger move back to where it started
 unfix move_P
