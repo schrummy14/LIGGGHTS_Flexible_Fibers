@@ -1,0 +1,106 @@
+#Density
+variable    rho_1       equal   920
+
+#Poission ratio
+variable	nu_1	    equal	0.31
+
+#Coefficient of restituion for viscoelastic damping
+variable    en_11       equal   0.95
+
+# Elasticity modulus
+variable    E_1         equal   9.77244e+09
+
+# Sliding friction coefficient REMOVED CONTRIBUTION IN ROLLING TEST
+variable    muf_11      equal   0.05
+
+# Work of adhesion
+variable	W_11	    equal	0.218
+
+# Adhesion hysteresis for rolling friction
+variable    adh_hyst_11   equal   1.0*100
+
+# 		Initialization
+units		si
+newton		off
+boundary	f f f
+atom_style	granular
+communicate	single vel yes
+
+variable	i	loop 4
+
+#Dominating variables
+variable    particle_radius index   1600e-6 1640e-6 1660e-6 1700e-6
+variable    particle_diameter equal 2*${particle_radius}
+variable    domain_length    equal  4000e-6
+
+region      reg_block block -${domain_length} ${domain_length} -${domain_length} ${domain_length} -${domain_length} ${domain_length} units box
+
+create_box	2 reg_block
+
+neighbor 	10e-6 bin
+neigh_modify	delay 0
+
+
+# 		Physical properties of particle for granular model
+fix		m1 all property/global youngsModulus peratomtype ${E_1}  ${E_1}
+fix		m2 all property/global poissonsRatio peratomtype ${nu_1}  ${E_1}
+fix		m3 all property/global coefficientRestitution peratomtypepair 2 ${en_11} ${en_11} ${en_11} ${en_11}
+fix     	m4 all property/global coefficientFriction peratomtypepair 2 ${muf_11} ${muf_11} ${muf_11} ${muf_11} 
+fix		m5 all property/global workOfAdhesion peratomtypepair 2 ${W_11} ${W_11} ${W_11} ${W_11} 
+fix     	m6 all property/global resolutionJKR scalar 1e-4
+fix     	m8 all property/global coefficientRollingFriction peratomtypepair 2 10 10 10 10
+
+hard_particles yes
+
+# Particle insertion
+variable	xpos equal ${particle_diameter}*0.51
+create_atoms	1 single ${xpos} 0.0 0.0
+set 		type 1 density ${rho_1}
+set 		type 1 diameter ${particle_diameter}
+velocity 	all set -0.0005 0.0 0.0
+
+# Geometry
+fix		wall1 all wall/gran model jkr tangential jkr_tan rolling_friction cdt primitive type 1 xplane 0.0
+
+
+# Contact model
+pair_style	gran model jkr tangential jkr_tan rolling_friction cdt
+pair_coeff	* *
+
+# integration
+fix		integrate all nve/sphere
+
+timestep	1e-7
+
+# Setting outputs
+thermo_style	custom step time cpu atoms ke 
+thermo		10000		
+thermo_modify	lost ignore norm no
+
+
+# run 1st step to check timestep and initialize
+fix		ctg all check/timestep/gran 10000 0.2 0.01
+
+
+# Create dump
+dump		dmp3 all custom/vtk 10000 post/dump_.$i.*.vtk id type x y z vx vy vz fx fy fz omegax omegay omegaz radius 
+
+dump_modify dmp3 binary yes
+
+
+run 5000000
+
+unfix ctg
+
+fix 1 all gravity 9.81 vector 0 0 -1
+
+
+run		3000000
+
+clear
+next		i
+next		particle_radius
+jump 		in.sliding_friction_test
+
+
+

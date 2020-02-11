@@ -1,0 +1,96 @@
+### Initialization ###
+
+units 		si
+atom_style 	sphere
+boundary 	f f f
+newton 		off
+communicate 	single vel yes
+neigh_modify	delay 0
+
+# Declare domain
+region 		reg block -0.0025 0.0 -0.00025 0.00025 -0.00025 0.00025 units box
+create_box 	2 reg
+
+
+#neighbor 	1e-3 bin	
+#neigh_modify	every 50000 delay 0 check no one 4000
+
+### Setup ###
+
+### VARIABLE INSERT ###
+
+# Loop information: 
+
+
+# Material properties:
+variable	E_1	equal	215e9
+variable	nu_1	equal	0.3
+
+variable	Wij	equal	0.0
+variable	rho_1	equal	8300
+
+variable	en	equal	0.5
+
+variable	dt	equal	1e-10
+variable	r equal 100000
+
+variable	dumP equal 5000
+
+# Material and interaction properties
+fix 		m1 all property/global youngsModulus peratomtype ${E_1} ${E_1}
+fix 		m2 all property/global poissonsRatio peratomtype ${nu_1} ${nu_1}
+fix 		m3 all property/global coefficientRestitution peratomtypepair 2 ${en} ${en} ${en} ${en}
+fix 		m5 all property/global workOfAdhesion peratomtypepair 2 ${Wij} ${Wij} ${Wij} ${Wij} 
+fix         m7 all property/global resolutionJKR scalar 1e-4
+
+hard_particles yes
+
+# Particle insertion
+#create_atoms	1 single -5.5e-5 0.0 0.0
+create_atoms	1 single -5.1e-6 0.0 0.0
+
+set 		type 1 density ${rho_1}
+set 		type 1 diameter 10e-6
+velocity 	all set 0.03 0.0 0.0
+
+
+# Geometry
+fix		wall1 all wall/gran model jkr primitive type 2 xplane 0.0
+
+
+# Physics
+pair_style 	gran model jkr
+pair_coeff	* *
+
+
+
+### Detailed settings ###
+
+# Integration
+fix		integrate all nve/sphere
+
+
+# Timestep
+timestep 	${dt}
+
+# Thermo settings
+#thermo_style 	custom step atoms ke cpu
+thermo_style	custom step time cpu atoms ke
+thermo 		${dumP}
+thermo_modify	lost ignore norm no
+# compute_modify	thermo_temp dynamic yes
+
+
+# Run 1 step to check timestep and initialize
+fix		ctg all check/timestep/gran 5000 0.1 0.1
+
+
+# Dump particle information
+dump		dmp all custom ${dumP} post/liggghts.dump id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
+dump		dmp2 all custom/vtk ${dumP} post/liggghts.*..vtk id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
+
+### Execution and further settings ###
+
+# Run condition and printing of atom parameters
+run		$r
+
