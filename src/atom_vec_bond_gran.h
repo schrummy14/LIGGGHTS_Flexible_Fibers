@@ -77,6 +77,7 @@ class AtomVecBondGran : public AtomVec {
   int **bond_type,**bond_atom;
   int num_bondhist;
   double ***bond_hist;
+  int disableNormalContact = 0;
 
   class FixBondPropagateGran *fbpg;
 };

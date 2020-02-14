@@ -275,6 +275,18 @@ public:
 
       for (int jj = 0; jj < jnum; jj++) {
         const int j = jlist[jj] & NEIGHMASK;
+        
+        // If two spheres are bonded, skip contact forces (should only remove normal force)
+        bool isBonded = false;
+        if (atom->disableNormalContact == 1) {
+          for(int k = 0; k < atom->num_bond[i]; k++) {
+            if(atom->bond_atom[i][k] == atom->tag[j]) {
+              isBonded = true;
+              break;
+            }
+          }
+        }
+        if (isBonded) continue;
 
         const double delx = xtmp - x[j][0];
         const double dely = ytmp - x[j][1];

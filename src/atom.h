@@ -129,6 +129,7 @@ class Atom : protected Pointers {
   int **bond_type;     
   int **bond_atom;     
   double ***bond_hist; 
+  int disableNormalContact = 0;
                        
   int *num_angle;
   int **angle_type;

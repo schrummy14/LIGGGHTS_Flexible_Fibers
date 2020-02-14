@@ -67,7 +67,7 @@ AtomVecBondGran::AtomVecBondGran(LAMMPS *lmp) : AtomVec(lmp)
 void AtomVecBondGran::settings(int narg, char **arg)
 {
   if (narg == 0) return;		//in case of restart no arguments are given, instead nbondtypes and bond_per_atom are defined by read_restart_settings
-  if (narg != 4) error->all(FLERR,"Invalid atom_style bond/gran command,expecting exactly 4 arguments");
+  if (narg < 4) error->all(FLERR,"Invalid atom_style bond/gran command,expecting 4 or 6 arguments");
 
   if(strcmp(arg[0],"n_bondtypes"))
     error->all(FLERR,"Illegal atom_style bond/gran command, expecting 'n_bondtypes'");
@@ -78,6 +78,13 @@ void AtomVecBondGran::settings(int narg, char **arg)
     error->all(FLERR,"Illegal atom_style bond/gran command, expecting 'bonds_per_atom'");
 
   atom->bond_per_atom = atoi(arg[3]);
+
+  if (narg < 6) return;
+  
+  if(strcmp(arg[4],"disableNormalContact"))
+    error->all(FLERR,"Illegal atom_style bond/gran command, expecting 'disableNormalContact'");
+  
+  atom->disableNormalContact = atoi(arg[5]);
 
 }
 
