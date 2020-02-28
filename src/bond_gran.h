@@ -46,6 +46,8 @@ class BondGran : public Bond {
   //double single(int, double, int, int);
   double single(int, double, int, int, double &);
 
+  double getMinDt();
+
  protected:
   int dampmode;
   int breakmode;

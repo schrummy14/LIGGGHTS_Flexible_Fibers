@@ -68,6 +68,7 @@ class BondHarmonic : public Bond {
   void read_restart(FILE *);
   void write_data(FILE *);
   double single(int, double, int, int, double &);
+  double getMinDt();
 
  protected:
   double *k,*r0;

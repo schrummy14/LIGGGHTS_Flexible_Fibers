@@ -79,6 +79,7 @@ class Bond : protected Pointers {
   virtual double memory_usage();
   virtual unsigned int data_mask() {return datamask;}
   virtual unsigned int data_mask_ext() {return datamask_ext;}
+  virtual double getMinDt() {return 1.0;}
 
  protected:
   int suffix_flag;             // suffix compatibility flag

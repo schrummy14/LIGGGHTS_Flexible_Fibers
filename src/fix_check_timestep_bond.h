@@ -32,99 +32,54 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
-    This file is from LAMMPS
-    LAMMPS - Large-scale Atomic/Molecular Massively Parallel Simulator
-    http://lammps.sandia.gov, Sandia National Laboratories
-    Steve Plimpton, sjplimp@sandia.gov
+    (if not contributing author is listed, this file has been contributed
+    by the core developer)
 
-    Copyright (2003) Sandia Corporation.  Under the terms of Contract
-    DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-    certain rights in this software.  This software is distributed under
-    the GNU General Public License.
+    Copyright 2012-     DCS Computing GmbH, Linz
+    Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
 
-#ifdef BOND_CLASS
+#ifdef FIX_CLASS
 
-BondStyle(hybrid,BondHybrid)
+FixStyle(check/timestep/bond,FixCheckTimestepBond)
 
 #else
 
-#ifndef LMP_BOND_HYBRID_H
-#define LMP_BOND_HYBRID_H
+#ifndef LMP_FIX_CHECK_TIMESTEP_BOND_H
+#define LMP_FIX_CHECK_TIMESTEP_BOND_H
 
-#include <stdio.h>
-#include "bond.h"
+#include "fix.h"
 
 namespace LAMMPS_NS {
 
-class BondHybrid : public Bond {
-  friend class Force;
-
+class FixCheckTimestepBond : public Fix {
  public:
-  int nstyles;                  // # of different bond styles
-  Bond **styles;                // class list for each Bond style
-  char **keywords;              // keyword for each Bond style
-
-  BondHybrid(class LAMMPS *);
-  ~BondHybrid();
-  void compute(int, int);
-  void settings(int, char **);
-  void coeff(int, char **);
-  void init_style();
-  double equilibrium_distance(int);
-  void write_restart(FILE *);
-  void read_restart(FILE *);
-  double single(int, double, int, int, double &);
-  double memory_usage();
-  double getMinDt();
+  FixCheckTimestepBond(class LAMMPS *, int, char **);
+  int setmask();
+  void init();
+  void end_of_step();
+  double compute_vector(int);
 
  private:
-  int *map;                     // which style each bond type points to
+  class Properties* properties;
+  class PairGran* pg;
+  class FixWallGran* fwg;
+  class FixPropertyGlobal* Y;
+  class FixPropertyGlobal* nu;
 
-  int *nbondlist;               // # of bonds in sub-style bondlists
-  int *maxbond;                 // max # of bonds sub-style lists can store
-  int ***bondlist;              // bondlist for each sub-style
+  void calc_bond_estims();
 
-  void allocate();
+  double v_rel_max_simulation; //max relative velocity detected in simulation
+  double bond_time;
+  double fraction_bond,fraction_skin;
+  double fraction_bond_lim;
+  bool warnflag,errorflag;
+  double r_min;
+//   double Kmax;
+//   double massMin;
 };
 
 }
 
 #endif
 #endif
-
-/* ERROR/WARNING messages:
-
-E: Illegal ... command
-
-Self-explanatory.  Check the input script syntax and compare to the
-documentation for the command.  You can use -echo screen as a
-command-line option when running LAMMPS to see the offending line.
-
-E: Bond style hybrid cannot use same bond style twice
-
-Self-explanatory.
-
-E: Bond style hybrid cannot have hybrid as an argument
-
-Self-explanatory.
-
-E: Bond style hybrid cannot have none as an argument
-
-Self-explanatory.
-
-E: Bond coeff for hybrid has invalid style
-
-Bond style hybrid uses another bond style as one of its coefficients.
-The bond style used in the bond_coeff command or read from a restart
-file is not recognized.
-
-E: Invoked bond equil distance on bond style none
-
-Self-explanatory.
-
-E: Invoked bond single on bond style none
-
-Self-explanatory.
-
-*/

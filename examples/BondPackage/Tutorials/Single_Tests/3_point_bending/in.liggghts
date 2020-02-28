@@ -48,7 +48,7 @@ variable thermo_step             equal ceil(${thermo_time}/${dt})
 # Define a granular particle with granular bonds
 # n_bondtypes 1 says that there is only one type of bond in the simulation
 # bonds_per_atom 6 means that each particle can have upto 6 bonds
-atom_style hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 6
+atom_style hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 6 disableNormalContact 1
 
 # Needed due to the Young's modulus being greater than 1.0E7
 hard_particles yes
@@ -146,6 +146,9 @@ fix wall all wall/gran model hertz tangential history mesh n_meshes 3 meshes plu
 ## Have the plunger move down towards the fiber at your set velocity
 fix move_P all move/mesh mesh plung linear 0.0 0.0 -${plung_speed}
 
+## Check the time step for the bond
+fix dtBond all check/timestep/bond 1 0.1
+
 ## Set the atoms to have a set density and set diameter
 set group all density ${particle_density} diameter ${particle_diameter}
 
@@ -162,7 +165,7 @@ timestep ${dt}
 
 # Run one step such that the bonds can form, stop bond construction, and add gravity
 run 1
-
+unfix dtBond
 # Do not create new bonds after this line
 fix_modify bondcr every 0
 

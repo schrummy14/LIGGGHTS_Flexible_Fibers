@@ -389,3 +389,15 @@ double BondHybrid::memory_usage()
     if (styles[m]) bytes += styles[m]->memory_usage();
   return bytes;
 }
+
+double BondHybrid::getMinDt()
+{
+  double minDt = 1.0;
+  for (int m = 0; m < nstyles; m++) {
+    if (styles[m]) {
+      double curDt = styles[m]->getMinDt();
+      if (curDt < minDt) minDt = curDt;
+    }
+  }
+  return minDt;
+}

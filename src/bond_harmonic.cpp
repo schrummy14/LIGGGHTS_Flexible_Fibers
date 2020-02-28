@@ -228,3 +228,7 @@ double BondHarmonic::single(int type, double rsq, int i, int j,
   if (r > 0.0) fforce = -2.0*rk/r;
   return rk*dr;
 }
+
+double BondHarmonic::getMinDt(){
+  return 1.0;
+}
