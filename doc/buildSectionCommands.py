@@ -379,9 +379,10 @@ each style or click on the style itself for a full description:</p>
         computeName = computeType[8:].replace("_","/").replace(".html","")
         curStr = """<td><a class="reference internal" href="%s"><em>%s</em></a></td>""" % (computeType, computeName)
         lines.append(curStr)
-    
-    lines.append("""<td>&nbsp;</td>""")
-    lines.append("""<td>&nbsp;</td>""")
+    kRemain = 3 - (k%3)
+    if kRemain < 3:
+        for k in range(kRemain):
+            lines.append("""<td>&nbsp;</td>""")
     lines.append("""</tr>""")
     lines.append("""</tbody>""")
     lines.append("""</table>""")
@@ -445,8 +446,10 @@ of each style or click on the style itself for a full description:</p>
         fixName = fixType[4:].replace("_","/").replace(".html","")
         curStr = """<td><a class="reference internal" href="%s"><em>%s</em></a></td>""" % (fixType, fixName)
         lines.append(curStr)
-    
-    lines.append("""<td>&nbsp;</td>""")
+    kRemain = 3 - (k%3)
+    if kRemain > 0:
+        for k in range(kRemain):
+            lines.append("""<td>&nbsp;</td>""")
     lines.append("""</tr>""")
     lines.append("""</tbody>""")
     lines.append("""</table>""")
