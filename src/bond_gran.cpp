@@ -176,7 +176,6 @@ void BondGran::compute(int eflag, int vflag)
   int newton_bond = force->newton_bond;
   double dt = update->dt;
   double cutoff=neighbor->skin;
-  double dtInv = 1.0/dt;
 
   if(breakmode == BREAKSTYLE_STRESS_TEMP)
   {
@@ -478,6 +477,9 @@ void BondGran::compute(int eflag, int vflag)
       double K_tor_inv = 1.0/K_tor;
       double K_ben_inv = 1.0/K_ben;
 
+      double beta0dt = beta0[type]*dt;
+      double beta2dtInv = damp[type]/dt;
+
       // Get 2E/k for each dirrection
       // E = 0.5*Kx^2 + 0.5*mv^2
       // E = 0.5(K^2x^2/K + mv^2)
@@ -499,21 +501,21 @@ void BondGran::compute(int eflag, int vflag)
       double E_torqu_tang_y = K_ben_inv*(K_ben_inv*bondhistlist[n][10]*bondhistlist[n][10] + I_t*wt2*wt2);
       double E_torqu_tang_z = K_ben_inv*(K_ben_inv*bondhistlist[n][11]*bondhistlist[n][11] + I_t*wt3*wt3);
 
-      force_damp_n[0] = -Kn*(dt*beta0[type] + beta1[type]*Me*sqrt(E_force_norm_x) + dtInv*damp[type]*Me*E_force_norm_x)/Me;
-      force_damp_n[1] = -Kn*(dt*beta0[type] + beta1[type]*Me*sqrt(E_force_norm_y) + dtInv*damp[type]*Me*E_force_norm_y)/Me;
-      force_damp_n[2] = -Kn*(dt*beta0[type] + beta1[type]*Me*sqrt(E_force_norm_z) + dtInv*damp[type]*Me*E_force_norm_z)/Me;
+      force_damp_n[0] = -Kn*(beta0dt + beta1[type]*Me*sqrt(E_force_norm_x) + beta2dtInv*Me*E_force_norm_x)/Me;
+      force_damp_n[1] = -Kn*(beta0dt + beta1[type]*Me*sqrt(E_force_norm_y) + beta2dtInv*Me*E_force_norm_y)/Me;
+      force_damp_n[2] = -Kn*(beta0dt + beta1[type]*Me*sqrt(E_force_norm_z) + beta2dtInv*Me*E_force_norm_z)/Me;
 
-      force_damp_t[0] = -Kt*(dt*beta0[type] + beta1[type]*Me*sqrt(E_force_tang_x) + dtInv*damp[type]*Me*E_force_tang_x)/Me;
-      force_damp_t[1] = -Kt*(dt*beta0[type] + beta1[type]*Me*sqrt(E_force_tang_y) + dtInv*damp[type]*Me*E_force_tang_y)/Me;
-      force_damp_t[2] = -Kt*(dt*beta0[type] + beta1[type]*Me*sqrt(E_force_tang_z) + dtInv*damp[type]*Me*E_force_tang_z)/Me;
+      force_damp_t[0] = -Kt*(beta0dt + beta1[type]*Me*sqrt(E_force_tang_x) + beta2dtInv*Me*E_force_tang_x)/Me;
+      force_damp_t[1] = -Kt*(beta0dt + beta1[type]*Me*sqrt(E_force_tang_y) + beta2dtInv*Me*E_force_tang_y)/Me;
+      force_damp_t[2] = -Kt*(beta0dt + beta1[type]*Me*sqrt(E_force_tang_z) + beta2dtInv*Me*E_force_tang_z)/Me;
 
-      torque_damp_n[0] = -K_tor*(dt*beta0[type] + beta1[type]*Js*sqrt(E_torqu_norm_x) + dtInv*damp[type]*Js*E_torqu_norm_x)/Js;
-      torque_damp_n[1] = -K_tor*(dt*beta0[type] + beta1[type]*Js*sqrt(E_torqu_norm_y) + dtInv*damp[type]*Js*E_torqu_norm_y)/Js;
-      torque_damp_n[2] = -K_tor*(dt*beta0[type] + beta1[type]*Js*sqrt(E_torqu_norm_z) + dtInv*damp[type]*Js*E_torqu_norm_z)/Js;
+      torque_damp_n[0] = -K_tor*(beta0dt + beta1[type]*Js*sqrt(E_torqu_norm_x) + beta2dtInv*Js*E_torqu_norm_x)/Js;
+      torque_damp_n[1] = -K_tor*(beta0dt + beta1[type]*Js*sqrt(E_torqu_norm_y) + beta2dtInv*Js*E_torqu_norm_y)/Js;
+      torque_damp_n[2] = -K_tor*(beta0dt + beta1[type]*Js*sqrt(E_torqu_norm_z) + beta2dtInv*Js*E_torqu_norm_z)/Js;
 
-      torque_damp_t[0] = -K_ben*(dt*beta0[type] + beta1[type]*Js*sqrt(E_torqu_tang_x) + dtInv*damp[type]*Js*E_torqu_tang_x)/Js;
-      torque_damp_t[1] = -K_ben*(dt*beta0[type] + beta1[type]*Js*sqrt(E_torqu_tang_y) + dtInv*damp[type]*Js*E_torqu_tang_y)/Js;
-      torque_damp_t[2] = -K_ben*(dt*beta0[type] + beta1[type]*Js*sqrt(E_torqu_tang_z) + dtInv*damp[type]*Js*E_torqu_tang_z)/Js;
+      torque_damp_t[0] = -K_ben*(beta0dt + beta1[type]*Js*sqrt(E_torqu_tang_x) + beta2dtInv*Js*E_torqu_tang_x)/Js;
+      torque_damp_t[1] = -K_ben*(beta0dt + beta1[type]*Js*sqrt(E_torqu_tang_y) + beta2dtInv*Js*E_torqu_tang_y)/Js;
+      torque_damp_t[2] = -K_ben*(beta0dt + beta1[type]*Js*sqrt(E_torqu_tang_z) + beta2dtInv*Js*E_torqu_tang_z)/Js;
 
     } else if (dampmode == DAMPSTYLE_NON_LINEAR_REDUCED) {
 
@@ -613,24 +615,33 @@ void BondGran::compute(int eflag, int vflag)
       double Me_inv = 1.0/Me;
       double Js_inv = 1.0/Js;
 
+      double beta0dt = dt*beta0[type];
+      double beta2dtInv = damp[type]/dt;
+
       // Get 2E/k for each dirrection
       // E = 0.5*Kx^2 + 0.5*mv^2
       // E = 0.5(K^2x^2/K + mv^2)
       // E = 0.5(bondhist^2/K + mv^2)
       // 2E/k == (bondhist^2/k + mv^2)/k
 
+      // friction values do not change... pre compute them.
+      double fdn = -Kn*beta0dt*Me_inv;
+      double fdt = -Kt*beta0dt*Me_inv;
+      double mdn = -K_tor*beta0dt*Js_inv;
+      double mdt = -K_ben*beta0dt*Js_inv;
+
       // Force Damping in x direction ---------------------------------------------------------------------------------
       // Internal Friction
-      force_damp_n[0]  = -Kn*beta0[type]*Me_inv;
-      force_damp_t[0]  = -Kt*beta0[type]*Me_inv;
+      force_damp_n[0]  = fdn;
+      force_damp_t[0]  = fdt;
 
       // Fluidic Damping
       force_damp_n[0] += -Kn*beta1[type]*sqrt(Kn_inv*(bondhistlist[n][0]*bondhistlist[n][0]*Kn_inv + Me*vn1*vn1));
       force_damp_t[0] += -Kt*beta1[type]*sqrt(Kt_inv*(bondhistlist[n][3]*bondhistlist[n][3]*Kt_inv + Me*vtr1*vtr1));
 
       // Quadratic Damping
-      force_damp_n[0] += -damp[type]*(bondhistlist[n][0]*bondhistlist[n][0]*Kn_inv + Me*vn1*vn1);
-      force_damp_t[0] += -damp[type]*(bondhistlist[n][3]*bondhistlist[n][3]*Kt_inv + Me*vtr1*vtr1);
+      force_damp_n[0] += -beta2dtInv*(bondhistlist[n][0]*bondhistlist[n][0]*Kn_inv + Me*vn1*vn1);
+      force_damp_t[0] += -beta2dtInv*(bondhistlist[n][3]*bondhistlist[n][3]*Kt_inv + Me*vtr1*vtr1);
       
       // Apply damping direction
       force_damp_n[0] *= SIGNUM_DOUBLE(vr1);
@@ -638,16 +649,16 @@ void BondGran::compute(int eflag, int vflag)
 
       // Force Damping in y direction ---------------------------------------------------------------------------------
       // Internal Friction
-      force_damp_n[1]  = -dt*Kn*beta0[type]*Me_inv;
-      force_damp_t[1]  = -dt*Kt*beta0[type]*Me_inv;
+      force_damp_n[1]  = fdn;
+      force_damp_t[1]  = fdt;
 
       // Fluidic Damping
       force_damp_n[1] += -Kn*beta1[type]*sqrt(Kn_inv*(bondhistlist[n][1]*bondhistlist[n][1]*Kn_inv + Me*vn2*vn2));
       force_damp_t[1] += -Kt*beta1[type]*sqrt(Kt_inv*(bondhistlist[n][4]*bondhistlist[n][4]*Kt_inv + Me*vtr2*vtr2));
       
       // Quadratic Damping
-      force_damp_n[1] += -dtInv*damp[type]*(bondhistlist[n][1]*bondhistlist[n][1]*Kn_inv + Me*vn2*vn2);
-      force_damp_t[1] += -dtInv*damp[type]*(bondhistlist[n][4]*bondhistlist[n][4]*Kt_inv + Me*vtr2*vtr2);
+      force_damp_n[1] += -beta2dtInv*(bondhistlist[n][1]*bondhistlist[n][1]*Kn_inv + Me*vn2*vn2);
+      force_damp_t[1] += -beta2dtInv*(bondhistlist[n][4]*bondhistlist[n][4]*Kt_inv + Me*vtr2*vtr2);
 
       // Apply damping direction
       force_damp_n[1] *= SIGNUM_DOUBLE(vr2);
@@ -655,16 +666,16 @@ void BondGran::compute(int eflag, int vflag)
 
       // Force Damping in z direction ---------------------------------------------------------------------------------
       // Internal Friction
-      force_damp_n[2]  = -dt*Kn*beta0[type]*Me_inv;
-      force_damp_t[2]  = -dt*Kt*beta0[type]*Me_inv;
+      force_damp_n[2]  = fdn;
+      force_damp_t[2]  = fdt;
       
       // Fluidic Damping
       force_damp_n[2] += -Kn*beta1[type]*sqrt(Kn_inv*(bondhistlist[n][2]*bondhistlist[n][2]*Kn_inv + Me*vn3*vn3));
       force_damp_t[2] += -Kt*beta1[type]*sqrt(Kt_inv*(bondhistlist[n][5]*bondhistlist[n][5]*Kt_inv + Me*vtr3*vtr3));
       
       // Quadratic Damping
-      force_damp_n[2] += -dtInv*damp[type]*(bondhistlist[n][2]*bondhistlist[n][2]*Kn_inv + Me*vn3*vn3);
-      force_damp_t[2] += -dtInv*damp[type]*(bondhistlist[n][5]*bondhistlist[n][5]*Kt_inv + Me*vtr3*vtr3);
+      force_damp_n[2] += -beta2dtInv*(bondhistlist[n][2]*bondhistlist[n][2]*Kn_inv + Me*vn3*vn3);
+      force_damp_t[2] += -beta2dtInv*(bondhistlist[n][5]*bondhistlist[n][5]*Kt_inv + Me*vtr3*vtr3);
 
       // Apply damping direction
       force_damp_n[2] *= SIGNUM_DOUBLE(vr3);
@@ -672,57 +683,57 @@ void BondGran::compute(int eflag, int vflag)
 
       // Torque Damping in x direction --------------------------------------------------------------------------------
       // Internal Friction
-      torque_damp_n[0]  = -dt*K_tor*beta0[type]*Js_inv;
-      torque_damp_t[0]  = -dt*K_ben*beta0[type]*Js_inv;
+      torque_damp_n[0]  = mdn;
+      torque_damp_t[0]  = mdt;
       
       // Fluidic Damping
       torque_damp_n[0] += -K_tor*beta1[type]*sqrt(K_tor_inv*(bondhistlist[n][6]*bondhistlist[n][6]*K_tor_inv + I_n*wn1*wn1));
       torque_damp_t[0] += -K_ben*beta1[type]*sqrt(K_ben_inv*(bondhistlist[n][9]*bondhistlist[n][9]*K_ben_inv + I_t*wt1*wt1));
       
       // Quadratic Damping
-      torque_damp_n[0] += -dtInv*damp[type]*(bondhistlist[n][6]*bondhistlist[n][6]*K_tor_inv + I_n*wn1*wn1);
-      torque_damp_t[0] += -dtInv*damp[type]*(bondhistlist[n][9]*bondhistlist[n][9]*K_ben_inv + I_t*wt1*wt1);
+      torque_damp_n[0] += -beta2dtInv*(bondhistlist[n][6]*bondhistlist[n][6]*K_tor_inv + I_n*wn1*wn1);
+      torque_damp_t[0] += -beta2dtInv*(bondhistlist[n][9]*bondhistlist[n][9]*K_ben_inv + I_t*wt1*wt1);
 
       // Apply damping direction
       torque_damp_n[0] *= SIGNUM_DOUBLE(wr1);
       torque_damp_t[0] *= SIGNUM_DOUBLE(wr1);
 
-      // Torque Damping in x direction --------------------------------------------------------------------------------
+      // Torque Damping in y direction --------------------------------------------------------------------------------
       // Internal Friction
-      torque_damp_n[1]  = -dt*K_tor*beta0[type]*Js_inv;
-      torque_damp_t[1]  = -dt*K_ben*beta0[type]*Js_inv;
+      torque_damp_n[1]  = mdn;
+      torque_damp_t[1]  = mdt;
 
       // Fluidic Damping
       torque_damp_n[1] += -K_tor*beta1[type]*sqrt(K_tor_inv*(bondhistlist[n][7]*bondhistlist[n][7]*K_tor_inv + I_n*wn2*wn2));
       torque_damp_t[1] += -K_ben*beta1[type]*sqrt(K_ben_inv*(bondhistlist[n][10]*bondhistlist[n][10]*K_ben_inv + I_t*wt2*wt2));
       
       // Quadratic Damping
-      torque_damp_n[1] += -dtInv*damp[type]*(bondhistlist[n][7]*bondhistlist[n][7]*K_tor_inv + I_n*wn2*wn2);
-      torque_damp_t[1] += -dtInv*damp[type]*(bondhistlist[n][10]*bondhistlist[n][10]*K_ben_inv + I_t*wt2*wt2);
+      torque_damp_n[1] += -beta2dtInv*(bondhistlist[n][7]*bondhistlist[n][7]*K_tor_inv + I_n*wn2*wn2);
+      torque_damp_t[1] += -beta2dtInv*(bondhistlist[n][10]*bondhistlist[n][10]*K_ben_inv + I_t*wt2*wt2);
 
       // Apply damping direction
       torque_damp_n[1] *= SIGNUM_DOUBLE(wr2);
       torque_damp_t[1] *= SIGNUM_DOUBLE(wr2);
 
-      // Torque Damping in x direction --------------------------------------------------------------------------------
+      // Torque Damping in z direction --------------------------------------------------------------------------------
       // Internal Friction
-      torque_damp_n[2]  = -dt*K_tor*beta0[type]*Js_inv;
-      torque_damp_t[2]  = -dt*K_ben*beta0[type]*Js_inv;
+      torque_damp_n[2]  = mdn;
+      torque_damp_t[2]  = mdt;
       
       // Fluidic Damping
       torque_damp_n[2] += -K_tor*beta1[type]*sqrt(K_tor_inv*(bondhistlist[n][8]*bondhistlist[n][8]*K_tor_inv + I_n*wn3*wn3));
       torque_damp_t[2] += -K_ben*beta1[type]*sqrt(K_ben_inv*(bondhistlist[n][11]*bondhistlist[n][11]*K_ben_inv + I_t*wt3*wt3));
       
       // Quadratic Damping
-      torque_damp_n[2] += -dtInv*damp[type]*(bondhistlist[n][8]*bondhistlist[n][8]*K_tor_inv + I_n*wn3*wn3);
-      torque_damp_t[2] += -dtInv*damp[type]*(bondhistlist[n][11]*bondhistlist[n][11]*K_ben_inv + I_t*wt3*wt3);
+      torque_damp_n[2] += -beta2dtInv*(bondhistlist[n][8]*bondhistlist[n][8]*K_tor_inv + I_n*wn3*wn3);
+      torque_damp_t[2] += -beta2dtInv*(bondhistlist[n][11]*bondhistlist[n][11]*K_ben_inv + I_t*wt3*wt3);
 
       // Apply damping direction
       torque_damp_n[2] *= SIGNUM_DOUBLE(wr3);
       torque_damp_t[2] *= SIGNUM_DOUBLE(wr3);
       
     } else {
-
+        // You shouldn't have gotten here...
         error->all(FLERR,"Damp style does not exist\n");
 
     }
