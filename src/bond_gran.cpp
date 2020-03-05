@@ -1080,9 +1080,8 @@ double BondGran::getMinDt()
   int nbondlist = neighbor->nbondlist;
   int **bondlist = neighbor->bondlist;
 
-  bool isDamped = false;
-
-  double minDtSq = 1.0;
+  double curDt = 0.0;
+  double minDt = 1.0;
   double *radius = atom->radius;
   double *density = atom->density;
   double **bondhistlist = neighbor->bondhistlist;
@@ -1092,8 +1091,7 @@ double BondGran::getMinDt()
     int i1 = bondlist[k][0];
     int i2 = bondlist[k][1];
     int type = bondlist[k][2];
-    if (damp[type] > 0.0)
-      isDamped = true;
+
     double rin = ri[type]*fmin(radius[i1],radius[i2]); 
     double rout= ro[type]*fmin(radius[i1],radius[i2]);
     double A = M_PI * (rout*rout - rin*rin);
@@ -1101,10 +1099,14 @@ double BondGran::getMinDt()
     double m1 = 4.1887902047863909846168578443*density[i1]*radius[i1]*radius[i1]*radius[i1];
     double m2 = 4.1887902047863909846168578443*density[i2]*radius[i2]*radius[i2]*radius[i2];
     double Me = m1*m2/(m1+m2);
-    double curDtSq = Me/K;
-    if (curDtSq < minDtSq) minDtSq = curDtSq;
+    
+    curDt = sqrt(Me/K);
+    if (dampmode == DAMPSTYLE_YU_GUO) {
+      curDt /= (1.0 + 2.93*damp[type]);
+    } else {
+      curDt /= (1.0 + 2.93*damp[type]); // use same method for now, since damp is small, this should be close...
+    }
+    if (curDt < minDt) minDt = curDt;
   }
-  if (isDamped)
-    error->warning(FLERR, "Damping detected, dt value may still be too high");
-  return sqrt(minDtSq);
+  return minDt;
 }
