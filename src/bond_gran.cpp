@@ -615,8 +615,8 @@ void BondGran::compute(int eflag, int vflag)
       double Me_inv = 1.0/Me;
       double Js_inv = 1.0/Js;
 
-      double beta0dt = dt*beta0[type];
-      double beta2dtInv = damp[type]/dt;
+      double beta0dt = /*dt**/beta0[type];
+      double beta2dtInv = damp[type]/*/dt*/;
 
       // Get 2E/k for each dirrection
       // E = 0.5*Kx^2 + 0.5*mv^2
