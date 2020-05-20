@@ -42,10 +42,16 @@ large TODO list for granular bonds:  (could be a diploma thesis?)
 + need a better dissipative formulation than the hardcoded
   'dissipate' value which produces plastic deformation
   need some vel-dependant damping
+MS This has been done with a velocity based version and a force based version
+
 + need to carefully debug and validate this bond style
   valiation against fix rigid
+MS Validation has been done against the cantilever beam and beam theory.
+
 + check whether run this bond style w/ or w/o gran pair style active,
   (neigh_modify command)
+Needs grain to handle torque
+
 + need to store bond radii per particle, not per type
 + parallel debugging and testing not yet done
 + need evtally implemetation
@@ -53,6 +59,7 @@ large TODO list for granular bonds:  (could be a diploma thesis?)
 
 /* Matt Schramm edits for bond dampening --> MS */
 /* Yu Guo edits for bond dampening --> YG */
+/* D. Kramolis edits for domain end detection and other bug fixes --> KRAMOLIS */
 
 enum{
      BREAKSTYLE_SIMPLE,
@@ -195,43 +202,95 @@ void BondGran::compute(int eflag, int vflag)
     i2 = bondlist[n][1]; // Sphere 2
 
     //2nd check if bond overlap the box-borders
-    if (x[i1][0]<(domain->boxlo[0]+cutoff)) {
+    // KRAMOLIS do not use neighbor cutoff - it is usually set as 4 * atom radius or more (bugfix - correct sign - bonds were breaking inside domain far away from wall, added info about broken bonds) 
+   // should be rather bond_skin or bond_length or radius, enable periodic detection
+   //2nd check if bond overlap the box-borders
+    double maxoverlap = radius[i1];  // max overlap is diameter - but position is in the middle of atom
+    if ((x[i1][0]<(domain->boxlo[0]-maxoverlap)) && (domain->xperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at xmin\n");
+#     endif
       continue;
-    } else if (x[i1][0]>(domain->boxhi[0]-cutoff)) {
+    } else if ((x[i1][0]>(domain->boxhi[0]+maxoverlap)) && (domain->xperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at xmax\n");
+#     endif
       continue;
-    } else if (x[i1][1]<(domain->boxlo[1]+cutoff)) {
+    } else if ((x[i1][1]<(domain->boxlo[1]-maxoverlap)) && (domain->yperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at ymin\n");
+#     endif
       continue;
-    } else if (x[i1][1]>(domain->boxhi[1]-cutoff)) {
+    } else if ((x[i1][1]>(domain->boxhi[1]+maxoverlap)) && (domain->yperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at ymax\n");
+#     endif
       continue;
-    } else if (x[i1][2]<(domain->boxlo[2]+cutoff)) {
+    } else if ((x[i1][2]<(domain->boxlo[2]-maxoverlap)) && (domain->zperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at zmin\n");
+#     endif
       continue;
-    } else if (x[i1][2]>(domain->boxhi[2]-cutoff)) {
+    } else if ((x[i1][2]>(domain->boxhi[2]+maxoverlap)) && (domain->zperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at zmax\n");
+#     endif
       continue;
     }
-
-    if (x[i2][0]<(domain->boxlo[0]+cutoff)) {
+    maxoverlap = radius[i2];  // max overlap is diameter - but position is in the middle of atom
+    if ((x[i2][0]<(domain->boxlo[0]-maxoverlap)) && (domain->xperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at xmin\n");
+#     endif
       continue;
-    } else if (x[i2][0]>(domain->boxhi[0]-cutoff)) {
+    } else if ((x[i2][0]>(domain->boxhi[0]+maxoverlap)) && (domain->xperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at xmax\n");
+#     endif
       continue;
-    } else if (x[i2][1]<(domain->boxlo[1]+cutoff)) {
+    } else if ((x[i2][1]<(domain->boxlo[1]-maxoverlap)) && (domain->yperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at ymin\n");
+#     endif
       continue;
-    } else if (x[i2][1]>(domain->boxhi[1]-cutoff)) {
+    } else if ((x[i2][1]>(domain->boxhi[1]+maxoverlap)) && (domain->yperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at ymax\n");
+#     endif
       continue;
-    } else if (x[i2][2]<(domain->boxlo[2]+cutoff)) {
+    } else if ((x[i2][2]<(domain->boxlo[2]-maxoverlap)) && (domain->zperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at zmin\n");
+#     endif
       continue;
-    } else if (x[i2][2]>(domain->boxhi[2]-cutoff)) {
+    } else if ((x[i2][2]>(domain->boxhi[2]+maxoverlap)) && (domain->zperiodic == 0)) {
       bondlist[n][3]=1;
+#     ifdef LIGGGHTS_DEBUG
+        fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
+        fprintf(screen, "   bond overlaped domain border at zmax\n");
+#     endif
       continue;
     }
 
