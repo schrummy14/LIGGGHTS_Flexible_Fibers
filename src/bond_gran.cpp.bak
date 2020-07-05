@@ -189,12 +189,6 @@ void BondGran::compute(int eflag, int vflag)
     if(!fix_Temp) error->all(FLERR, "Internal error in BondGran");
     Temp = fix_Temp->vector_atom;
   }
-
-  /* if (comm->me) {
-    for (n = 0; n < nlocal; n++) {
-      fprintf(screen, "\natom->bondhist[%i][0] = [%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f]\n", n, atom->bond_hist[n][0][0],atom->bond_hist[n][0][1],atom->bond_hist[n][0][2],atom->bond_hist[n][0][3],atom->bond_hist[n][0][4],atom->bond_hist[n][0][5],atom->bond_hist[n][0][6],atom->bond_hist[n][0][7],atom->bond_hist[n][0][8],atom->bond_hist[n][0][9],atom->bond_hist[n][0][10],atom->bond_hist[n][0][11],atom->bond_hist[n][0][12]);
-    }
-  } */
   
   for (n = 0; n < nbondlist; n++) { // Loop through Bond list
     //1st check if bond is broken,
@@ -207,10 +201,10 @@ void BondGran::compute(int eflag, int vflag)
     i1 = bondlist[n][0]; // Sphere 1
     i2 = bondlist[n][1]; // Sphere 2
 
-    // 2nd check if bond overlap the box-borders
+    //2nd check if bond overlap the box-borders
     // KRAMOLIS do not use neighbor cutoff - it is usually set as 4 * atom radius or more (bugfix - correct sign - bonds were breaking inside domain far away from wall, added info about broken bonds) 
-    // should be rather bond_skin or bond_length or radius, enable periodic detection
-    // 2nd check if bond overlap the box-borders
+   // should be rather bond_skin or bond_length or radius, enable periodic detection
+   //2nd check if bond overlap the box-borders
     double maxoverlap = radius[i1];  // max overlap is diameter - but position is in the middle of atom
     if ((x[i1][0]<(domain->boxlo[0]-maxoverlap)) && (domain->xperiodic == 0)) {
       bondlist[n][3]=1;
@@ -895,53 +889,6 @@ void BondGran::compute(int eflag, int vflag)
         torque[i2][0] += radius[i2]*tor1 - (tot_torqu_x) - (tot_torqu_damp_x);
         torque[i2][1] += radius[i2]*tor2 - (tot_torqu_y) - (tot_torqu_damp_y);
         torque[i2][2] += radius[i2]*tor3 - (tot_torqu_z) - (tot_torqu_damp_z);
-      }
-    }
-  }
-  neigh2atom();
-}
-
-void BondGran::neigh2atom()
-{
-
-  int **bondlist = neighbor->bondlist;
-  double **bondhistlist = neighbor->bondhistlist;
-
-  int nbondlist = neighbor->nbondlist;
-
-  int i,m,k,neighID,atom1,atom2,atom11,atom22;
-
-  int nlocal = atom->nlocal;
-  int *num_bond = atom->num_bond;
-  int **bond_atom = atom->bond_atom;
-  int **bond_type = atom->bond_type;
-  double ***bond_hist = atom->bond_hist;  
-  int *tag = atom->tag;
-  int newton_bond = force->newton_bond;
-  int n_bondhist = atom->n_bondhist;  
-
-  for (i = 0; i < nlocal; i++) {
-    atom1 = i;
-    for (m = 0; m < num_bond[atom1]; m++) {
-      atom2 = atom->map(bond_atom[atom1][m]);
-      atom2 = domain->closest_image(atom1,atom2);
-      if (newton_bond || i < atom2) {
-
-        neighID = -1;
-        for (k = 0; k < nbondlist; k++) {
-          if ((bondlist[k][0]==atom1 && bondlist[k][1]==atom2) || ((bondlist[k][1]==atom1 && bondlist[k][0]==atom2))) {
-            neighID = k;
-
-            bond_type[i][m] = bondlist[neighID][2];
-            if(n_bondhist) { 
-              for(int j = 0; j < n_bondhist; j++) {
-                  bond_hist[i][m][j] = bondhistlist[neighID][j];
-              }
-            }
-
-            break;
-          }
-        }
       }
     }
   }
