@@ -8,8 +8,13 @@ Syntax: python install.py [-h] [libdir] [pydir]
         pydir = target dir for liggghts.py, default = Python site-packages dir
 """
 
-import sys,os # ,commands
-import subprocess as commands
+import sys,os
+
+if sys.version_info[0] == 2:
+  import commands
+else:
+  import subprocess as commands
+  
 
 if (len(sys.argv) > 1 and sys.argv[1] == "-h") or len(sys.argv) > 3:
   print(instructions)
