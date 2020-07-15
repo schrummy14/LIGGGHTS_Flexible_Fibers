@@ -169,6 +169,11 @@ void FixAirDrag::post_force(int vflag)
   double vrx, vry, vrz;
   double vel_norm; // norm of the velocity
 
+  // double sumX,sumY,sumZ;
+
+  sumX = 0.0;
+  sumY = 0.0;
+  sumZ = 0.0;
   for (int i = 0; i < nlocal; i++)
     if (mask[i] & groupbit) {
       if (iregion >= 0 &&
@@ -179,7 +184,7 @@ void FixAirDrag::post_force(int vflag)
       // Calculate b and c coefficients for forces
       // Equations from "Classical Mechanics" by John R. Taylor
       // Linear term b = 3*pi*nu*D
-      b = M_6_PI * air_viscosity * radius[i]; // 6 * pi * vu * r
+      b = M_6_PI * air_viscosity * radius[i]; // 6 * pi * nu * r
       // Quadratic term c = k*p*A
       c = M_PI_4 * air_density *radius[i]*radius[i]; // 0.25 * rho * pi*r*r
 
@@ -192,6 +197,10 @@ void FixAirDrag::post_force(int vflag)
       f[i][0] += vrx*temp;
       f[i][1] += vry*temp;
       f[i][2] += vrz*temp;
+
+      sumX += vrx*temp;
+      sumY += vry*temp;
+      sumZ += vrz*temp;
       
       // TORQUES ---------------------------------------------------------
       // Equations from "Viscous torque on a sphere under arbitrary rotation" by U. Lei et all
@@ -200,6 +209,7 @@ void FixAirDrag::post_force(int vflag)
       T[i][1] -= d*omega[i][1];
       T[i][2] -= d*omega[i][2];
     }
+//    fprintf(screen,"Total Drag Force (%.6e, %.6e, %.6e)\n", sumX, sumY, sumZ);
 }
 
 /* ---------------------------------------------------------------------- */

@@ -60,7 +60,7 @@ class BondGran : public Bond {
   double *ro, *ri; // Outside and Inside bond radius scale
 
   void allocate();
-  void neigh2atom();
+  void neigh2atom(double);
 
   class FixPropertyAtom *fix_Temp;
   double *Temp;

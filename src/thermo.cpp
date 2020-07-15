@@ -642,6 +642,8 @@ void Thermo::parse_fields(char *str)
       addfield("numbonds",&Thermo::compute_numbond,BIGINT);  // added for bond_package
     } else if (strcmp(word,"time") == 0) {
       addfield("Time",&Thermo::compute_time,FLOAT);
+    } else if (strcmp(word,"bondEnergy") == 0) {  // added for bond_package
+      addfield("bondEnergy",&Thermo::compute_bondEnergy,FLOAT);  // added for bond_package
     } else if (strcmp(word,"cpu") == 0) {
       addfield("CPU",&Thermo::compute_cpu,FLOAT);
     } else if (strcmp(word,"tpcpu") == 0) {
@@ -1036,6 +1038,7 @@ int Thermo::evaluate_keyword(char *word, double *answer)
   else if (strcmp(word,"cellbeta") == 0) compute_cellbeta();
   else if (strcmp(word,"cellgamma") == 0) compute_cellgamma();
   else if (strcmp(word,"numbonds") == 0) compute_numbond();	// added for bond package
+  else if (strcmp(word,"bondEnergy") == 0) compute_bondEnergy(); // added for bond package
 
   else return 1;
 
@@ -1418,6 +1421,16 @@ void Thermo::compute_numbond()
   bigint bondall;
   MPI_Allreduce(&numbond,&bondall,1,MPI_LMP_BIGINT,MPI_SUM,world);
   bivalue = bondall/2; //every bond is counted twice (for every partner-atom)
+}
+
+/* ---------------------------------------------------------------------- */
+
+void Thermo::compute_bondEnergy()
+{
+  double localBondEnergy = atom->getBondEnergy();
+  double allBondEnergy = 0.0;
+  MPI_Allreduce(&localBondEnergy, &allBondEnergy,1,MPI_DOUBLE,MPI_SUM,world);
+  dvalue = allBondEnergy;
 }
 
 /* ---------------------------------------------------------------------- */

@@ -130,6 +130,7 @@ class Atom : protected Pointers {
   int **bond_atom;     
   double ***bond_hist; 
   int disableNormalContact = 0;
+  double totBondEnergy = 0.0;
                        
   int *num_angle;
   int **angle_type;
@@ -288,6 +289,9 @@ class Atom : protected Pointers {
   void map_one(int, int);
   void map_delete();
   int map_find_hash(int);
+
+  double getBondEnergy(){return totBondEnergy;};
+  void setBondEnergy(double val){totBondEnergy = val;};
 
  private:
 
