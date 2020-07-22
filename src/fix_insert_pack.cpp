@@ -157,6 +157,24 @@ FixInsertPack::FixInsertPack(LAMMPS *lmp, int narg, char **arg) :
         error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'do_dense_pack'");
       iarg += 2;
       hasargs = true;
+    } else if (strcmp(arg[iarg],"bound_insert") == 0) {
+      boundInsert = true;
+      if (iarg+3 > narg) {
+        fprintf(screen, "Expecting a direction and a value after bound_insert\n");
+        error->fix_error(FLERR,this,"");
+      }
+      if (strcmp(arg[iarg+1],"x") == 0) {
+        boundDirection = 0;
+      } else if (strcmp(arg[iarg+1],"y") == 0) {
+        boundDirection = 1;
+      } else if (strcmp(arg[iarg+1],"z") == 0) {
+        boundDirection = 2;
+      } else {
+        error->fix_error(FLERR,this,"Expecting x, y, or z after bound_insert");
+      }
+      boundVal = atof(arg[iarg+2]);
+      iarg += 3;
+      hasargs = true;
     } else if(strcmp(style,"insert/pack") == 0)
         error->fix_error(FLERR,this,"unknown keyword");
   }
@@ -193,6 +211,7 @@ void FixInsertPack::init_defaults()
 
       warn_region = true;
       use_dense_pack = false;
+      boundInsert = false;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -460,6 +479,9 @@ void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, 
       while(nins == 0 && ntry < maxtry) {
         //fprintf(screen,"Looking for insertion point\n");
         ins_region->generate_random_shrinkby_cut(pos, rbound, true);
+        if (boundInsert) {
+          pos[boundDirection] = boundVal+pti->r_bound_ins;
+        }
         //fprintf(screen,"Found insertion point\n");
         ++ntry;
         // randomize vel, omega, quat here
@@ -497,6 +519,12 @@ void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, 
         if(all_in_flag) ins_region->generate_random_shrinkby_cut(pos,rbound,true);
         else ins_region->generate_random(pos,true);
 
+        // fprintf(screen, "\n\nPos = [%f, %f, %f]\n", pos[0], pos[1], pos[2]);
+        if (boundInsert) {
+          pos[boundDirection] = boundVal;
+        }
+        // fprintf(screen, "Pos = [%f, %f, %f]\n", pos[0], pos[1], pos[2]);
+
         // randomize vel, omega, quat here
         vectorCopy3D(v_insert,v_toInsert);
         // could ramdonize vel, omega, quat here
@@ -532,6 +560,12 @@ void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, 
             if(all_in_flag) ins_region->generate_random_shrinkby_cut(pos,rbound,true);
             else ins_region->generate_random(pos,true);
             ntry++;
+
+            // fprintf(screen, "\n\nPos = [%f, %f, %f]\n", pos[0], pos[1], pos[2]);
+            if (boundInsert) {
+              pos[boundDirection] = boundVal;
+            }
+            // fprintf(screen, "Pos = [%f, %f, %f]\n", pos[0], pos[1], pos[2]);
 
           }while((check_dist_from_subdomain_border_) && (ntry < maxtry && domain->dist_subbox_borders(pos) < rbound));
 

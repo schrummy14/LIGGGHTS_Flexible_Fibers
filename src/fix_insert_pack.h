@@ -102,6 +102,10 @@ class FixInsertPack : public FixInsert {
   // use dense packing
   bool use_dense_pack;
 
+  bool boundInsert;
+  int boundDirection;
+  double boundVal;
+
 };
 
 }

@@ -78,6 +78,8 @@ FixBondCreateGran::FixBondCreateGran(LAMMPS *lmp, int narg, char **arg) :
   if (cutoff < 0.0) error->all(FLERR,"Illegal fix bond/create command");
   if (btype < 1 || btype > atom->nbondtypes)
     error->all(FLERR,"Invalid bond type in fix bond/create command");
+  
+  doNorm = false;
 
   cutsq = cutoff*cutoff;
 
@@ -117,6 +119,16 @@ FixBondCreateGran::FixBondCreateGran(LAMMPS *lmp, int narg, char **arg) :
         error->all(FLERR,"Illegal fix bond/create command");
       if (atoi(seed) <= 0) error->all(FLERR,"Illegal fix bond/create command");
       iarg += 3;
+    } else if (strcmp(arg[iarg],"doNorm") == 0) {
+      if (iarg+2 > narg) error->all(FLERR,"Illegal fix bond/create command");
+      if (strcmp(arg[iarg+1],"yes") == 0) {
+        doNorm = true;
+      } else if (strcmp(arg[iarg+1],"no") == 0) {
+        doNorm = false;
+      } else {
+        error->all(FLERR,"Expected yes or no after doNorm");
+      }
+      iarg += 2;
     } else error->all(FLERR,"Illegal fix bond/create command");
   }
 
@@ -225,11 +237,13 @@ void FixBondCreateGran::init()
   if(!(force->bond_match("gran")))
      error->all(FLERR,"Fix bond/create can only be used together with dedicated 'granular' bond styles");
 
-  // check cutoff for iatomtype,jatomtype - cutneighsq is used here
-  double cutsq_limit = sqrt(force->pair->cutsq[iatomtype][jatomtype]) + neighbor->skin;
-  cutsq_limit *= cutsq_limit;
-  if (force->pair == NULL || cutsq > cutsq_limit)
-    error->all(FLERR,"Fix bond/create cutoff is longer than pairwise cutoff");
+  // check cutoff for iatomtype,jatomtype - cutneighsq is used here only if doNorm is false
+  if (doNorm == false) {
+    double cutsq_limit = sqrt(force->pair->cutsq[iatomtype][jatomtype]) + neighbor->skin;
+    cutsq_limit *= cutsq_limit;
+    if (force->pair == NULL || cutsq > cutsq_limit)
+      error->all(FLERR,"Fix bond/create cutoff is longer than pairwise cutoff");
+  }
 /*
   // require special bonds = 0,1,1
 
@@ -316,9 +330,10 @@ void FixBondCreateGran::setup(int vflag)
 void FixBondCreateGran::post_integrate()
 {
   int i,j,k,m,ii,jj,inum,jnum,itype,jtype,n1,n3,possible;
-  double xtmp,ytmp,ztmp,delx,dely,delz,rsq,min,max;
+  double xtmp,ytmp,ztmp,delx,dely,delz,rsq,min,max,r1,r2;
   int *ilist,*jlist,*numneigh,**firstneigh,*slist;
   int flag;
+  bool skipBond;
 
   if (nevery == 0 || update->ntimestep % nevery ) return;
 
@@ -354,6 +369,7 @@ void FixBondCreateGran::post_integrate()
   // loop over neighbors of my atoms
   // each atom sets one closest eligible partner atom ID to bond with
 
+  double *radius = atom->radius;
   double **x = atom->x;
   int *tag = atom->tag;
   int *mask = atom->mask;
@@ -370,6 +386,7 @@ void FixBondCreateGran::post_integrate()
     i = ilist[ii];
     if (!(mask[i] & groupbit)) continue;
     itype = type[i];
+    r1 = radius[i];
     xtmp = x[i][0];
     ytmp = x[i][1];
     ztmp = x[i][2];
@@ -399,7 +416,15 @@ void FixBondCreateGran::post_integrate()
       dely = ytmp - x[j][1];
       delz = ztmp - x[j][2];
       rsq = delx*delx + dely*dely + delz*delz;
-      if (rsq >= cutsq) continue;
+      
+      if (doNorm) {
+        r2 = radius[j];
+        skipBond = (rsq/((r1+r2)*(r1+r2)) >= cutsq);
+
+      } else {
+        skipBond = (rsq >= cutsq);
+      }
+      if (skipBond) continue;
 
       if(already_bonded(i,j)) continue;
 
