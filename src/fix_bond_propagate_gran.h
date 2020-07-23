@@ -40,6 +40,7 @@ class FixBondPropagateGran : public Fix {
   void pre_exchange();
   void write_restart(FILE *);
   void restart(char *);
+  void post_run();
 
  private:
   void remove_bond(int ilocal,int ibond, int bondnumber);

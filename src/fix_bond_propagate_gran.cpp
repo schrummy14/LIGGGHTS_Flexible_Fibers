@@ -258,3 +258,54 @@ void FixBondPropagateGran::restart(char *buf)
 
   //error->warning(FLERR,"Restart functionality not yet tested for granular bonds...");
 }
+
+
+/* ----------------------------------------------------------------------
+    Take bond histories from neighbor class and store them into the atom
+    class. This needs to be done for CFD-DEM coupling. If this is not
+    done, the fiber will "forget" what the histories were and the bonds
+    will reset to equilibrium conditions.
+------------------------------------------------------------------------- */
+void FixBondPropagateGran::post_run() 
+{
+  int **bondlist = neighbor->bondlist;
+  double **bondhistlist = neighbor->bondhistlist;
+
+  int nbondlist = neighbor->nbondlist;
+
+  int i,m,k,neighID,atom1,atom2,atom11,atom22;
+
+  int nlocal = atom->nlocal;
+  int *num_bond = atom->num_bond;
+  int **bond_atom = atom->bond_atom;
+  int **bond_type = atom->bond_type;
+  double ***bond_hist = atom->bond_hist;  
+  int *tag = atom->tag;
+  int newton_bond = force->newton_bond;
+  int n_bondhist = atom->n_bondhist;  
+
+  for (i = 0; i < nlocal; i++) {
+    atom1 = i;
+    for (m = 0; m < num_bond[atom1]; m++) {
+      atom2 = atom->map(bond_atom[atom1][m]);
+      if (newton_bond || i < atom2) {
+
+        neighID = -1;
+        for (k = 0; k < nbondlist; k++) {
+          if ((bondlist[k][0]==atom1 && bondlist[k][1]==atom2) || ((bondlist[k][1]==atom1 && bondlist[k][0]==atom2))) {
+            neighID = k;
+
+            bond_type[i][m] = bondlist[neighID][2];
+            if(n_bondhist) { 
+              for(int j = 0; j < n_bondhist; j++) {
+                  bond_hist[i][m][j] = bondhistlist[neighID][j];
+              }
+            }
+
+            break;
+          }
+        }
+      }
+    }
+  }
+}

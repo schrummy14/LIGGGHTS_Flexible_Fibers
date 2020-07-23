@@ -1040,55 +1040,8 @@ void BondGran::compute(int eflag, int vflag)
       }
     }
   }
-  neigh2atom(0.5*totBondEnergy);
-}
-
-void BondGran::neigh2atom(double totBondEnergy)
-{
-
-  int **bondlist = neighbor->bondlist;
-  double **bondhistlist = neighbor->bondhistlist;
-
-  int nbondlist = neighbor->nbondlist;
-
-  int i,m,k,neighID,atom1,atom2,atom11,atom22;
-
-  int nlocal = atom->nlocal;
-  int *num_bond = atom->num_bond;
-  int **bond_atom = atom->bond_atom;
-  int **bond_type = atom->bond_type;
-  double ***bond_hist = atom->bond_hist;  
-  int *tag = atom->tag;
-  int newton_bond = force->newton_bond;
-  int n_bondhist = atom->n_bondhist;  
-
-  atom->setBondEnergy(totBondEnergy);
-
-  for (i = 0; i < nlocal; i++) {
-    atom1 = i;
-    for (m = 0; m < num_bond[atom1]; m++) {
-      atom2 = atom->map(bond_atom[atom1][m]);
-      atom2 = domain->closest_image(atom1,atom2);
-      if (newton_bond || i < atom2) {
-
-        neighID = -1;
-        for (k = 0; k < nbondlist; k++) {
-          if ((bondlist[k][0]==atom1 && bondlist[k][1]==atom2) || ((bondlist[k][1]==atom1 && bondlist[k][0]==atom2))) {
-            neighID = k;
-
-            bond_type[i][m] = bondlist[neighID][2];
-            if(n_bondhist) { 
-              for(int j = 0; j < n_bondhist; j++) {
-                  bond_hist[i][m][j] = bondhistlist[neighID][j];
-              }
-            }
-
-            break;
-          }
-        }
-      }
-    }
-  }
+  // neigh2atom(0.5*totBondEnergy);
+  atom->setBondEnergy(0.5*totBondEnergy);
 }
 
 /* ---------------------------------------------------------------------- */
