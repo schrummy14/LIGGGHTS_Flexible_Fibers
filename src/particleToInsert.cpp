@@ -199,8 +199,8 @@ void ParticleToInsert::doFiberBond()
         
         fprintf(screen, "setting bond histories to zero...");
         for (int ih = 0; ih < n_bondhist; ih++) {
-            bond_hist[i][i+1][ih] = 0.;
-            bond_hist[i+1][i][ih] = 0.;
+            bond_hist[i][num_bond[i]][ih] = 0.;
+            bond_hist[i+1][num_bond[i+1]][ih] = 0.;
         }
         num_bond[i]++;
         num_bond[i+1]++;
