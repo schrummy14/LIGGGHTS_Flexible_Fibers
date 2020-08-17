@@ -215,12 +215,12 @@ if __name__ == "__main__":
     X2 = df[["frq","bgd"]] # X = df[["frq","bgd"]]
     y = df["bld"]
 
-    md1 = fitlm(X1,y,"quadratic")
+#    md1 = fitlm(X1,y,"quadratic")
     # print(md1.summary())
     md2 = fitlm(X2,y,"interactions")
-    # print(md2.summary())
+    print(md2.summary())
 
-    sLM = stepwiselm(X2,y)
+    sLM = stepwiselm(X2,y,'interactions')
     print(sLM.summary())
 
     # plt.plot(bld,bgd,'o')

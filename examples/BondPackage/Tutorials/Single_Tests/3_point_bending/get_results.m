@@ -20,16 +20,18 @@ figure
 plot(x(1:id_max),f(1:id_max),x(id_max+1:end),f(id_max+1:end))
 xlabel ('Displacement (mm)')
 ylabel ('Force (N)')
-legend ('Compression','Release','Location','NW')
+% legend ('Compression','Release','Location','NW')
+legend('Compression', 'Release')
 title 'Raw Data'
 
 %% Smooth the data a litte
-f = medfilt1(f,15);
+%f = medfilt1(f,15);
 figure
 plot(x(1:id_max),f(1:id_max),x(id_max+1:end),f(id_max+1:end))
 xlabel ('Displacement (mm)')
 ylabel ('Force (N)')
-legend ('Compression','Release','Location','NW')
+% legend ('Compression','Release','Location','NW')
+legend('Compression','Release')
 title 'Smoothed Data'
 
 %% Find linear portion of the curve
@@ -67,3 +69,4 @@ end
 
 figure 
 plot(x_new,f_new,'k-',x_new,f_prime,'r--')
+pause

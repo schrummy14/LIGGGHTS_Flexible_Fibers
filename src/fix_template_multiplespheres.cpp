@@ -99,8 +99,11 @@ FixTemplateMultiplespheres::FixTemplateMultiplespheres(LAMMPS *lmp, int narg, ch
   // re-create pti with correct nspheres
   delete pti;
   pti = new ParticleToInsert(lmp,nspheres);
+  bondType = 0;
+  pti->bondType = 0;
 
   bonded = false;
+  pti->isBonded = bonded;
   fix_bond_random_id = 0;
 
   for (int i = 0; i < 3; i++) {
@@ -209,12 +212,19 @@ FixTemplateMultiplespheres::FixTemplateMultiplespheres(LAMMPS *lmp, int narg, ch
     {
         if (narg < iarg+2)
             error->fix_error(FLERR,this,"not enough arguments for 'bonded'");
-        if(0 == strcmp(arg[iarg+1],"yes"))
+        if(0 == strcmp(arg[iarg+1],"yes")) {
             bonded = true;
-        else if(0 == strcmp(arg[iarg+1],"no"))
+            if (narg < iarg+3)
+                error->fix_error(FLERR,this,"not enough arguments for 'bonded yes'");
+            bondType = atoi(arg[iarg+2]);
+            iarg+=1;
+        } else if(0 == strcmp(arg[iarg+1],"no"))
             bonded = false;
         else
             error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'bonded'");
+        pti->isBonded = bonded;
+        pti->bondType = bondType;
+        // fprintf(screen, "\n\nisBonded = %s\n", bonded ? "yes" : "no");
         iarg+=2;
     }
     else if(strcmp(style,"particletemplate/multiplespheres") == 0)
@@ -227,7 +237,6 @@ FixTemplateMultiplespheres::FixTemplateMultiplespheres(LAMMPS *lmp, int narg, ch
 
   if(ntry < 1e3) error->fix_error(FLERR,this,"ntry is too low");
   if(comm->me == 0 && ntry < 1e5) error->warning(FLERR,"fix particletemplate/multisphere: ntry is very low");
-
 }
 
 /* ---------------------------------------------------------------------- */
@@ -258,7 +267,6 @@ void FixTemplateMultiplespheres::post_create()
 
     if(bonded && !fix_bond_random_id)
     {
-
         fix_bond_random_id = static_cast<FixPropertyAtom*>(modify->find_fix_property("bond_random_id","property/atom","scalar",0,0,this->style,false));
 
         if(!fix_bond_random_id)
@@ -597,6 +605,8 @@ void FixTemplateMultiplespheres::randomize_ptilist(int n_random,int distribution
           pti->r_bound_ins = r_bound;
           vectorCopy3D(x_bound,pti->x_bound_ins);
           pti->atom_type = atom_type;
+          pti->isBonded = bonded;
+          pti->bondType = bondType;
           if(atom_type_sphere)
           {
             vectorCopyN(atom_type_sphere,pti->atom_type_vector,nspheres);

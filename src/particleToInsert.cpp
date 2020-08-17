@@ -69,6 +69,9 @@ ParticleToInsert::ParticleToInsert(LAMMPS* lmp, int ns, FixPropertyAtom * const 
 
     nparticles = ns;
 
+    isBonded = false;
+    bondType = 0;
+
     memory->create(x_ins,nparticles,3,"x_ins");
     radius_ins = new double[nparticles];
 
@@ -125,6 +128,9 @@ int ParticleToInsert::insert()
                 vectorCopy3D(omega_ins,atom->omega[m]);
                 atom->radius[m] = radius_ins[i];
                 atom->density[m] = density_ins;
+                // atom->tag[m] = m;
+
+                // fprintf(screen, "Atom[%i]->tag = %i\n", m, atom->tag[m]);
                 
                 atom->rmass[m] = (1==nparticles)? (mass_ins) : (4.18879020479/*4//3*pi*/*radius_ins[i]*radius_ins[i]*radius_ins[i]*density_ins);
 
@@ -153,8 +159,90 @@ int ParticleToInsert::insert()
                     fix_release->array_atom[m][14] = (double) id_ins;
         //}
     }
-    
+    fprintf(screen, "\ninserted = %d\n", inserted);
+    if (inserted > 1) doFiberBond();
     return inserted;
+}
+
+/* ---------------------------------------------------------------------- */
+void ParticleToInsert::doFiberBond()
+{
+    if (!isBonded) return;
+
+    int *tag = atom->tag;
+    int **bond_type = atom->bond_type;
+    int **bond_atom = atom->bond_atom;
+    int *num_bond = atom->num_bond;
+    int n_bondhist = atom->n_bondhist;
+    double ***bond_hist = atom->bond_hist;
+
+    int bondStart = atom->nlocal - nparticles;
+    int bondEnd = atom->nlocal - 1;
+
+    for (int i = bondStart; i < bondEnd; i++) {
+        fprintf(screen, "Setting num_bond[%i] = 0, ", i);
+        num_bond[i] = 0;
+    }
+    fprintf(screen, "Setting num_bond[%i] = 0\n", bondEnd);
+    num_bond[bondEnd] = 0;
+
+    for (int i = bondStart; i < bondEnd; i++) {
+        fprintf(screen, "Connecting atom %i to %i...", i, i+1);
+        bond_type[i][num_bond[i]] = bondType;
+        bond_atom[i][num_bond[i]] = i+1+1;
+        fprintf(screen, " Done\n");
+
+        fprintf(screen, "Connecting atom %i to %i...", i+1, i);
+        bond_type[i+1][num_bond[i+1]] = bondType;
+        bond_atom[i+1][num_bond[i+1]] = i+1;
+        fprintf(screen, " Done\n");
+        
+        fprintf(screen, "setting bond histories to zero...");
+        for (int ih = 0; ih < n_bondhist; ih++) {
+            bond_hist[i][i+1][ih] = 0.;
+            bond_hist[i+1][i][ih] = 0.;
+        }
+        num_bond[i]++;
+        num_bond[i+1]++;
+        fprintf(screen, " Done\n");
+    }
+    fprintf(screen, "Finished this particle\n");
+    // bond_type[bondEnd][num_bond[bondEnd]] = bondType;
+    // bond_atom[bondEnd][num_bond[bondEnd]] = bondEnd - 1;
+
+    // fprintf(screen, "\nnlocal = %i\nbondStart = %i\nbondEnd = %i\n", atom->nlocal, bondStart, bondEnd);
+
+    // fprintf(screen, "connecting atoms %i to %i\n", bondStart, bondStart+1);
+    // num_bond[bondStart] = 1;
+    // bond_type[bondStart][0] = bondType; // bondType;  
+    // bond_atom[bondStart][0] = bondStart+1;
+    // //reset history
+    // for (int ih = 0; ih < n_bondhist; ih++) {
+    //     bond_hist[bondStart][bondStart+1][ih] = 0.;
+    // }
+
+    // fprintf(screen, "connecting atoms %i to %i\n", bondEnd, bondEnd-1);
+    // num_bond[bondEnd] = 1;
+    // bond_type[bondEnd][0] = bondType;  
+    // bond_atom[bondEnd][0] = bondEnd-1;
+    // //reset history
+    // for (int ih = 0; ih < n_bondhist; ih++) {
+    //     bond_hist[bondEnd][bondEnd-1][ih] = 0.;
+    // }
+
+    // for(int i = (bondStart+1); i < (bondEnd); i++) {
+    //     fprintf(screen, "connecting atoms %i to %i and %i to %i\n", i, i-1, i, i+1);
+    //     num_bond[i] = 2;
+    //     bond_type[i][0] = bondType;
+    //     bond_type[i][1] = bondType;
+    //     bond_atom[i][0] = i-1;
+    //     bond_atom[i][1] = i+1;
+    //     //reset history
+    //     for (int ih = 0; ih < n_bondhist; ih++) {
+    //         bond_hist[i][i+1][ih] = 0.;
+    //         bond_hist[i][i-1][ih] = 0.;
+    //     }
+    // }
 }
 
 /* ---------------------------------------------------------------------- */

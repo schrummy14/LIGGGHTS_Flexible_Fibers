@@ -6,7 +6,7 @@ variable particle_diameter       equal 2.83e-3    # meters
 variable bond_out_diameter       equal 2.83e-3    # meters
 variable bond_in_diameter        equal 0.0        # meters
 variable bond_damp_type          equal 1          # Use Yu Guo Damping
-variable bond_damp_val           equal 50.0       # NA
+variable bond_damp_val           equal 1.0       # NA
 variable particle_density        equal 420.0      # kg/m3
 variable contact_youngs_modulus  equal 1.0e9      # Pa
 variable bond_youngs_modulus     equal 1.0e9      # Pa
@@ -16,10 +16,10 @@ variable particle_poissons_ratio equal 0.3        # NA
 variable deflection_distance     equal 20.0e-3 # distance to deflect the straw
 variable deflection_speed        equal 1.0     # the speed of the deflection (m/s)
 variable wait_time               equal 25.0e-3 # time we wait for the beam to settle in seconds
-variable vibrate_time            equal 0.125   # time we let the beam vibrate in seconds
+variable vibrate_time            equal 0.25   # time we let the beam vibrate in seconds
 variable fileprint_time          equal 1.0e-3  # how often we print to the file in seconds
-variable thermo_time             equal 1.0e-4  # how often we print to the screen in seconds
-variable output_time             equal 5.0e-5  # how often we print to beam.csv in seconds
+variable thermo_time             equal 1.0e-3  # how often we print to the screen in seconds
+variable output_time             equal 5.0e-3  # how often we print to beam.csv in seconds
 
 ### Material Dependent Properties
 variable particle_radius         equal 0.5*${particle_diameter}
@@ -94,7 +94,8 @@ neigh_modify delay 0 # Update neighbors whenever we need to
 pair_coeff * *
 
 # Bond coefficients (Bond type) (Outside Bond ) (Inside Bond) (Bond_Y) (Bond_G) (Bond_Damp_Type) (Bond_Damp) (Bond_Break_Type) (Crit_Norm) (Crit_Tan)
-bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
+# bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
+  bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} 5 0.0 0.05 0.0 1 1.0e16 1.0e16
 
 # Material Properties
 fix m1 all property/global youngsModulus peratomtype ${contact_youngs_modulus}

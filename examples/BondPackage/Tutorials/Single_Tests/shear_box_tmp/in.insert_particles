@@ -1,5 +1,5 @@
 ## DEM Shear Test of wheat straw in LIGGGHTS
-
+variable numPars equal 2000
 ### Material Independent Properties
 variable particle_diameter             equal 2.50e-3    # particles diameter in meters
 variable bond_out_diameter             equal 2.50e-3    # fiber outer diameter in meters
@@ -133,7 +133,7 @@ fix pts1 all particletemplate/multiplespheres 15485863 atom_type 1 &
                 0.0025 0.0 0.0 0.00125 &
                 0.0050 0.0 0.0 0.00125 &
                 0.0075 0.0 0.0 0.00125 &
-                bonded no
+                bonded yes 1
 
 # Set the distribution of particles
 fix  pdd1 all particledistribution/discrete 32452843  1 pts1 1.0
@@ -145,7 +145,7 @@ region fill_box block 0.0 0.1015 0.0 0.1015 0.0065 0.0835 units box
 fix ins all insert/pack seed 32452867 distributiontemplate pdd1 &
         maxattempt 50000 insert_every once overlapcheck yes orientation random &
         all_in yes vel constant 0.0 0.0 -0.0 region fill_box &
-        particles_in_region 5000 ntry_mc 10000 check_dist_from_subdomain_border no
+        particles_in_region ${numPars} ntry_mc 10000 check_dist_from_subdomain_border no
 
 # Set the timestep to use
 timestep ${dt}
@@ -153,12 +153,14 @@ timestep ${dt}
 # Set skin for for bond creation
 variable bond_skin equal 1.000001*${particle_diameter}
 
+thermo_style custom step atoms numbonds ke
+
 # Bond the atoms together to form fibers
 run 1
-fix bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff btype newperts
-run 1
-fix_modify bondcr every 0  #do not create new bonds after this line
-run 1
+# fix bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff btype newperts
+#run 1
+# fix_modify bondcr every 0  #do not create new bonds after this line
+#run 1
 
 # Write the restart file
 write_restart restarts/restart0.liggghts

@@ -290,9 +290,9 @@ int FixParticledistributionDiscrete::random_init_single(int ntotal)
 Region* FixParticledistributionDiscrete::randomize_single()
 {
     if(ntemplates == 1){
-         templates[0]->randomize_single();
+        templates[0]->randomize_single();
          
-         return templates[0]->region(); 
+        return templates[0]->region(); 
     }
 
     //choose a template from the discrete distribution, beginning from large to small particles

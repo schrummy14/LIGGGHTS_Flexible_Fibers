@@ -37,7 +37,7 @@ variable r3                      equal ${r2}*${particle_radius}
 variable K                       equal ${bond_youngs_mod_max}*PI*${r2}/${bond_length}
 variable m                       equal 4.0*PI*${r3}*${particle_density}/3.0
 variable w                       equal sqrt($K/$m)
-variable dt                      equal 0.95/((1.1+2.9*${bond_damp_val_max})*$w)
+variable dt                      equal 1.0e-7 # 0.95/((1.1+2.9*${bond_damp_val_max})*$w)
 
 ### Simulation Dependent Parameters
 variable time_to_deflect         equal (${deflection_distance}+0.5*${particle_diameter})/${deflection_speed}
@@ -99,7 +99,7 @@ neigh_modify delay 0 # Update neighbors whenever we need to
 pair_coeff * *
 
 # Bond coefficients (Bond type) (Outside Bond ) (Inside Bond) (Bond_Y) (Bond_G) (Bond_Damp_Type) (Bond_Damp) (Bond_Break_Type) (Crit_Norm) (Crit_Tan)
-bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
+bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} 6 0.0 ${bond_damp_val} 0.0 1 1.0e32 1.0e32
 
 # Material Properties
 fix m1 all property/global youngsModulus peratomtype ${contact_youngs_modulus}
@@ -129,7 +129,7 @@ variable sim_time equal step*${dt}
 variable px equal x[${lastone}]
 variable pz equal z[${lastone}]
 variable vz equal vz[${lastone}]
-thermo_style custom step atoms numbond v_sim_time cpu cpuremain v_pz v_vz ke
+thermo_style custom step atoms numbonds v_sim_time cpu cpuremain v_pz v_vz ke
 thermo ${thermo_step}
 thermo_modify lost ignore norm no
 

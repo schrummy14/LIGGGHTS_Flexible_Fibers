@@ -481,36 +481,34 @@ void FixBondCreateGran::post_integrate()
   for (i = 0; i < nlocal; i++) {
     if (npartner[i] == 0) continue; //NP modified C.K.
 
-    for(k = 0; k < npartner[i]; k++)
-    {
-        j = atom->map(partner[i][k]);
+    for(k = 0; k < npartner[i]; k++) {
+      j = atom->map(partner[i][k]);
 
-        int found = 0;
-        for(int jp = 0; jp < npartner[j]; jp++)
-            if(partner[j][jp] == tag[i]) found = 1;
-        if (!found) error->all(FLERR,"Internal fix bond/create error");
+      int found = 0;
+      for(int jp = 0; jp < npartner[j]; jp++)
+          if(partner[j][jp] == tag[i]) found = 1;
+      if (!found) error->all(FLERR,"Internal fix bond/create error");
 
-        // apply probability constraint
-        // MIN,MAX insures values are added in same order on different procs
+      // apply probability constraint
+      // MIN,MAX insures values are added in same order on different procs
 
-        if (fraction < 1.0) {
-          min = MIN(probability[i],probability[j]);
-          max = MAX(probability[i],probability[j]);
-          if (0.5*(min+max) >= fraction) continue;
-        }
+      if (fraction < 1.0) {
+        min = MIN(probability[i],probability[j]);
+        max = MAX(probability[i],probability[j]);
+        if (0.5*(min+max) >= fraction) continue;
+      }
 
-        /*NL*///
-        // fprintf(screen,"creating bond btw atoms %d and %d (i has now %d bonds) at step %d\n",i,j,num_bond[i]+1,update->ntimestep);
+      /*NL*///
+      // fprintf(screen,"creating bond btw atoms %d and %d (i has now %d bonds) at step %d\n",i,j,num_bond[i]+1,update->ntimestep);
 
-        // if newton_bond is set, only store with I or J
-        // if not newton_bond, store bond with both I and J
+      // if newton_bond is set, only store with I or J
+      // if not newton_bond, store bond with both I and J
 
-        if (!newton_bond || tag[i] < tag[j]) 
-	{ 
-	  if (num_bond[i] == atom->bond_per_atom)  
-	      error->one(FLERR,"New bond exceeded bonds per atom in fix bond/create");
-          bond_type[i][num_bond[i]] = btype;  
-          bond_atom[i][num_bond[i]] = tag[j];
+      if (!newton_bond || tag[i] < tag[j]) { 
+	      if (num_bond[i] == atom->bond_per_atom)  
+	        error->one(FLERR,"New bond exceeded bonds per atom in fix bond/create");
+        bond_type[i][num_bond[i]] = btype;  
+        bond_atom[i][num_bond[i]] = tag[j];
   	  /*  print these lines
   	  std::cout << "if (!newton_bond || tag["<<i<<"] (="<<tag[i]<<") < tag["<<j<<"] (="<<tag[j]<<")) "<<std::endl; // NP P.F. correct this okt-29
           std::cout << "if (num_bond["<<i<<"] (="<<num_bond[i]<<")== atom->bond_per_atom(="<<atom->bond_per_atom<<"))  "<<std::endl; 
@@ -518,24 +516,24 @@ void FixBondCreateGran::post_integrate()
 	  std::cout << "bond_atom["<<i<<"]["<<num_bond[i]<<"] = tag["<<j<<"] (="<<tag[j]<<");"<<std::endl; 
           */
 
-          //reset history
-          for (int ih = 0; ih < n_bondhist; ih++) {
-              bond_hist[i][num_bond[i]][ih] = 0.;
-          }
-          num_bond[i]++;
+        //reset history
+        for (int ih = 0; ih < n_bondhist; ih++) {
+            bond_hist[i][num_bond[i]][ih] = 0.;
         }
+        num_bond[i]++;
+      }
         // increment bondcount, convert atom to new type if limit reached
 
-        bondcount[i]++;
-        if (type[i] == iatomtype) {
-          if (bondcount[i] == imaxbond) type[i] = inewtype; // bondtype defined by user in input script = iatomtype
-        } else {
-          if (bondcount[i] == jmaxbond) type[i] = jnewtype;
-        }
+      bondcount[i]++;
+      if (type[i] == iatomtype) {
+        if (bondcount[i] == imaxbond) type[i] = inewtype; // bondtype defined by user in input script = iatomtype
+      } else {
+        if (bondcount[i] == jmaxbond) type[i] = jnewtype;
+      }
 
-        // count the created bond once
+      // count the created bond once
 
-        if (tag[i] < tag[j]) ncreate++;
+      if (tag[i] < tag[j]) ncreate++;
     }
   }
 

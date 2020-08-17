@@ -20,10 +20,11 @@ print("natoms =", numAtoms)
 
 # Try extracting atom's positions
 print("")
-print("Attempting to get the atom's positions")
+print("Attempting to get the atom's id and positions")
+ids = lmp.extract_atom("id",0)
 pos = lmp.extract_atom("x",3)
 for k in range(0,numAtoms):
-    print("Pos[%i] = [%f, %f, %f]" % (k, pos[k][0], pos[k][1], pos[k][2]))
+    print("Pos[%i] = [%i, %f, %f, %f]" % (k, ids[k], pos[k][0], pos[k][1], pos[k][2]))
 
 # Try extracting a compute
 print("")

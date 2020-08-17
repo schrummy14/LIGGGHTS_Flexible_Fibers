@@ -45,10 +45,10 @@ def readDOEparams(fileName = "DOE_Params.txt"):
 
 
 if __name__ == "__main__":
-    N_bond_damp_vals = 4
-    N_bond_Youngs_modulus = 4
+    N_bond_damp_vals = 5
+    N_bond_Youngs_modulus = 5
 
-    bond_damp_vals = linspace(0,10,N_bond_damp_vals)
+    bond_damp_vals = linspace(0,0.002,N_bond_damp_vals)
     bond_Youngs_modulus_vals = linspace(1e9,1e10,N_bond_Youngs_modulus)
 
     variable_names = [

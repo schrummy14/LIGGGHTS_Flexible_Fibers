@@ -86,8 +86,10 @@ void Neighbor::bond_all()
 
   for (i = 0; i < nlocal; i++)
     for (m = 0; m < num_bond[i]; m++) {
-      atom1 = atom->map(bond_atom[i][m]);
+      // fprintf(screen,"m = %i, num_bond[%i] = %i, bond_atom[i][m] = %i\n",m, i, num_bond[i], bond_atom[i][m]);
+      atom1 = atom->map(bond_atom[i][m]); 
       if (atom1 == -1) {
+        // fprintf(screen, "i = %i, m = %i\n", i, m);
         char str[512];
         sprintf(str,
                 "Bond atoms %d %d missing on proc %d at step " BIGINT_FORMAT,

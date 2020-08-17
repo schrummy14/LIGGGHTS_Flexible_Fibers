@@ -169,6 +169,7 @@ class FixTemplateMultiplespheres : public FixTemplateSphere {
   bool no_overlap;
 
   bool bonded;
+  int bondType;
   class FixPropertyAtom *fix_bond_random_id;
 };
 
