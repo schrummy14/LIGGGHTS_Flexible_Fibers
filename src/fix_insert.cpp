@@ -786,6 +786,7 @@ void FixInsert::pre_exchange()
     }
 
     atom->tag_extend();
+    atom->molecule_extend();
     atom->natoms += static_cast<double>(ninserted_spheres_this);
     if (atom->map_style)
     {

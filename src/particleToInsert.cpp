@@ -104,54 +104,59 @@ int ParticleToInsert::insert()
     // add particles, set coordinate and radius
     // set group mask to "all" plus fix groups
 
+    // Atom is the primative element (sphere)
+    // Molecule is a mega-particle consisting of 1 or multiple atoms
+
     int inserted = 0;
     int nfix = modify->nfix;
     Fix **fix = modify->fix;
 
+    int molId;
+    if (atom->molecule_flag) {
+        if (atom->nlocal > 0) molId = -abs(atom->molecule[atom->nlocal-1]) - 1;
+        else molId = -1;
+    }
+
     for(int i = 0; i < nparticles; i++)
     {
+        inserted++;
+        if(atom_type_vector_flag)
+            atom->avec->create_atom(atom_type_vector[i],x_ins[i]);
+        else
+            atom->avec->create_atom(atom_type,x_ins[i]);
+        int m = atom->nlocal - 1;
+        atom->mask[m] = 1 | groupbit;
+        vectorCopy3D(v_ins,atom->v[m]);
+        vectorCopy3D(omega_ins,atom->omega[m]);
+        atom->radius[m] = radius_ins[i];
+        atom->density[m] = density_ins;
+        if (atom->molecule_flag) atom->molecule[m] = molId;
         
-        //if (domain->is_in_extended_subdomain(x_ins[i]))
-        //{
-                
-                inserted++;
-                if(atom_type_vector_flag)
-                    atom->avec->create_atom(atom_type_vector[i],x_ins[i]);
+        atom->rmass[m] = (1==nparticles)? (mass_ins) : (4.18879020479/*4//3*pi*/*radius_ins[i]*radius_ins[i]*radius_ins[i]*density_ins);
+
+        //pre_set_arrays() called via FixParticleDistribution
+        for (int j = 0; j < nfix; j++)
+            if (fix[j]->create_attribute) fix[j]->set_arrays(m);
+
+        // apply fix property setting coming from fix insert
+        // this overrides the set_arrays call above
+        if(fix_property)
+        {
+            for (int j = 0; j < n_fix_property; j++)
+            {
+                if (fix_property_nentry[j] == 1)
+                    fix_property[j]->vector_atom[m] = fix_property_value[j][0];
                 else
-                    atom->avec->create_atom(atom_type,x_ins[i]);
-                int m = atom->nlocal - 1;
-                atom->mask[m] = 1 | groupbit;
-                vectorCopy3D(v_ins,atom->v[m]);
-                vectorCopy3D(omega_ins,atom->omega[m]);
-                atom->radius[m] = radius_ins[i];
-                atom->density[m] = density_ins;
-                
-                atom->rmass[m] = (1==nparticles)? (mass_ins) : (4.18879020479/*4//3*pi*/*radius_ins[i]*radius_ins[i]*radius_ins[i]*density_ins);
-
-                //pre_set_arrays() called via FixParticleDistribution
-                for (int j = 0; j < nfix; j++)
-                   if (fix[j]->create_attribute) fix[j]->set_arrays(m);
-
-                // apply fix property setting coming from fix insert
-                // this overrides the set_arrays call above
-                if(fix_property)
                 {
-                    for (int j = 0; j < n_fix_property; j++)
-                    {
-                        if (fix_property_nentry[j] == 1)
-                            fix_property[j]->vector_atom[m] = fix_property_value[j][0];
-                        else
-                        {
-                            for (int k = 0; k < fix_property_nentry[j]; k++)
-                                fix_property[j]->array_atom[m][k] = fix_property_value[j][k];
-                        }
-                    }
+                    for (int k = 0; k < fix_property_nentry[j]; k++)
+                        fix_property[j]->array_atom[m][k] = fix_property_value[j][k];
                 }
-                if (fix_template_)
-                    fix_template_->vector_atom[m] = (double)distorder;
-                if (fix_release)
-                    fix_release->array_atom[m][14] = (double) id_ins;
-        //}
+            }
+        }
+        if (fix_template_)
+            fix_template_->vector_atom[m] = (double)distorder;
+        if (fix_release)
+            fix_release->array_atom[m][14] = (double) id_ins;
     }
     
     return inserted;
