@@ -126,7 +126,7 @@ class Atom : protected Pointers {
   int maxspecial;               // special[nlocal][maxspecial]
 
   int *num_bond;       
-  int **bond_type;     
+  int **bond_type;     // flip to negative when broken...
   int **bond_atom;     
   double ***bond_hist; 
   int disableNormalContact = 0;
@@ -219,6 +219,7 @@ class Atom : protected Pointers {
   class AtomVec *style_match(const char *);
   void modify_params(int, char **);
   void tag_extend();
+  void molecule_extend();
   int tag_consecutive();
   int tag_max(); 
 
