@@ -1,12 +1,14 @@
 # README
+
 ## Overview
+
 This folder contains a series of test cases, both single interaction and bulk interaction,
 for the flexible fiber model. If you wish to add a new test to the suite, add the folder
 here with the following structure.
 
 ## Adding your own tests
+
 Each of your own tests should contain the following files and folders.
-<Your Test>
 
     run.sh <- This file carries out any and all steps needed to run your DEM test
     
@@ -16,6 +18,6 @@ Each of your own tests should contain the following files and folders.
     
     run <- Folder that contains all STL files, in.liggghts, and any other files or folders needed
 
-
 testAll.py carries out the test and provides a summery report
+
 cleanAll.py cleans all directories to what they were when this directory was first downloaded
