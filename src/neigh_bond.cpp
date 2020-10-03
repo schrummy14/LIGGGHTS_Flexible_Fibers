@@ -138,7 +138,7 @@ void Neighbor::bond_partial()
 
   for (i = 0; i < nlocal; i++)
     for (m = 0; m < num_bond[i]; m++) {
-      if (bond_type[i][m] <= 0) continue;
+      if (bond_type[i][m] == 0) continue;
       atom1 = atom->map(bond_atom[i][m]);
       if (atom1 == -1) {
         char str[512];

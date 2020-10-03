@@ -114,7 +114,7 @@ int ParticleToInsert::insert()
     int molId;
     if (atom->molecule_flag) {
         if (atom->nlocal > 0) molId = -abs(atom->molecule[atom->nlocal-1]) - 1;
-        else molId = -1;
+        else molId = -3; // multisphere particles start with a value of -2, so we will start with a value of -3
     }
 
     for(int i = 0; i < nparticles; i++)

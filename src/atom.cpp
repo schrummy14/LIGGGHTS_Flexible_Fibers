@@ -586,7 +586,7 @@ void Atom::molecule_extend()
   int noTag = 0;
   int curTag = 0;
   for (int i = 0; i < nlocal; i++) {
-    if (molecule[i] < 1) {
+    if (molecule[i] < -2) { // Multisphere particles use -2 to figure out the body variable
       curTag = molecule[i];
       noTag++;
     }
@@ -598,7 +598,7 @@ void Atom::molecule_extend()
   int iTag = maxTagAll + noTagSum - noTag + 0; // 0 as we change the tag later
   curTag = 0;
   for (int i = 0; i < nlocal; i++) {
-    if (molecule[i] < 1) {
+    if (molecule[i] < -2) { // Multisphere particles use -2 to figure out the body variable
       if (molecule[i] != curTag) {
         curTag = molecule[i];
         iTag++;

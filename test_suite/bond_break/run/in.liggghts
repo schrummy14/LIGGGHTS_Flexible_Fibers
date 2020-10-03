@@ -1,0 +1,84 @@
+
+atom_style	hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 12 disableNormalContact 1
+hard_particles yes
+atom_modify	map array
+boundary	f f f
+newton		off
+
+communicate	single vel yes
+
+units		si
+
+region		reg block -0.3 0.3 -0.3 0.3 0. 0.5 units box
+create_box	1 reg
+
+neighbor	0.004 bin
+neigh_modify	delay 0
+
+#Material properties required for new pair styles
+
+fix		m1 all property/global youngsModulus peratomtype 1.e7
+fix		m2 all property/global poissonsRatio peratomtype 0.45
+fix		m3 all property/global coefficientRestitution peratomtypepair 1 0.9
+fix		m4 all property/global coefficientFriction peratomtypepair 1 0.01
+fix		m5 all property/global characteristicVelocity scalar 2.
+
+#New pair style
+pair_style gran model hertz tangential history #Hertzian without cohesion
+pair_coeff	* *
+bond_style gran
+bond_coeff	1 1.0 0.0 1e7 5e6 1 0.0 5 6e5 6e5
+
+timestep	0.000001
+
+fix zwalls all wall/gran model hertz tangential history primitive type 1 zplane 0.0
+
+#distributions for insertion
+# fix		pts1 all particletemplate/multiplespheres 15485863 atom_type 1 density constant 2500 nspheres 50 ntry 1000000 spheres file data/stone1.multisphere scale 0.001 bonded yes type 1
+
+fix pts1 all particletemplate/multiplespheres 15485863 atom_type 1 density constant 2500 nspheres 5 ntry 100000 spheres &
+		0.0 0.0 4.441842e-03 4.441842e-03 &
+		0.0 0.0 1.227808e-02 4.441842e-03 &
+		0.0 0.0 2.011432e-02 4.441842e-03 &
+		0.0 0.0 2.795055e-02 4.441842e-03 &
+		0.0 0.0 3.578679e-02 4.441842e-03 &
+		bonded yes
+
+fix		pdd1 all particledistribution/discrete 15485867 1 pts1 1.0
+
+#region and insertion
+region		bc cylinder z 0.0 0.0 0.25 0.05 0.1 units box
+
+fix		ins all insert/pack seed 32452843 distributiontemplate pdd1 vel constant 0. 0. 0. &
+		insert_every once overlapcheck yes orientation random region bc ntry_mc 10000 particles_in_region 10 # orientation random region bc ntry_mc 10000 particles_in_region 1
+
+# Create bonded group
+group bonded_group region reg
+# Integrate using velocity verlet
+fix integr bonded_group nve/sphere
+
+#output settings, include total thermal energy
+compute		1 all erotate/sphere
+fix		ts all check/timestep/gran 1000 0.1 0.1
+thermo_style	custom step atoms numbonds ke c_1 f_ts[1] f_ts[2] vol
+thermo		1000
+thermo_modify	lost ignore norm no
+
+run 1
+velocity all zero linear
+velocity all zero angular
+fix bondcr_1 all bond/create/gran 1 1 1 1.0 1 12 doNorm yes #every itype jtype cutoff btype newperts
+run 1
+fix_modify bondcr_1 every 0  #do not create new bonds after this line
+group bonded_group region reg
+velocity all set 0.0 0.0 -5.0
+velocity all zero angular
+
+fix		gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+#insert the first particles so that dump is not empty
+dump		dmp all custom 200 post/dump*.liggghts id type mol x y z vx vy vz fx fy fz omegax omegay omegaz radius
+variable	myKE equal ke
+fix		extra all print 200 "${myKE}" file ke.txt screen no
+
+run 40000 upto

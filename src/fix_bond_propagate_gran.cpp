@@ -97,7 +97,7 @@ void FixBondPropagateGran::pre_exchange()
     i2 = bondlist[n][1];
     int broken = bondlist[n][3];
 
-    if(broken) continue; //do not copy broken bonds
+    if(broken == 1) continue; //do not copy broken bonds
 
     if (newton_bond || i1 < nlocal)
     {
@@ -135,8 +135,11 @@ void FixBondPropagateGran::pre_exchange()
   std::vector<unsigned int> list_bond_id;
   std::vector<unsigned int>::iterator it1;
 
-  for (n=0; n<nbondlist; n++) if(bondlist[n][3])
-                                list_bond_id.push_back(n);// load all broken bond ids into the list
+  for (n=0; n<nbondlist; n++) {
+    if(bondlist[n][3] == 1) {
+      list_bond_id.push_back(n);// load all broken bond ids into the list
+    }
+  }
 
   //DEBUG
   //if (list_bond_id.size()>0) printf("will delete %d broken bonds at step %d\n",list_bond_id.size(),update->ntimestep);
@@ -149,7 +152,7 @@ void FixBondPropagateGran::pre_exchange()
 
     //ich glaube das kann mit der komprimierten Liste von PF nicht mehr eintreten ...
     int broken = bondlist[n][3];
-    if(!broken) continue;
+    if(broken != 1) continue;
 
     //printf("detected bond %d:%d<->%d as broken at step %ld\n",n,atom->tag[i1],atom->tag[i2],update->ntimestep);
     //NP if the bond is broken, we remove it from

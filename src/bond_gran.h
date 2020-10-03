@@ -55,7 +55,6 @@ class BondGran : public Bond {
   double *r_break,*sigma_break,*tau_break,*T_break;
 
   // Added by Matt Schramm, Iowa State University
-  bool isSymmetricUpdate; // Apply Damping symmetricly or not
   double *damp, *beta0, *beta1; // dampening coeffinient
   double *ro, *ri; // Outside and Inside bond radius scale
 

@@ -281,7 +281,13 @@ public:
         if (atom->disableNormalContact == 1) {
           for(int k = 0; k < atom->num_bond[i]; k++) {
             if(atom->bond_atom[i][k] == atom->tag[j]) {
-              isBonded = true;
+              // It is a bonded pair but is the bond broken?
+              // Bond type is flipped negative in bond calculation
+              if(atom->bond_type[i][k] != 0) { // Bond is brocken and contact could be applied
+                // if(atom->bond_type[i][k] < 0) 
+                  // fprintf(screen, "Spheres %i and %i were previously part of a bond and are overlapping, do not apply contact.\n", atom->tag[i], atom->tag[j]);
+                isBonded = true;
+              }
               break;
             }
           }

@@ -18,15 +18,25 @@ if __name__ == "__main__":
     for fold in folders:
         print("Testing", fold)
         os.chdir(fold)
+        try:
+            d2 = np.genfromtxt('truth.txt')
+        except:
+            print("No truth.txt file found, skipping...")
+            os.chdir('..')
+            continue
+        # os.chdir(fold)
         singeCheck()
         d1 = np.genfromtxt('results.txt')
-        d2 = np.genfromtxt('truth.txt')
-        d = np.abs(d1-d2)/np.abs(d2)
+        # d2 = np.genfromtxt('truth.txt')
+        #d = 0
+        #for k in range(len(d2)):
+        #    d += np.abs(d1-d2)/np.max(np.array([1,d2[k]]))
+        d = np.abs(d1-d2)/(np.abs(d2)+1.0e-10)
         d = np.sum(d)
         if d < 1.0e-10:
             print(fold, ': pass')
             os.remove('results.txt')
         else:
             print(fold, ' : fail')
-        
+
         os.chdir('..')
