@@ -50,19 +50,19 @@ DCS Computing GmbH, Linz, Austria
 
 www.dcs-computing.com, office@dcs-computing.com
 
-LIGGGHTS® is open-source, distributed under the terms of the GNU Public 
+LIGGGHTS® is open-source, distributed under the terms of the GNU Public
 License, version 2 or later.
 
-LIGGGHTS® is part of CFDEM®project: 
+LIGGGHTS® is part of CFDEM®project:
 
-www.liggghts.com | www.cfdem.com
+<https://www.liggghts.com> | <https://www.cfdem.com>
 
 Core developer and main author:
 Christoph Kloss, christoph.kloss@dcs-computing.com
 
-LIGGGHTS® and CFDEM® are registered trade marks of DCS Computing GmbH, 
+LIGGGHTS® and CFDEM® are registered trade marks of DCS Computing GmbH,
 the producer of the LIGGGHTS® software and the CFDEM®coupling software
-See http://www.cfdem.com/terms-trademark-policy for details.
+See <http://www.cfdem.com/terms-trademark-policy> for details.
 
 ----------------------------------------------------------------------
 
@@ -119,7 +119,7 @@ funding from the DOE.  It is an open-source code, distributed freely
 under the terms of the GNU Public License (GPL).
 
 The primary author of LAMMPS is Steve Plimpton, who can be emailed
-at sjplimp@sandia.gov.  The LAMMPS WWW Site at lammps.sandia.gov has
+at sjplimp@sandia.gov.  The LAMMPS WWW Site at <https://lammps.sandia.gov> has
 more information about the code and its uses.
 
 ----------------------------------------------------------------------
