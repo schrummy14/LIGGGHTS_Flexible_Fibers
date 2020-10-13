@@ -96,12 +96,17 @@ FixTemplateMultiplespheres::FixTemplateMultiplespheres(LAMMPS *lmp, int narg, ch
   r_sphere = new double[nspheres];
   atom_type_sphere = 0;
 
-  // re-create pti with correct nspheres
+  // re-create pti with correct nspheres (Not part of PFM)
   delete pti;
   pti = new ParticleToInsert(lmp,nspheres);
 
   bonded = false;
-  fix_bond_random_id = 0;
+  bond_type = 1;
+
+  // number of partners and partner array
+  np = NULL;
+  p = NULL;
+  fix_bond_random_id = NULL;
 
   for (int i = 0; i < 3; i++) {
       x_min[i] = LARGE;
@@ -209,16 +214,81 @@ FixTemplateMultiplespheres::FixTemplateMultiplespheres(LAMMPS *lmp, int narg, ch
     {
         if (narg < iarg+2)
             error->fix_error(FLERR,this,"not enough arguments for 'bonded'");
-        if(0 == strcmp(arg[iarg+1],"yes"))
+
+        ++iarg;
+        // Note: Implicitly creates the bonds between the atoms based on the neighbour list and a bonding distance
+        if(strcmp(arg[iarg],"yes") == 0 || strcmp(arg[iarg],"yes/implicit") == 0)
+        {
+            ++iarg;
             bonded = true;
-        else if(0 == strcmp(arg[iarg+1],"no"))
+        }
+        // Note: Explicitly creates bonds between the atoms without using any bonding distance equation and neighbor lists.
+        //       This bonding scheme has been implemented for the specific application. User-defined partner list is required
+        //       for creating the bonds.
+        else if(strcmp(arg[iarg],"yes/explicit") == 0)
+        {
+            if(narg<iarg+2)
+                error->fix_error(FLERR,this,"Partner list is required for explicit bonds!");
+
+            ++iarg;
+            if(strcmp(arg[iarg],"nbond_pairs") == 0)
+            {
+                ++iarg;
+                int nbond_pairs = atoi(arg[iarg]);
+
+                if (narg < iarg + 2*nbond_pairs + 1)
+                {
+                    error->fix_error(FLERR,this,"not enough arguments: define the partner list here!");
+                }
+                else
+                {
+                    ++iarg;
+                    // number of partners and partner array
+                    np = new int[nspheres]();
+                    p = new int*[nspheres];
+                    for(int i=0; i<nspheres; ++i)
+                        p[i] = new int[nspheres-1]();
+
+                    for(int i = 0; i < nbond_pairs; ++i)
+                    {
+                        int ipartner = atoi(arg[iarg++])-1;
+                        int jpartner = atoi(arg[iarg++])-1;
+                        {
+                            p[ipartner][np[ipartner]] = jpartner;
+                            p[jpartner][np[jpartner]] = ipartner;
+
+                            np[ipartner]++;
+                            np[jpartner]++;
+                        }
+                    }
+                }
+                bonded = true;
+            }
+        }
+        //Note: This switch can be used to create a multiplesphere particle without any bonds.
+        else if(strcmp(arg[iarg],"no") == 0)
+        {
+            ++iarg;
             bonded = false;
+        }
         else
-            error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'bonded'");
-        iarg+=2;
+        {
+            error->fix_error(FLERR,this,"expecting 'yes/implicit' or 'yes/explicit' or 'no' after 'bonded'");
+        }
+        hasargs = true;
     }
-    else if(strcmp(style,"particletemplate/multiplespheres") == 0)
-        error->fix_error(FLERR,this,"unknown keyword");
+    else if (strcmp(arg[iarg],"bond_type") == 0) {
+        if (narg < iarg+2) error->fix_error(FLERR, this, "not enough arguments for option 'bond_type'");
+        bond_type = atoi(arg[iarg+1]);
+        if (bond_type < 1 || bond_type > atom->nbondtypes) error->fix_error(FLERR, this, "'bond_type' value must be > 0 and <= number of bond types");
+        iarg += 2;
+        hasargs = true;
+    }
+    else if(strcmp(style,"particletemplate/multiplespheres") == 0) {
+        char err_msg[50];
+        sprintf(err_msg, "unknown keyword: %s", arg[iarg]);
+        error->fix_error(FLERR,this,err_msg);
+    }
   }
 
   if(!spheres_read) error->fix_error(FLERR,this,"need to define spheres for the template");
@@ -237,6 +307,14 @@ FixTemplateMultiplespheres::~FixTemplateMultiplespheres()
     memory->destroy(x_sphere);
     delete []r_sphere;
     if(atom_type_sphere) delete []atom_type_sphere;
+
+    if (p)
+    {
+        for(int i = 0; i < nspheres; ++i)
+            delete [] p[i];
+        delete [] p;
+        delete [] np;
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -634,6 +712,7 @@ void FixTemplateMultiplespheres::randomize_ptilist(int n_random,int distribution
             pti_list[i]->fix_property_value[0][0] = static_cast<double>(update->ntimestep)+random_insertion->uniform();
             pti_list[i]->n_fix_property = 1;
             pti_list[i]->fix_property_nentry[0] = 1;
+            pti_list[i]->bond_type = bond_type;
           }
     }
 }
@@ -730,4 +809,27 @@ unsigned int FixTemplateMultiplespheres::generate_hash()
     add_hash_value(cubic_expectancy(pdf_density), start, hash);
     add_hash_value(bonded ? 1 : 0, start, hash);
     return hash;
+}
+
+/* ----------------------------------------------------------------------*/
+
+void FixTemplateMultiplespheres::finalize_insertion()
+{
+    if(bonded) {
+        // check each pti since we don't know which of them have actually been inserted
+        for(int i = 0; i < n_pti_max; ++i) {
+            ParticleToInsert *pti = pti_list[i];
+            // only need to create bonds if fix_property is fix_bond_random_id
+            if(pti->fix_property && pti->fix_property[0] == fix_bond_random_id) {
+                // only need to create bonds for pti created this time step
+                // timestep is integer part of fix_property_value
+                // Note: it's possble that not each pti gets inserted, the pti itself
+                //       does the final check if bond creation is necessary
+                bigint insertionstep = static_cast<bigint>(pti->fix_property_value[0][0]);
+                if(insertionstep == update->ntimestep) {
+                    pti->create_bonds(np, p);
+                }
+            }
+        }
+    }
 }

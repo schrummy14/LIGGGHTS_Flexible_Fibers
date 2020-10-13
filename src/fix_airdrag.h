@@ -57,24 +57,23 @@ FixStyle(airdrag,FixAirDrag)
 namespace LAMMPS_NS {
 
 class FixAirDrag : public Fix {
- public:
-  FixAirDrag(class LAMMPS *, int, char **);
-  virtual ~FixAirDrag();
-  int setmask();
-  void init();
-  void setup(int);
-  void min_setup(int);
-  void post_force(int);
-  void post_force_respa(int, int, int);
-  void min_post_force(int);
+    public:
+        FixAirDrag(class LAMMPS *, int, char **);
+        virtual ~FixAirDrag();
+        int setmask();
+        void init();
+        void setup(int);
+        void min_setup(int);
+        void post_force(int);
+        void post_force_respa(int, int, int);
+        void min_post_force(int);
 
- protected:
-  double air_viscosity, air_density; // Fluid Properties
-  double wx, wy, wz; // Fluid Flow Properties
-  double sumX, sumY, sumZ; // total force value
-  int nlevels_respa;
-  char *idregion;
-  int varflag,iregion;
+    protected:
+        double air_viscosity, air_density; // Fluid Properties
+        double wx, wy, wz; // Fluid Flow Properties
+        int nlevels_respa;
+        char *idregion;
+        int varflag,iregion;
 };
 
 }

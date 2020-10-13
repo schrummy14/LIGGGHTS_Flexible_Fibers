@@ -95,7 +95,7 @@ pair_coeff * *
 
 # Bond coefficients (Bond type) (Outside Bond ) (Inside Bond) (Bond_Y) (Bond_G) (Bond_Damp_Type) (Bond_Damp) (Bond_Break_Type) (Crit_Norm) (Crit_Tan)
 # bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
-bond_coeff 1 1.0 0.0 ${bond_youngs_modulus} ${bond_shear_modulus} 5 0.0 0.25 0.0 1 1.0e16 1.0e16
+bond_coeff 1 1.0 0.0 ${bond_youngs_modulus} ${bond_shear_modulus} 2 0.0 0.25 0.0 1 1.0e16 1.0e16
 
 # Material Properties
 fix m1 all property/global youngsModulus peratomtype ${contact_youngs_modulus}

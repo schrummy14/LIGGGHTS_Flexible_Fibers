@@ -1,0 +1,106 @@
+#Simple chute wear test
+
+# atom_style    granular
+atom_style hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 2
+atom_modify   map array
+boundary      f f f
+newton        off
+processors * 1 1
+communicate   single vel yes
+
+units         si
+
+region        domain block -0.5 0.1 -0.2 0.2 -0.4 0.15 units box
+create_box    1 domain
+
+neighbor      0.002 bin
+neigh_modify  delay 0
+
+
+#Material properties required for new pair styles
+
+fix  m1 all property/global youngsModulus peratomtype 5.e6
+fix  m2 all property/global poissonsRatio peratomtype 0.45
+fix  m3 all property/global coefficientRestitution peratomtypepair 1 0.3
+fix  m4 all property/global coefficientFriction peratomtypepair 1 0.5
+fix  m5 all property/global k_finnie peratomtypepair 1 1.0
+
+#New pair style
+pair_style  gran model hertz tangential history #Hertzian without cohesion
+bond_style  gran
+
+pair_coeff  * *
+bond_coeff 1 1.0 0.0 5.0e6 1.0e6 2 0.0 0.001 0.0 1 1.0e10 1.0e10
+
+timestep    0.00001
+
+fix  gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+#the chute
+fix  cad all mesh/surface/stress file meshes/simple_chute.stl type 1 wear finnie
+fix  granwalls all wall/gran model hertz tangential history mesh n_meshes 1 meshes cad
+fix  floor all wall/gran model hertz tangential history primitive type 1 zplane -0.4
+fix  wall_x1 all wall/gran model hertz tangential history primitive type 1 xplane -0.5
+fix  wall_x2 all wall/gran model hertz tangential history primitive type 1 xplane  0.1
+fix  wall_y1 all wall/gran model hertz tangential history primitive type 1 yplane -0.2
+fix  wall_y2 all wall/gran model hertz tangential history primitive type 1 yplane  0.2
+
+#distributions for insertion
+fix  pts1 all particletemplate/sphere 15485863 atom_type 1 density constant 2500 radius constant 0.0015
+
+fix  pts2 all particletemplate/sphere 15485867 atom_type 1 density constant 2500 radius constant 0.0025
+
+fix  pts3 all particletemplate/multiplespheres 123457 atom_type 1 density constant 2500 nspheres 10 ntry 100000 spheres &
+		0.0 0.0 0.000 0.002 &
+		0.0 0.0 0.004 0.002 &
+		0.0 0.0 0.008 0.002 &
+		0.0 0.0 0.012 0.002 &
+		0.0 0.0 0.016 0.002 &
+		0.0 0.0 0.020 0.002 &
+		0.0 0.0 0.024 0.002 &
+		0.0 0.0 0.028 0.002 &
+		0.0 0.0 0.032 0.002 &
+		0.0 0.0 0.036 0.002 &
+		bonded yes/explicit nbond_pairs 9 &
+		1 2 &
+		2 3 &
+		3 4 &
+		4 5 &
+		5 6 &
+		6 7 &
+		7 8 &
+		8 9 &
+		9 10 bond_type 1
+
+fix  pdd1 all particledistribution/discrete 32452843  3 pts1 0.2 pts2 0.3 pts3 0.5
+
+#region and insertion
+group  nve_group region domain
+region bc block -0.25 0.0 -0.1 0.1 0.05 0.15 units box
+# region bc cylinder z 0.0 0.0 0.015 0.05 0.12 units box
+
+#particle insertion
+fix    ins nve_group insert/pack seed 32452867 distributiontemplate pdd1 &
+       maxattempt 5000 insert_every 1000 overlapcheck yes orientation random &
+       all_in yes vel constant 0.0 0.0 -1.0 region bc particles_in_region 50 ntry_mc 100000 
+
+#apply nve integration to all particles that are inserted as single particles
+fix    integr nve_group nve/sphere
+
+#output settings, include total thermal energy
+compute       1 all erotate/sphere
+thermo_style  custom step atoms ke c_1 vol
+thermo        1000
+thermo_modify lost ignore norm no
+
+#insert the first particles so that dump is not empty
+run    1
+dump   dmp all custom 200 post/chute_*.liggghts id mol type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius 
+dump   dumpstress all mesh/gran/VTK 200 post/mesh_*.vtk stress wear cad
+
+#insert particles
+run    100000 upto
+
+shell echo 1 > ../results.txt
+
+ 

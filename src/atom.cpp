@@ -74,6 +74,9 @@
 #include "memory.h"
 #include "error.h"
 
+#include <set>
+#include <map>
+
 using namespace LAMMPS_NS;
 
 #define DELTA 1
@@ -565,11 +568,42 @@ void Atom::modify_params(int narg, char **arg)
 }
 
 /* ----------------------------------------------------------------------
+   add unique mol ids to any atoms with mol <= 0
+   new mol ids are grouped by proc and start after max current mol id
+   called after creating new bonded atoms
+------------------------------------------------------------------------- */
+
+void Atom::mol_extend()
+{
+  int maxmol = 0;
+  for (int i = 0; i < nlocal; ++i) maxmol = MAX(maxmol,molecule[i]);
+  int maxmol_all;
+  MPI_Allreduce(&maxmol,&maxmol_all,1,MPI_INT,MPI_MAX,world);
+
+  // nomol = # of molecules I own with no mol id (molecule <= 0)
+  // nomol_sum = # of total molecules on procs <= me with no mol id
+
+  std::set<int> uniquemol;
+  for (int i = 0; i < nlocal; i++) if (molecule[i] <= 0) uniquemol.insert(molecule[i]);
+  int nomol = uniquemol.size();
+  int nomol_sum;
+  MPI_Scan(&nomol,&nomol_sum,1,MPI_INT,MPI_SUM,world);
+
+  // imol = 1st new mol id that my untagged molecules should use
+
+  int imol = maxmol_all + nomol_sum - nomol + 1;
+  std::map<int, int> dummy2mol;
+  for (std::set<int>::iterator it=uniquemol.begin(); it!=uniquemol.end(); ++it) dummy2mol[*it] = imol++;
+  for (int i = 0; i < nlocal; ++i) if (molecule[i] <= 0) molecule[i] = dummy2mol[molecule[i]];
+}
+
+
+/* ----------------------------------------------------------------------
    add unique molecule tags to any atoms with molecule tag = 0
    new molecule tags are grouped by proc and start after max current 
    molecule tag called after creating new atoms
 ------------------------------------------------------------------------- */
-void Atom::molecule_extend()
+/* void Atom::molecule_extend()
 {
   if(!atom->molecule_flag) return;
 
@@ -587,7 +621,7 @@ void Atom::molecule_extend()
   int curTag = 0;
   for (int i = 0; i < nlocal; i++) {
     if (molecule[i] < -2) { // Multisphere particles use -2 to figure out the body variable
-      curTag = molecule[i];
+      curTag = molecule[i]; // may be removed...
       noTag++;
     }
   }
@@ -606,7 +640,7 @@ void Atom::molecule_extend()
       molecule[i] = iTag;
     }
   }
-}
+}*/
 
 
 /* ----------------------------------------------------------------------

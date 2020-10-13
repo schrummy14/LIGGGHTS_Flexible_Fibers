@@ -62,6 +62,7 @@
 #include "particleToInsert.h"
 #include "fix_multisphere.h"
 #include "math_extra_liggghts.h"
+#include <set>
 
 #define SEED_OFFSET 12
 
@@ -315,40 +316,48 @@ int FixInsertPack::calc_ninsert_this()
   int np_region = 0;
   double vol_region = 0., mass_region = 0.;
   double _4Pi3 = 4.*M_PI/3.;
-  for(int i = 0; i < nlocal; i++)
-  {
-      
-      if(fix_multisphere && fix_multisphere->belongs_to(i) >= 0) continue;
-      if(ins_region->match(x[i][0],x[i][1],x[i][2]))
-        
-      {
-          np_region++;
-          vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
-          mass_region += rmass[i];
-      }
-  }
-
-  int nbody;
-  double x_bound_body[3], mass_body, density_body;
-  if(multisphere)
-  {
-      nbody = multisphere->n_body();
-
-      for(int ibody = 0; ibody < nbody; ibody++)
-      {
-          multisphere->x_bound(x_bound_body,ibody);
-          //r_bound_body = multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
-          multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
-          if(ins_region->match(x_bound_body[0],x_bound_body[1],x_bound_body[2]))
-            
-          {
-              np_region++;
-              mass_body = multisphere->mass(ibody);
-              density_body = multisphere->density(ibody);
-              vol_region += mass_body/density_body;
-              mass_region += mass_body;
+  if(atom->molecular && atom->molecule_flag) {
+      std::set<int> uniquemol;
+      int *molecule = atom->molecule;
+      for(int i = 0; i < nlocal; i++) {
+          if(ins_region->match(x[i][0],x[i][1],x[i][2])) {
+              uniquemol.insert(molecule[i]);
+              vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
+              mass_region += rmass[i];
           }
       }
+      np_region = uniquemol.size();
+  } else {
+    for(int i = 0; i < nlocal; i++) {
+        if(fix_multisphere && fix_multisphere->belongs_to(i) >= 0) continue;
+        if(ins_region->match(x[i][0],x[i][1],x[i][2])) {
+            np_region++;
+            vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
+            mass_region += rmass[i];
+        }
+    }
+
+    int nbody;
+    double x_bound_body[3], mass_body, density_body;
+    if(multisphere) {
+        nbody = multisphere->n_body();
+
+        for(int ibody = 0; ibody < nbody; ibody++)
+        {
+            multisphere->x_bound(x_bound_body,ibody);
+            //r_bound_body = multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
+            multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
+            if(ins_region->match(x_bound_body[0],x_bound_body[1],x_bound_body[2]))
+              
+            {
+                np_region++;
+                mass_body = multisphere->mass(ibody);
+                density_body = multisphere->density(ibody);
+                vol_region += mass_body/density_body;
+                mass_region += mass_body;
+            }
+        }
+    }
   }
 
   // calculate and return number of particles that is missing

@@ -786,7 +786,7 @@ void FixInsert::pre_exchange()
     }
 
     atom->tag_extend();
-    atom->molecule_extend();
+    // atom->molecule_extend();
     atom->natoms += static_cast<double>(ninserted_spheres_this);
     if (atom->map_style)
     {
@@ -797,8 +797,11 @@ void FixInsert::pre_exchange()
   }
 
   // give particle distributions the chance to do some wrap-up
-  
   fix_distribution->finalize_insertion();
+
+  if (atom->molecule_flag) {
+    atom->mol_extend();
+  }
 
   // give derived classes the chance to do some wrap-up
   

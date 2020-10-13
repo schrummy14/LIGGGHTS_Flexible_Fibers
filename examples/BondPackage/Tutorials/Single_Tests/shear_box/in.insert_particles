@@ -99,7 +99,7 @@ fix BotShear all mesh/surface/stress file STL/ShearBox_TopPlate.STL type 2 &
 
 # Top plate has a mass of 401 grams
 fix TopShear all mesh/surface/stress/servo file STL/ShearBox_TopPlate.STL type 2 &
-                       scale 0.001 rotate axis 1 0 0 angle 180 move 0.0 0.1015 0.080 &
+                       scale 0.001 rotate axis 1 0 0 angle 180 move 0.0 0.1015 0.090 &
                        curvature_tolerant yes com 0.05 0.05 0.08 ctrlPV force &
                        axis 0.0 0.0 -1.0 target_val ${shear_force} vel_max 5.0 &
                        kp 5.0e-2 ki 0.0 kd 0.0
@@ -133,19 +133,22 @@ fix pts1 all particletemplate/multiplespheres 15485863 atom_type 1 &
                 0.0025 0.0 0.0 0.00125 &
                 0.0050 0.0 0.0 0.00125 &
                 0.0075 0.0 0.0 0.00125 &
-                bonded yes
+                bonded yes/explicit nbond_pairs 3 &
+		1 2 &
+		2 3 &
+		3 4 bond_type 1
 
 # Set the distribution of particles
 fix  pdd1 all particledistribution/discrete 32452843  1 pts1 1.0
 
 # Create a region to insert the particles
-region fill_box block 0.0 0.1015 0.0 0.1015 0.0065 0.0735 units box
+region fill_box block 0.0 0.1015 0.0 0.1015 0.0065 0.0835 units box
 
 # Particle insertion
 fix ins all insert/pack seed 32452867 distributiontemplate pdd1 &
-        maxattempt 500 insert_every once overlapcheck yes orientation random &
+        maxattempt 5000 insert_every once overlapcheck yes orientation random &
         all_in yes vel constant 0.0 0.0 -0.0 region fill_box &
-        particles_in_region 5000 ntry_mc 10000 check_dist_from_subdomain_border no
+        particles_in_region 50000 ntry_mc 10000 check_dist_from_subdomain_border no
 
 # Set the timestep to use
 timestep ${dt}
@@ -155,10 +158,10 @@ variable bond_skin equal 1.000001*${particle_diameter}
 
 # Bond the atoms together to form fibers
 run 1
-fix bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff btype newperts
-run 1
-fix_modify bondcr every 0  #do not create new bonds after this line
-run 1
+# fix bondcr all bond/create/gran 1 1 1 ${bond_skin} 1 6 #every itype jtype cutoff btype newperts
+# run 1
+# fix_modify bondcr every 0  #do not create new bonds after this line
+# run 1
 
 # Write the restart file
 write_restart restarts/restart0.liggghts

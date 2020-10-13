@@ -68,6 +68,10 @@ namespace LAMMPS_NS {
         double mass_ins;
         double r_bound_ins;
 
+        // insertion properties
+        int nspheres;
+        int bond_type;
+
         int distorder;
 
         // per-sphere radius, position
@@ -113,8 +117,12 @@ namespace LAMMPS_NS {
         void setFixTemplate(FixPropertyAtom* fix_template)
         { fix_template_ = fix_template; }
 
+        int create_bonds(int *npartner=NULL, int **partner=NULL);
     private:
-
+        int local_start;
+        bool needs_bonding;
+        int create_bond_partners(int *&npartner, int **&partner);
+        void destroy_bond_partners(int *npartner, int **partner);
         // Fix property atom that identifies the template
         FixPropertyAtom *fix_template_;
     };

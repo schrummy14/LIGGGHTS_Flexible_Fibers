@@ -219,7 +219,8 @@ class Atom : protected Pointers {
   class AtomVec *style_match(const char *);
   void modify_params(int, char **);
   void tag_extend();
-  void molecule_extend();
+  // void molecule_extend();
+  void mol_extend();
   int tag_consecutive();
   int tag_max(); 
 

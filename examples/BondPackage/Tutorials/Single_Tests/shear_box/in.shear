@@ -147,7 +147,7 @@ dump stlbotshear all mesh/vtk ${fileprint_step} post/stl_BotShear*.vtk stress st
 dump stltopshear all mesh/vtk ${fileprint_step} post/stl_TopShear*.vtk stress stresscomponents TopShear
 dump stlbothalf  all mesh/vtk ${fileprint_step} post/stl_BotHalf*.vtk  stress stresscomponents BotHalfShear
 dump stltophalf  all mesh/vtk ${fileprint_step} post/stl_TopHalf*.vtk  stress stresscomponents TopHalfShear
-dump dmp all custom ${fileprint_step} post/dump*.liggghts id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
+dump dmp all custom ${fileprint_step} post/dump*.liggghts id mol type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
 dump bondforcechain all local ${fileprint_step} post/bfc*.bond &
     c_bc[1] c_bc[2] c_bc[3] c_bc[4] c_bc[5] c_bc[6] c_bc[7] c_bc[8] c_bc[9] c_bc[10] c_bc[11] c_bc[12] c_bc[13] c_bc[14] c_bc[15] c_bc[16]
 

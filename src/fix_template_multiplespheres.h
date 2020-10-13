@@ -109,7 +109,7 @@ class FixTemplateMultiplespheres : public FixTemplateSphere {
   void randomize_ptilist(int ,int ,int);
   void direct_set_ptlist(const int i, const void * const data, const int distribution_groupbit, const int distorder);
 
-  virtual void finalize_insertion() {}
+  virtual void finalize_insertion();
 
   virtual unsigned int generate_hash();
 
@@ -169,6 +169,12 @@ class FixTemplateMultiplespheres : public FixTemplateSphere {
   bool no_overlap;
 
   bool bonded;
+  int bond_type;
+
+  // number of partners and partner array
+  int *np;
+  int **p;
+
   class FixPropertyAtom *fix_bond_random_id;
 };
 

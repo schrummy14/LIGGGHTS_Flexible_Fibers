@@ -1,3 +1,6 @@
+
+set -e
+
 # Run all simulations
 
 liggghts_prog=$1
