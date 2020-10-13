@@ -20,6 +20,10 @@ Estimating bond damping and bond Young's modulus for a flexible wheat
 straw discrete element method model. Biosystems Engineering, 186,
 349-355. https://doi.org/10.1016/j.biosystemseng.2019.08.003
 
+Thank you to the Department of Particulate Flow Modelling at Johannes 
+Kepler University in Linz, Austria http://www.jku.at/pfm for releasing 
+their dynamic insertion code!
+
 This also contains the source files for the JKR contact model as
 provided by eidevag (https://github.com/eidevag/LIGGGHTS-PUBLIC-JKR).
 Please cite the following paper when utilizing the JKR model.
