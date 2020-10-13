@@ -114,7 +114,27 @@ fix  pts1 all particletemplate/multiplespheres 15485863 atom_type 1 density cons
 0.05094 0.0 0.0 0.001415 &
 0.05377 0.0 0.0 0.001415 &
 0.05660 0.0 0.0 0.001415 &
-bonded yes
+bonded yes/explicit nbond_pairs 20 &
+1 2 &
+2 3 &
+3 4 &
+4 5 &
+5 6 &
+6 7 &
+7 8 &
+8 9 &
+9 10 &
+10 11 &
+11 12 &
+12 13 &
+13 14 &
+14 15 &
+15 16 &
+16 17 &
+17 18 &
+18 19 &
+19 20 &
+20 21 bond_type 1
 
 # Set the probability that a template will be used
 fix  pdd1 all particledistribution/discrete 32452843 1 pts1 1.0
@@ -141,18 +161,18 @@ run 1
 
 ## Bond Particles together
 # Define the bond radius to determine if two particle become bonded together
-variable bond_skin equal 1.000001*${particle_diameter}
+#variable bond_skin equal 1.000001*${particle_diameter}
 # Define a bond of type bond_1 between atom types atom_a and atom_b every n_step steps
-variable bond_1 equal 1
-variable atom_a equal 1
-variable atom_b equal 1
-variable n_step equal 1
-fix bondcr all bond/create/gran ${n_step} ${atom_a} ${atom_b} ${bond_skin} ${bond_1} 6
+#variable bond_1 equal 1
+#variable atom_a equal 1
+#variable atom_b equal 1
+#variable n_step equal 1
+#fix bondcr all bond/create/gran ${n_step} ${atom_a} ${atom_b} ${bond_skin} ${bond_1} 6
 # Find potential bonds
-run 1
+#run 1
 # Do not create new bonds after this line
-fix_modify bondcr every 0
+#fix_modify bondcr every 0
 
 # Update all fixes and save
-run 1
+#run 1
 write_restart restarts/restart0.liggghts
