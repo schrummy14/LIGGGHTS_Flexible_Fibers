@@ -51,7 +51,7 @@ from this model into account, typically leading to a lower value of tangential f
 
 [Restrictions:]
 
-The cohesion model has been derived for the Hertzian Style, it may note be
+The cohesion model has been derived for the Hertzian Style, it may not be
 appropriate for the Hookean styles. 
 
 It is not available for "atom_style"_atom_style.html superquadric

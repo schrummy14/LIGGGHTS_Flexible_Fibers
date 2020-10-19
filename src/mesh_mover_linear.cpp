@@ -297,10 +297,10 @@ MeshMoverVibLin::MeshMoverVibLin(LAMMPS *lmp,AbstractMesh *_mesh, FixMoveMesh *_
     if (strcmp(arg[5], "order"))
         error->all(FLERR, "Expected keyword 'order'");
     ord = force->inumeric(FLERR, arg[6]);
-    if (narg < 10+2*ord)
+    if (narg < 10+2*ord+1)
         error->all(FLERR, "Not enough arguments for movement type viblin");
-    if (narg > 10+2*ord)
-        error->warning(FLERR, "Movement type wiggle requires only (10 + 2*$order) arguments, excess arguments will be ignored");
+    if (narg > 10+2*ord+1)
+        error->warning(FLERR, "Movement type wiggle requires only (10 + 2*$order + 1) arguments, excess arguments will be ignored");
     if (ord > 30 || ord < 1)
         error->all(FLERR, "order can be at most 30 and must be greater 0");
 

@@ -38,7 +38,7 @@ If you are using the SJKR2 model, you must also define the cohesion energy densi
 fix id all property/global cohesionEnergyDensity peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
     (value_ij=value for the cohesion energy density (in Energy/Length3 units) between atom type i and j; n_atomtypes is the number of atom types you want to use in your simulation) :pre
 
-IMPORTANT NOTE: The cohesion model has been derived for the Hertzian Style, it may note be
+IMPORTANT NOTE: The cohesion model has been derived for the Hertzian Style, it may not be
 appropriate for the Hookean styles.
 
 IMPORTANT NOTE: You have to use atom styles beginning from 1, e.g. 1,2,3,...
@@ -52,7 +52,7 @@ from this model into account, typically leading to a lower value of tangential f
 
 [Restrictions:]
 
-The cohesion model has been derived for the Hertzian Style, it may note be
+The cohesion model has been derived for the Hertzian Style, it may not be
 appropriate for the Hookean styles. 
 
 It is not available for "atom_style"_atom_style.html superquadric
