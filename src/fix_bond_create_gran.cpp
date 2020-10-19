@@ -244,24 +244,7 @@ void FixBondCreateGran::init()
     if (force->pair == NULL || cutsq > cutsq_limit)
       error->all(FLERR,"Fix bond/create cutoff is longer than pairwise cutoff");
   }
-/*
-  // require special bonds = 0,1,1
 
-  int flag = 0;
-  if (force->special_lj[1] != 0.0 || force->special_lj[2] != 1.0 ||
-      force->special_lj[3] != 1.0) flag = 1;
-  if (force->special_coul[1] != 0.0 || force->special_coul[2] != 1.0 ||
-      force->special_coul[3] != 1.0) flag = 1;
-  if (flag) error->all(FLERR,"Fix bond/create requires special_bonds = 0,1,1");
-
-  // warn if angles, dihedrals, impropers are being used
-
-  if (force->angle || force->dihedral || force->improper) {
-    if (me == 0)
-      error->warning(FLERR,"Created bonds will not create angles, "
-                     "dihedrals, or impropers");
-  }
-*/
   // need a half neighbor list, built when ever re-neighboring occurs
 
   int irequest = neighbor->request((void *) this);

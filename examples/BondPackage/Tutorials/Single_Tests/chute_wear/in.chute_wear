@@ -35,16 +35,16 @@ bond_coeff 1 1.0 0.0 5.0e6 1.0e6 2 0.0 0.001 0.0 1 1.0e10 1.0e10
 timestep    0.00001
 
 fix  gravi all gravity 9.81 vector 0.0 0.0 -1.0
-
+# fix  rmMol all remove/molecule
 #the chute
 fix  cad all mesh/surface/stress file meshes/simple_chute.stl type 1 wear finnie
 fix  inface all mesh/surface file meshes/insertion_face.stl type 1
 fix  granwalls all wall/gran model hertz tangential history mesh n_meshes 1 meshes cad
-fix  floor all wall/gran model hertz tangential history primitive type 1 zplane -0.4
-fix  wall_x1 all wall/gran model hertz tangential history primitive type 1 xplane -0.5
-fix  wall_x2 all wall/gran model hertz tangential history primitive type 1 xplane  0.1
-fix  wall_y1 all wall/gran model hertz tangential history primitive type 1 yplane -0.2
-fix  wall_y2 all wall/gran model hertz tangential history primitive type 1 yplane  0.2
+#fix  floor all wall/gran model hertz tangential history primitive type 1 zplane -0.4
+#fix  wall_x1 all wall/gran model hertz tangential history primitive type 1 xplane -0.5
+#fix  wall_x2 all wall/gran model hertz tangential history primitive type 1 xplane  0.1
+#fix  wall_y1 all wall/gran model hertz tangential history primitive type 1 yplane -0.2
+#fix  wall_y2 all wall/gran model hertz tangential history primitive type 1 yplane  0.2
 
 #distributions for insertion
 fix  pts1 all particletemplate/sphere 15485863 atom_type 1 density constant 2500 radius constant 0.0015
@@ -60,7 +60,7 @@ fix  pdd1 all particledistribution/discrete 32452843  3 pts1 0.2 pts2 0.3 pts3 0
 
 #region and insertion
 group  nve_group region domain
-region bc cylinder z 0.0 0.0 0.015 0.05 0.12 units box
+region bc cylinder z 0.0 0.0 0.035 0.05 0.12 units box
 
 #particle insertion
 fix    ins nve_group insert/pack seed 32452867 distributiontemplate pdd1 &
@@ -72,7 +72,7 @@ fix    integr nve_group nve/sphere
 
 #output settings, include total thermal energy
 compute       1 all erotate/sphere
-thermo_style  custom step atoms ke c_1 vol
+thermo_style  custom step atoms numbonds ke c_1 vol
 thermo        1000
 thermo_modify lost ignore norm no
 
@@ -81,7 +81,7 @@ run    1
 dump   dmp all custom 200 post/chute_*.liggghts id mol type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius 
 dump   dumpstress all mesh/gran/VTK 200 post/mesh_*.vtk stress wear cad
 
-#insert particles
+# insert particles
 run    100000 upto
 unfix  ins
 

@@ -291,110 +291,102 @@ void FixInsertPack::calc_region_volume_local()
 
 int FixInsertPack::calc_ninsert_this()
 {
-  int nlocal = atom->nlocal;
-  double **x = atom->x;
-  double *rmass = atom->rmass;
-  double *radius = atom->radius;
+    const int nlocal = atom->nlocal;
+    double * const * const x = atom->x;
+    double * const rmass = atom->rmass;
+    double * const radius = atom->radius;
 
-  int ninsert_this = 0;
+    int ninsert_this = 0;
 
-  // check if region extends outside simulation box
-  // if so, throw error if boundary setting is "f f f"
+    // check if region extends outside simulation box
+    // if so, throw error if boundary setting is "f f f"
 
-  if(warn_region && ins_region->bbox_extends_outside_box())
-  {
-      for(int idim = 0; idim < 3; idim++)
-        for(int iface = 0; iface < 2; iface++)
-            if(domain->boundary[idim][iface] == 1)
-                error->fix_error(FLERR,this,"Insertion region extends outside simulation box and a fixed boundary is used."
+    if(warn_region && ins_region->bbox_extends_outside_box()) {
+        for(int idim = 0; idim < 3; idim++)
+            for(int iface = 0; iface < 2; iface++)
+                if(domain->boundary[idim][iface] == 1)
+                    error->fix_error(FLERR,this,"Insertion region extends outside simulation box and a fixed boundary is used."
                             "Please use non-fixed boundaries in this case only");
-  }
-
-  // get number of particles, masss and occupied volume in insertion region
-  // use all particles, not only those in the fix group
-
-  int np_region = 0;
-  double vol_region = 0., mass_region = 0.;
-  double _4Pi3 = 4.*M_PI/3.;
-  if(atom->molecular && atom->molecule_flag) {
-      std::set<int> uniquemol;
-      int *molecule = atom->molecule;
-      for(int i = 0; i < nlocal; i++) {
-          if(ins_region->match(x[i][0],x[i][1],x[i][2])) {
-              uniquemol.insert(molecule[i]);
-              vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
-              mass_region += rmass[i];
-          }
-      }
-      np_region = uniquemol.size();
-  } else {
-    for(int i = 0; i < nlocal; i++) {
-        if(fix_multisphere && fix_multisphere->belongs_to(i) >= 0) continue;
-        if(ins_region->match(x[i][0],x[i][1],x[i][2])) {
-            np_region++;
-            vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
-            mass_region += rmass[i];
-        }
     }
 
-    int nbody;
-    double x_bound_body[3], mass_body, density_body;
-    if(multisphere) {
-        nbody = multisphere->n_body();
+    // get number of particles, masss and occupied volume in insertion region
+    // use all particles, not only those in the fix group
 
-        for(int ibody = 0; ibody < nbody; ibody++)
-        {
-            multisphere->x_bound(x_bound_body,ibody);
-            //r_bound_body = multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
-            multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
-            if(ins_region->match(x_bound_body[0],x_bound_body[1],x_bound_body[2]))
-              
-            {
+    int np_region = 0;
+    double vol_region = 0., mass_region = 0.;
+    const double _4Pi3 = 4.*M_PI/3.;
+    if(atom->molecular && atom->molecule_flag) {
+        std::set<int> uniquemol;
+        int * const molecule = atom->molecule;
+        for(int i = 0; i < nlocal; i++) {
+            if(ins_region->match(x[i][0],x[i][1],x[i][2])) {
+                uniquemol.insert(molecule[i]);
+                vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
+                mass_region += rmass[i];
+            }
+        }
+        np_region = uniquemol.size();
+    } else {
+        for(int i = 0; i < nlocal; i++) {
+            if(fix_multisphere && fix_multisphere->belongs_to(i) >= 0) continue;
+            if(ins_region->match(x[i][0],x[i][1],x[i][2])) {
                 np_region++;
-                mass_body = multisphere->mass(ibody);
-                density_body = multisphere->density(ibody);
-                vol_region += mass_body/density_body;
-                mass_region += mass_body;
+                vol_region += _4Pi3*radius[i]*radius[i]*radius[i];
+                mass_region += rmass[i];
+            }
+        }
+
+        int nbody;
+        double x_bound_body[3], mass_body, density_body;
+        if(multisphere) {
+            nbody = multisphere->n_body();
+
+            for(int ibody = 0; ibody < nbody; ibody++) {
+                multisphere->x_bound(x_bound_body,ibody);
+                //r_bound_body = multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
+                multisphere->r_bound(ibody); // DEAD CODE? Side Effects?
+                if(ins_region->match(x_bound_body[0],x_bound_body[1],x_bound_body[2]))
+                {
+                    np_region++;
+                    mass_body = multisphere->mass(ibody);
+                    density_body = multisphere->density(ibody);
+                    vol_region += mass_body/density_body;
+                    mass_region += mass_body;
+                }
             }
         }
     }
-  }
 
-  // calculate and return number of particles that is missing
+    // calculate and return number of particles that is missing
 
-  if(volumefraction_region > 0.)
-  {
-      MPI_Sum_Scalar(vol_region,world);
-      ninsert_this = static_cast<int>((volumefraction_region*region_volume - vol_region) / fix_distribution->vol_expect() + random->uniform());
-      insertion_ratio = vol_region / (volumefraction_region*region_volume);
+    if(volumefraction_region > 0.)
+    {
+        MPI_Sum_Scalar(vol_region,world);
+        ninsert_this = static_cast<int>((volumefraction_region*region_volume - vol_region) / fix_distribution->vol_expect() + random->uniform());
+        insertion_ratio = vol_region / (volumefraction_region*region_volume);
+        
+    } else if(ntotal_region > 0) {
+        MPI_Sum_Scalar(np_region,world);
+        ninsert_this = ntotal_region - np_region;
+        insertion_ratio = static_cast<double>(np_region) / static_cast<double>(ntotal_region);
       
-  }
-  else if(ntotal_region > 0)
-  {
-      MPI_Sum_Scalar(np_region,world);
-      ninsert_this = ntotal_region - np_region;
-      insertion_ratio = static_cast<double>(np_region) / static_cast<double>(ntotal_region);
-      
-  }
-  else if(masstotal_region > 0.)
-  {
-      MPI_Sum_Scalar(mass_region,world);
-      ninsert_this = static_cast<int>((masstotal_region - mass_region) / fix_distribution->mass_expect() + random->uniform());
-      insertion_ratio = mass_region / masstotal_region;
-  }
-  else error->one(FLERR,"Internal error in FixInsertPack::calc_ninsert_this()");
-  //if(comm->me == 0)
-  //  printf("Target number of particles to be inserted: %d\n", ninsert_this);
+    } else if(masstotal_region > 0.) {
+        MPI_Sum_Scalar(mass_region,world);
+        ninsert_this = static_cast<int>((masstotal_region - mass_region) / fix_distribution->mass_expect() + random->uniform());
+        insertion_ratio = mass_region / masstotal_region;
+    } else error->one(FLERR,"Internal error in FixInsertPack::calc_ninsert_this()");
+    //if(comm->me == 0)
+    //  printf("Target number of particles to be inserted: %d\n", ninsert_this);
 
-  // can be < 0 due to overflow, round-off etc
-  if(ninsert_this < -200000)
-    error->fix_error(FLERR,this,"overflow in particle number calculation: inserting too many particles in one step");
-  if(ninsert_this < 0) ninsert_this = 0;
+    // can be < 0 due to overflow, round-off etc
+    if(ninsert_this < -200000)
+        error->fix_error(FLERR,this,"overflow in particle number calculation: inserting too many particles in one step");
+    if(ninsert_this < 0) ninsert_this = 0;
 
-  if(insertion_ratio < 0.) insertion_ratio = 0.;
-  if(insertion_ratio > 1.) insertion_ratio = 1.;
+    if(insertion_ratio < 0.) insertion_ratio = 0.;
+    if(insertion_ratio > 1.) insertion_ratio = 1.;
 
-  return ninsert_this;
+    return ninsert_this;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -429,14 +421,14 @@ inline int FixInsertPack::is_nearby(int i)
 /* ---------------------------------------------------------------------- */
 
 BoundingBox FixInsertPack::getBoundingBox() {
-  BoundingBox bb(ins_region->extent_xlo, ins_region->extent_xhi,
-                 ins_region->extent_ylo, ins_region->extent_yhi,
-                 ins_region->extent_zlo, ins_region->extent_zhi);
+    BoundingBox bb(ins_region->extent_xlo, ins_region->extent_xhi,
+                  ins_region->extent_ylo, ins_region->extent_yhi,
+                  ins_region->extent_zlo, ins_region->extent_zhi);
 
-  double extend = 2*maxrad /*cut*/ + this->extend_cut_ghost(); 
-  bb.shrinkToSubbox(domain->sublo, domain->subhi);
-  bb.extendByDelta(extend);
-  return bb;
+    const double extend = 2*maxrad /*cut*/ + this->extend_cut_ghost(); 
+    bb.shrinkToSubbox(domain->sublo, domain->subhi);
+    bb.extendByDelta(extend);
+    return bb;
 }
 
 /* ----------------------------------------------------------------------

@@ -63,7 +63,7 @@ Needs grain to handle torque
 /* D. Kramolis edits for domain end detection and other bug fixes --> KRAMOLIS */
 
 enum{
-     BREAKSTYLE_SIMPLE,
+     BREAKSTYLE_SIMPLE = 0,
      BREAKSTYLE_STRESS,
      BREAKSTYLE_STRESS_TEMP,
      BREAKSTYLE_SOFT_STRESS,
@@ -71,9 +71,9 @@ enum{
      BREAKSTYLE_SOFT_CONTACT_STRESS_HERTZ
     };
 enum {
-  DAMPSTYLE_NONE = 0,
-  DAMPSTYLE_YU_GUO,
-  DAMPSTYLE_NON_LINEAR
+    DAMPSTYLE_NONE = 0,
+    DAMPSTYLE_YU_GUO,
+    DAMPSTYLE_NON_LINEAR
 };
 /* ---------------------------------------------------------------------- */
 
@@ -95,7 +95,7 @@ BondGran::BondGran(LAMMPS *lmp) : Bond(lmp)
        atom_vec_bond_gran.cpp:  memory->grow(atom->bond_hist,nmax,atom->bond_per_atom,atom->n_bondhist,"atom:bond_hist");
      */
     if(!atom->style_match("bond/gran"))
-      error->all(FLERR,"A granular bond style can only be used together with atom style bond/gran");
+        error->all(FLERR,"A granular bond style can only be used together with atom style bond/gran");
     if(comm->me == 0)
         error->warning(FLERR,"Bond granular: This is a beta version - be careful!");
     fix_Temp = NULL;
@@ -153,7 +153,6 @@ void BondGran::compute(int eflag, int vflag)
     const int nlocal = atom->nlocal;
     const int newton_bond = force->newton_bond;
     const double dt = update->dt;
-    const double cutoff=neighbor->skin;
 
     if(breakmode == BREAKSTYLE_STRESS_TEMP) {
         if(!fix_Temp) error->all(FLERR, "Internal error in BondGran");
@@ -171,47 +170,47 @@ void BondGran::compute(int eflag, int vflag)
         const int i1 = bondlist[n][0]; // Sphere 1
         const int i2 = bondlist[n][1]; // Sphere 2
 
-        // 2nd check if bond overlap the box-borders
-        // KRAMOLIS do not use neighbor cutoff - it is usually set as 4 * atom radius or more (bugfix - correct sign - bonds were breaking inside domain far away from wall, added info about broken bonds) 
+        // KRAMOLIS do not use neighbor cutoff - it is usually set as 4 * atom radius or more 
+        // (bugfix - correct sign - bonds were breaking inside domain far away from wall, added info about broken bonds) 
         // should be rather bond_skin or bond_length or radius, enable periodic detection
         // 2nd check if bond overlap the box-borders
-        double maxoverlap = radius[i1] + cutoff;  // max overlap is diameter - but position is in the middle of atom
-        if ((x[i1][0]<(domain->boxlo[0]-maxoverlap)) && (domain->xperiodic == 0)) {
+        double maxoverlap = 0.25*radius[i1];  // max overlap is diameter - but position is in the middle of atom
+        if ((x[i1][0]<(domain->boxlo[0]+maxoverlap)) && (domain->xperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
               fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
               fprintf(screen, "   bond overlaped domain border at xmin\n");
 #           endif
             continue;
-        } else if ((x[i1][0]>(domain->boxhi[0]+maxoverlap)) && (domain->xperiodic == 0)) {
+        } else if ((x[i1][0]>(domain->boxhi[0]-maxoverlap)) && (domain->xperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmax\n");
 #           endif
             continue;
-        } else if ((x[i1][1]<(domain->boxlo[1]-maxoverlap)) && (domain->yperiodic == 0)) {
+        } else if ((x[i1][1]<(domain->boxlo[1]+maxoverlap)) && (domain->yperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymin\n");
 #           endif
             continue;
-        } else if ((x[i1][1]>(domain->boxhi[1]+maxoverlap)) && (domain->yperiodic == 0)) {
+        } else if ((x[i1][1]>(domain->boxhi[1]-maxoverlap)) && (domain->yperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymax\n");
 #           endif
             continue;
-        } else if ((x[i1][2]<(domain->boxlo[2]-maxoverlap)) && (domain->zperiodic == 0)) {
+        } else if ((x[i1][2]<(domain->boxlo[2]+maxoverlap)) && (domain->zperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at zmin\n");
 #           endif
             continue;
-        } else if ((x[i1][2]>(domain->boxhi[2]+maxoverlap)) && (domain->zperiodic == 0)) {
+        } else if ((x[i1][2]>(domain->boxhi[2]-maxoverlap)) && (domain->zperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
@@ -219,43 +218,43 @@ void BondGran::compute(int eflag, int vflag)
 #           endif
             continue;
         }
-        maxoverlap = radius[i2] + cutoff;  // max overlap is diameter - but position is in the middle of atom
-        if ((x[i2][0]<(domain->boxlo[0]-maxoverlap)) && (domain->xperiodic == 0)) {
+        maxoverlap = 0.25*radius[i2];  // max overlap is diameter - but position is in the middle of atom
+        if ((x[i2][0]<(domain->boxlo[0]+maxoverlap)) && (domain->xperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmin\n");
 #           endif
             continue;
-        } else if ((x[i2][0]>(domain->boxhi[0]+maxoverlap)) && (domain->xperiodic == 0)) {
+        } else if ((x[i2][0]>(domain->boxhi[0]-maxoverlap)) && (domain->xperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmax\n");
 #           endif
             continue;
-        } else if ((x[i2][1]<(domain->boxlo[1]-maxoverlap)) && (domain->yperiodic == 0)) {
+        } else if ((x[i2][1]<(domain->boxlo[1]+maxoverlap)) && (domain->yperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymin\n");
 #           endif
             continue;
-        } else if ((x[i2][1]>(domain->boxhi[1]+maxoverlap)) && (domain->yperiodic == 0)) {
+        } else if ((x[i2][1]>(domain->boxhi[1]-maxoverlap)) && (domain->yperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymax\n");
 #           endif
             continue;
-        } else if ((x[i2][2]<(domain->boxlo[2]-maxoverlap)) && (domain->zperiodic == 0)) {
+        } else if ((x[i2][2]<(domain->boxlo[2]+maxoverlap)) && (domain->zperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at zmin\n");
 #           endif
             continue;
-        } else if ((x[i2][2]>(domain->boxhi[2]+maxoverlap)) && (domain->zperiodic == 0)) {
+        } else if ((x[i2][2]>(domain->boxhi[2]-maxoverlap)) && (domain->zperiodic == 0)) {
             bondlist[n][3]=1;
 #           ifdef LIGGGHTS_DEBUG
                 fprintf(screen,"broken bond %d at step %ld\n",n,update->ntimestep);
