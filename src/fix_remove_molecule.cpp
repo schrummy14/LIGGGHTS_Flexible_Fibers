@@ -85,14 +85,24 @@ void FixRemoveMolecule::post_integrate()
     // Should try to use delete_atom class
     const int nbondlist = neighbor->nbondlist;
     int * const * const bondlist = neighbor->bondlist;
-
     int * const mol = atom->molecule;
+
+    double * const * const x = atom->x;
+    double * const radius = atom->radius;
 
     for (int k = 0; k < nbondlist; k++) {
         if (bondlist[k][3] != 1) continue;
-        
+
+        // now check if the atom is inside the boundary        
         const int i1 = bondlist[k][0];
         const int i2 = bondlist[k][1];
+        if (!((x[i1][0] - 0.25*radius[i1] < domain->boxlo[0] || x[i1][0] + 0.25*radius[i1] > domain->boxhi[0]) && domain->xperiodic == 0)) continue;
+        if (!((x[i1][1] - 0.25*radius[i1] < domain->boxlo[1] || x[i1][1] + 0.25*radius[i1] > domain->boxhi[1]) && domain->yperiodic == 0)) continue;
+        if (!((x[i1][2] - 0.25*radius[i1] < domain->boxlo[2] || x[i1][2] + 0.25*radius[i1] > domain->boxhi[2]) && domain->zperiodic == 0)) continue;
+
+        if (!((x[i2][0] - 0.25*radius[i2] < domain->boxlo[0] || x[i2][0] + 0.25*radius[i2] > domain->boxhi[0]) && domain->xperiodic == 0)) continue;
+        if (!((x[i2][1] - 0.25*radius[i2] < domain->boxlo[1] || x[i2][1] + 0.25*radius[i2] > domain->boxhi[1]) && domain->yperiodic == 0)) continue;
+        if (!((x[i2][2] - 0.25*radius[i2] < domain->boxlo[2] || x[i2][2] + 0.25*radius[i2] > domain->boxhi[2]) && domain->zperiodic == 0)) continue;
         
         if (mol[i1] == mol[i2]) {
             remove_molecule(mol[i1]);
