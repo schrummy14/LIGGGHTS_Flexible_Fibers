@@ -208,9 +208,9 @@ void FixContactHistoryMesh::allocate_pages()
     intersectpage_ = new MyPage<bool>*[numpages_];
     for (int i = 0; i < numpages_; i++) {
       ipage1_[i].init(oneatom_,pgsize_);
-      dpage1_[i].init(oneatom_*std::max(1,dnum_),pgsize_);
+      dpage1_[i].init(oneatom_*std::max(1,dnum_),pgsize_*std::max(1,dnum_));
       ipage2_[i].init(oneatom_,pgsize_);
-      dpage2_[i].init(oneatom_*std::max(1,dnum_),pgsize_);
+      dpage2_[i].init(oneatom_*std::max(1,dnum_),pgsize_*std::max(1,dnum_));
     }
 
 #if defined(_OPENMP)

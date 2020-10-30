@@ -141,11 +141,9 @@ void FixCheckTimestepBond::end_of_step()
 {
     calc_bond_estims();
 
-    const double skin = neighbor->skin;
     const double dt = update->dt;
 
     fraction_bond = dt/bond_time;
-    fraction_skin = (v_rel_max_simulation * dt) / neighbor->skin;
 
     if(errorflag || (warnflag && comm->me==0)) {
         char errstr[512];
@@ -158,24 +156,6 @@ void FixCheckTimestepBond::end_of_step()
             else
                 error->warning(FLERR,errstr);
         }
-
-        if(fraction_skin > 1)
-        {
-            sprintf(errstr,"time step too large or skin too small - particles may relatively travel a distance of %f per time-step, but skin is %f",v_rel_max_simulation*dt,skin);
-            if(errorflag)
-                error->fix_error(FLERR,this,errstr);
-            else
-                error->warning(FLERR,errstr);
-        }
-
-        if(v_rel_max_simulation * dt > r_min)
-        {
-            sprintf(errstr,"time step way too large - particles relativley move further than the minimum radius in one step");
-            if(errorflag)
-                error->fix_error(FLERR,this,errstr);
-            else
-                error->warning(FLERR,errstr);
-        }
     }
 }
 
@@ -183,70 +163,8 @@ void FixCheckTimestepBond::end_of_step()
 
 void FixCheckTimestepBond::calc_bond_estims()
 {
-    const int nlocal = atom->nlocal;
-    int * const mask = atom->mask;
-    double * const r = atom->radius;
-    double * const * const v = atom->v;
-
-    //check rayleigh time and vmax of particles
-    bond_time = BIG;
-    r_min = BIG;
-    double vmax_sqr = 0;
-    double vmag_sqr;
-
-    for (int i = 0; i < nlocal; i++) {
-        if (mask[i] & groupbit) {
-            double rad = r[i];
-            #ifdef SUPERQUADRIC_ACTIVE_FLAG
-            if(atom->superquadric_flag)
-                rad=std::min(std::min(atom->shape[i][0],atom->shape[i][1]),atom->shape[i][2]);        
-            #endif
-
-            vmag_sqr = vectorMag3DSquared(v[i]);
-            if(vmag_sqr > vmax_sqr)
-                vmax_sqr = vmag_sqr;
-
-            if(rad < r_min) r_min = rad;
-        }
-    }
     bond_time = force->bond->getMinDt();
-
-    MPI_Min_Scalar(r_min,world);
-    MPI_Max_Scalar(vmax_sqr,world);
     MPI_Min_Scalar(bond_time,world);
-
-    double vmax_sqr_mesh = 0.;
-    if(fwg) {
-        // get vmax of geometry
-        FixMeshSurface * const * const mesh_list = fwg->mesh_list();
-        TriMesh * mesh;
-        double * v_node;
-        double vmag_sqr_mesh;
-        // mesh_list = fwg->mesh_list();
-        for(int imesh = 0; imesh < fwg->n_meshes(); imesh++) {
-            mesh = (mesh_list[imesh])->triMesh();
-            if(mesh->isMoving()) {
-                // check if perElementProperty 'v' exists
-                if (mesh->prop().getElementPropertyIndex("v") == -1)
-                    error->one(FLERR,"Internal error - mesh has no perElementProperty 'v' \n");
-                // loop local elements only
-                const int sizeMesh = mesh->sizeLocal();
-                for(int itri = 0; itri < sizeMesh; itri++) {
-                    for(int inode = 0; inode < 3; inode++) {
-                        v_node = mesh->prop().getElementProperty<MultiVectorContainer<double,3,3> >("v")->begin()[itri][inode];
-                        vmag_sqr_mesh = vectorMag3DSquared(v_node);
-                        if(vmag_sqr_mesh > vmax_sqr_mesh)
-                          vmax_sqr_mesh = vmag_sqr_mesh;
-                    }
-                }
-            }
-        }
-    }
-
-    MPI_Max_Scalar(vmax_sqr_mesh,world);
-
-    // decide vmax - either particle-particle or particle-mesh contact
-    v_rel_max_simulation = std::max(2.*sqrt(vmax_sqr),sqrt(vmax_sqr) + sqrt(vmax_sqr_mesh));
 }
 
 /* ----------------------------------------------------------------------
@@ -256,6 +174,5 @@ void FixCheckTimestepBond::calc_bond_estims()
 double FixCheckTimestepBond::compute_vector(int n)
 {
     if(n == 0)      return fraction_bond;
-    else if(n == 1) return fraction_skin;
     return 0.;
 }

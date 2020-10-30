@@ -267,7 +267,7 @@ void FixContactHistory::allocate_pages()
     dpage_ = new MyPage<double>[nmypage];
     for (int i = 0; i < nmypage; i++) {
       ipage_[i].init(oneatom_,pgsize_);
-      dpage_[i].init(oneatom_*std::max(1,dnum_),pgsize_);
+      dpage_[i].init(oneatom_*std::max(1,dnum_),pgsize_*std::max(1,dnum_));
     }
   }
 }

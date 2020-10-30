@@ -43,17 +43,16 @@ using namespace FixConst;
 
 #define BIG 1.0e20
 
-#define MIN(A,B) ((A) < (B)) ? (A) : (B)
-#define MAX(A,B) ((A) > (B)) ? (A) : (B)
+#define MIN(A, B) ((A) < (B)) ? (A) : (B)
+#define MAX(A, B) ((A) > (B)) ? (A) : (B)
 
 /* ---------------------------------------------------------------------- */
 
-FixBondPropagateGran::FixBondPropagateGran(LAMMPS *lmp, int narg, char **arg) :
-  Fix(lmp, narg, arg)
+FixBondPropagateGran::FixBondPropagateGran(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
 {
-	//printf("constructor FixBondPropagateGran ###########\n");
-    restart_global = 1;
-	laststep=-1;
+  //printf("constructor FixBondPropagateGran ###########\n");
+  restart_global = 1;
+  laststep = -1;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -71,9 +70,9 @@ int FixBondPropagateGran::setmask()
   return mask;
 }
 
-void FixBondPropagateGran::pre_exchange()
+inline void FixBondPropagateGran::neigh2atom()
 {
-  int i1,i2,n;
+  int i1, i2, n;
   bool found;
   int **bondlist = neighbor->bondlist;
   double **bondhistlist = neighbor->bondhistlist;
@@ -81,7 +80,7 @@ void FixBondPropagateGran::pre_exchange()
 
   int **bond_atom = atom->bond_atom;
   int *num_bond = atom->num_bond;
-  double ***bond_hist = atom->bond_hist;// schickt eig. in. neighlist zu per atom arrays
+  double ***bond_hist = atom->bond_hist; // schickt eig. in. neighlist zu per atom arrays
   int n_bondhist = atom->n_bondhist;
   int nlocal = atom->nlocal;
   int *tag = atom->tag;
@@ -90,42 +89,112 @@ void FixBondPropagateGran::pre_exchange()
 
   //NP task 1
   //NP propagate bond contact history
-  if (!n_bondhist) return;
+  if (!n_bondhist)
+    return;
 
-  for (n = 0; n < nbondlist; n++) {
+  for (n = 0; n < nbondlist; n++)
+  {
     i1 = bondlist[n][0];
     i2 = bondlist[n][1];
     int broken = bondlist[n][3];
 
-    if(broken == 1) continue; //do not copy broken bonds
+    if (broken == 1)
+      continue; //do not copy broken bonds
 
     if (newton_bond || i1 < nlocal)
     {
-        found = false;
-        for(int k = 0; k < num_bond[i1]; k++)
-           if(bond_atom[i1][k] == tag[i2])
-           {
-         found = true;
-         for(int q = 0; q < n_bondhist; q++) bond_hist[i1][k][q] = bondhistlist[n][q];
-              break;
-           }
-        if(!found) error->one(FLERR,"Failed to operate on granular bond history during copy i1");
+      found = false;
+      for (int k = 0; k < num_bond[i1]; k++)
+        if (bond_atom[i1][k] == tag[i2])
+        {
+          found = true;
+          for (int q = 0; q < n_bondhist; q++)
+            bond_hist[i1][k][q] = bondhistlist[n][q];
+          break;
+        }
+      if (!found)
+        error->one(FLERR, "Failed to operate on granular bond history during copy i1");
     }
 
     if (newton_bond || i2 < nlocal)
     {
-        found = false;
-        for(int k = 0; k < num_bond[i2]; k++)
-           if(bond_atom[i2][k] == tag[i1])
-           {
-         found = true;
-         for(int q = 0; q < n_bondhist; q++) bond_hist[i2][k][q] = -bondhistlist[n][q];
-              break;
-           }
-        if(!found) error->one(FLERR,"Failed to operate on granular bond history during copy i2");
-
+      found = false;
+      for (int k = 0; k < num_bond[i2]; k++)
+        if (bond_atom[i2][k] == tag[i1])
+        {
+          found = true;
+          for (int q = 0; q < n_bondhist; q++)
+            bond_hist[i2][k][q] = -bondhistlist[n][q];
+          break;
+        }
+      if (!found)
+        error->one(FLERR, "Failed to operate on granular bond history during copy i2");
     }
   }
+}
+
+void FixBondPropagateGran::pre_exchange()
+{
+  int i1, i2, n;
+  bool found;
+  int **bondlist = neighbor->bondlist;
+  double **bondhistlist = neighbor->bondhistlist;
+  int nbondlist = neighbor->nbondlist;
+
+  int **bond_atom = atom->bond_atom;
+  int *num_bond = atom->num_bond;
+  double ***bond_hist = atom->bond_hist; // schickt eig. in. neighlist zu per atom arrays
+  int n_bondhist = atom->n_bondhist;
+  int nlocal = atom->nlocal;
+  int *tag = atom->tag;
+
+  int newton_bond = force->newton_bond;
+
+  // //NP task 1
+  // //NP propagate bond contact history
+  // if (!n_bondhist)
+  //   return;
+
+  // for (n = 0; n < nbondlist; n++)
+  // {
+  //   i1 = bondlist[n][0];
+  //   i2 = bondlist[n][1];
+  //   int broken = bondlist[n][3];
+
+  //   if (broken == 1)
+  //     continue; //do not copy broken bonds
+
+  //   if (newton_bond || i1 < nlocal)
+  //   {
+  //     found = false;
+  //     for (int k = 0; k < num_bond[i1]; k++)
+  //       if (bond_atom[i1][k] == tag[i2])
+  //       {
+  //         found = true;
+  //         for (int q = 0; q < n_bondhist; q++)
+  //           bond_hist[i1][k][q] = bondhistlist[n][q];
+  //         break;
+  //       }
+  //     if (!found)
+  //       error->one(FLERR, "Failed to operate on granular bond history during copy i1");
+  //   }
+
+  //   if (newton_bond || i2 < nlocal)
+  //   {
+  //     found = false;
+  //     for (int k = 0; k < num_bond[i2]; k++)
+  //       if (bond_atom[i2][k] == tag[i1])
+  //       {
+  //         found = true;
+  //         for (int q = 0; q < n_bondhist; q++)
+  //           bond_hist[i2][k][q] = -bondhistlist[n][q];
+  //         break;
+  //       }
+  //     if (!found)
+  //       error->one(FLERR, "Failed to operate on granular bond history during copy i2");
+  //   }
+  // }
+  neigh2atom();
 
   //NP task 2
   //NP remove broken bonds
@@ -135,16 +204,18 @@ void FixBondPropagateGran::pre_exchange()
   std::vector<unsigned int> list_bond_id;
   std::vector<unsigned int>::iterator it1;
 
-  for (n=0; n<nbondlist; n++) {
-    if(bondlist[n][3] == 1) {
-      list_bond_id.push_back(n);// load all broken bond ids into the list
+  for (n = 0; n < nbondlist; n++)
+  {
+    if (bondlist[n][3] == 1)
+    {
+      list_bond_id.push_back(n); // load all broken bond ids into the list
     }
   }
 
   //DEBUG
   //if (list_bond_id.size()>0) printf("will delete %d broken bonds at step %d\n",list_bond_id.size(),update->ntimestep);
 
-  for (it1=list_bond_id.begin(); it1!=list_bond_id.end(); ++it1)
+  for (it1 = list_bond_id.begin(); it1 != list_bond_id.end(); ++it1)
   {
     n = *it1;
     i1 = bondlist[n][0];
@@ -152,7 +223,8 @@ void FixBondPropagateGran::pre_exchange()
 
     //ich glaube das kann mit der komprimierten Liste von PF nicht mehr eintreten ...
     int broken = bondlist[n][3];
-    if(broken != 1) continue;
+    if (broken != 1)
+      continue;
 
     //printf("detected bond %d:%d<->%d as broken at step %ld\n",n,atom->tag[i1],atom->tag[i2],update->ntimestep);
     //NP if the bond is broken, we remove it from
@@ -163,56 +235,58 @@ void FixBondPropagateGran::pre_exchange()
 
     if (newton_bond || i1 < nlocal)
     {
-        found = false;
-        for(int k = 0; k < num_bond[i1]; k++)
-           if(bond_atom[i1][k] == tag[i2])
-           {
-         found = true;
-         remove_bond(i1,k,n);
-         break;
-           }
-        if(!found) error->one(FLERR,"Failed to operate on granular bond history during deletion1");
+      found = false;
+      for (int k = 0; k < num_bond[i1]; k++)
+        if (bond_atom[i1][k] == tag[i2])
+        {
+          found = true;
+          remove_bond(i1, k, n);
+          break;
+        }
+      if (!found)
+        error->one(FLERR, "Failed to operate on granular bond history during deletion1");
     }
     if (newton_bond || i2 < nlocal)
     {
-        found = false;
-        for(int k = 0; k < num_bond[i2]; k++)
-           if(bond_atom[i2][k] == tag[i1])
-           {
-              found = true;
-              remove_bond(i2,k,n);
-              int nbondlist = neighbor->nbondlist;
+      found = false;
+      for (int k = 0; k < num_bond[i2]; k++)
+        if (bond_atom[i2][k] == tag[i1])
+        {
+          found = true;
+          remove_bond(i2, k, n);
+          int nbondlist = neighbor->nbondlist;
 
-                if(n<nbondlist)
-                {
-                 neighbor->nbondlist = (nbondlist-1);                               // delete one bond -> reduce nbondlist by one
-                 for(int i = 0; i <= 3; i++)                                        
-                    neighbor->bondlist[n][i] = neighbor->bondlist[nbondlist-1][i];  // NP P.F. added also change in neighbor bondlist
-                 break;
-                }
-                else if(n == nbondlist)
-                {
-                 neighbor->nbondlist = (nbondlist-1);
-                 break;
-                }
-             break;
-           }
-        if(!found) error->one(FLERR,"Failed to operate on granular bond history during deletion2");
+          if (n < nbondlist)
+          {
+            neighbor->nbondlist = (nbondlist - 1); // delete one bond -> reduce nbondlist by one
+            for (int i = 0; i <= 3; i++)
+              neighbor->bondlist[n][i] = neighbor->bondlist[nbondlist - 1][i]; // NP P.F. added also change in neighbor bondlist
+            break;
+          }
+          else if (n == nbondlist)
+          {
+            neighbor->nbondlist = (nbondlist - 1);
+            break;
+          }
+          break;
+        }
+      if (!found)
+        error->one(FLERR, "Failed to operate on granular bond history during deletion2");
     }
   }
 }
 
-inline void FixBondPropagateGran::remove_bond(int ilocal,int ibond, int bondnumber) //NP P.F. added bondnumber
+inline void FixBondPropagateGran::remove_bond(int ilocal, int ibond, int bondnumber) //NP P.F. added bondnumber
 {
-    /*NL*///fprintf(screen,"removing bond\n");
-    /*NL*///error->one(FLERR,"romoving bond");
-    int nbond = atom->num_bond[ilocal];
-    atom->bond_atom[ilocal][ibond] = atom->bond_atom[ilocal][nbond-1];
-    atom->bond_type[ilocal][ibond] = atom->bond_type[ilocal][nbond-1];
-    for(int k = 0; k < atom->n_bondhist; k++) atom->bond_hist[ilocal][ibond][k] = atom->bond_hist[ilocal][nbond-1][k];
-    atom->num_bond[ilocal]--;
+  /*NL*/ //fprintf(screen,"removing bond\n");
+  /*NL*/ //error->one(FLERR,"romoving bond");
+  int nbond = atom->num_bond[ilocal];
+  atom->bond_atom[ilocal][ibond] = atom->bond_atom[ilocal][nbond - 1];
+  atom->bond_type[ilocal][ibond] = atom->bond_type[ilocal][nbond - 1];
+  for (int k = 0; k < atom->n_bondhist; k++)
+    atom->bond_hist[ilocal][ibond][k] = atom->bond_hist[ilocal][nbond - 1][k];
+  atom->num_bond[ilocal]--;
 }
-
 
 /*inline void FixBondPropagateGran::remove_bond(int ilocal,int ibond, int bondnumber) //NP P.F. added bondnumber
 {
@@ -237,10 +311,11 @@ void FixBondPropagateGran::write_restart(FILE *fp)
   double list[1];
   list[n++] = 1.;
 
-  if (comm->me == 0) {
+  if (comm->me == 0)
+  {
     int size = n * sizeof(double);
-    fwrite(&size,sizeof(int),1,fp);
-    fwrite(list,sizeof(double),n,fp);
+    fwrite(&size, sizeof(int), 1, fp);
+    fwrite(list, sizeof(double), n, fp);
   }
 
   //NP write data to atom arrays where it can then be stored
@@ -255,13 +330,12 @@ void FixBondPropagateGran::write_restart(FILE *fp)
 void FixBondPropagateGran::restart(char *buf)
 {
   int n = 0;
-  double *list = (double *) buf;
+  double *list = (double *)buf;
 
-  double dummy = static_cast<int> (list[n++]);
+  double dummy = static_cast<int>(list[n++]);
 
   //error->warning(FLERR,"Restart functionality not yet tested for granular bonds...");
 }
-
 
 /* ----------------------------------------------------------------------
     Take bond histories from neighbor class and store them into the atom
@@ -269,46 +343,54 @@ void FixBondPropagateGran::restart(char *buf)
     done, the fiber will "forget" what the histories were and the bonds
     will reset to equilibrium conditions.
 ------------------------------------------------------------------------- */
-void FixBondPropagateGran::post_run() 
+void FixBondPropagateGran::post_run()
 {
-  int **bondlist = neighbor->bondlist;
-  double **bondhistlist = neighbor->bondhistlist;
+  neigh2atom();
+  // int **bondlist = neighbor->bondlist;
+  // double **bondhistlist = neighbor->bondhistlist;
 
-  int nbondlist = neighbor->nbondlist;
+  // int nbondlist = neighbor->nbondlist;
 
-  int i,m,k,neighID,atom1,atom2,atom11,atom22;
+  // int i, m, k, neighID, atom1, atom2, atom11, atom22;
 
-  int nlocal = atom->nlocal;
-  int *num_bond = atom->num_bond;
-  int **bond_atom = atom->bond_atom;
-  int **bond_type = atom->bond_type;
-  double ***bond_hist = atom->bond_hist;  
-  int *tag = atom->tag;
-  int newton_bond = force->newton_bond;
-  int n_bondhist = atom->n_bondhist;  
+  // int nlocal = atom->nlocal;
+  // int *num_bond = atom->num_bond;
+  // int **bond_atom = atom->bond_atom;
+  // int **bond_type = atom->bond_type;
+  // double ***bond_hist = atom->bond_hist;
+  // int *tag = atom->tag;
+  // int newton_bond = force->newton_bond;
+  // int n_bondhist = atom->n_bondhist;
 
-  for (i = 0; i < nlocal; i++) {
-    atom1 = i;
-    for (m = 0; m < num_bond[atom1]; m++) {
-      atom2 = atom->map(bond_atom[atom1][m]);
-      if (newton_bond || i < atom2) {
+  // for (i = 0; i < nlocal; i++)
+  // {
+  //   atom1 = i;
+  //   for (m = 0; m < num_bond[atom1]; m++)
+  //   {
+  //     atom2 = atom->map(bond_atom[atom1][m]);
+  //     if (newton_bond || i < atom2)
+  //     {
 
-        neighID = -1;
-        for (k = 0; k < nbondlist; k++) {
-          if ((bondlist[k][0]==atom1 && bondlist[k][1]==atom2) || ((bondlist[k][1]==atom1 && bondlist[k][0]==atom2))) {
-            neighID = k;
+  //       neighID = -1;
+  //       for (k = 0; k < nbondlist; k++)
+  //       {
+  //         if ((bondlist[k][0] == atom1 && bondlist[k][1] == atom2) || ((bondlist[k][1] == atom1 && bondlist[k][0] == atom2)))
+  //         {
+  //           neighID = k;
 
-            bond_type[i][m] = bondlist[neighID][2];
-            if(n_bondhist) { 
-              for(int j = 0; j < n_bondhist; j++) {
-                  bond_hist[i][m][j] = bondhistlist[neighID][j];
-              }
-            }
+  //           bond_type[i][m] = bondlist[neighID][2];
+  //           if (n_bondhist)
+  //           {
+  //             for (int j = 0; j < n_bondhist; j++)
+  //             {
+  //               bond_hist[i][m][j] = bondhistlist[neighID][j];
+  //             }
+  //           }
 
-            break;
-          }
-        }
-      }
-    }
-  }
+  //           break;
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }

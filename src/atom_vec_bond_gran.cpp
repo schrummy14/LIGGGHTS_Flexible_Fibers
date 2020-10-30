@@ -81,7 +81,7 @@ void AtomVecBondGran::settings(int narg, char **arg)
 
   if (narg < 6) return;
   
-  if(strcmp(arg[4],"disableNormalContact"))
+  if(strcmp(arg[4],"disableNormalContact")) // Need to switch to a 'yes' or 'no' response
     error->all(FLERR,"Illegal atom_style bond/gran command, expecting 'disableNormalContact'");
   
   atom->disableNormalContact = atoi(arg[5]);
@@ -110,39 +110,38 @@ void AtomVecBondGran::init()
 
 void AtomVecBondGran::grow(int n)
 {
-  if (n == 0) nmax += DELTA;
-  else nmax = n;
-  atom->nmax = nmax;
+    if (n == 0) nmax += DELTA;
+    else nmax = n;
+    atom->nmax = nmax;
 
-  tag = memory->grow(atom->tag,nmax,"atom:tag");
-  type = memory->grow(atom->type,nmax,"atom:type");
-  mask = memory->grow(atom->mask,nmax,"atom:mask");
-  image = memory->grow(atom->image,nmax,"atom:image");
-  x = memory->grow(atom->x,nmax,3,"atom:x");
-  v = memory->grow(atom->v,nmax,3,"atom:v");
-  f = memory->grow(atom->f,nmax*comm->nthreads,3,"atom:f");
-  molecule = memory->grow(atom->molecule,nmax,"atom:molecule");
-  nspecial = memory->grow(atom->nspecial,nmax,3,"atom:nspecial");
-  special = memory->grow(atom->special,nmax,atom->maxspecial,"atom:special");
-  num_bond = memory->grow(atom->num_bond,nmax,"atom:num_bond");
-  bond_type = memory->grow(atom->bond_type,nmax,atom->bond_per_atom,"atom:bond_type");
-  bond_atom = memory->grow(atom->bond_atom,nmax,atom->bond_per_atom,"atom:bond_atom");
+    tag = memory->grow(atom->tag,nmax,"atom:tag");
+    type = memory->grow(atom->type,nmax,"atom:type");
+    mask = memory->grow(atom->mask,nmax,"atom:mask");
+    image = memory->grow(atom->image,nmax,"atom:image");
+    x = memory->grow(atom->x,nmax,3,"atom:x");
+    v = memory->grow(atom->v,nmax,3,"atom:v");
+    f = memory->grow(atom->f,nmax*comm->nthreads,3,"atom:f");
+    molecule = memory->grow(atom->molecule,nmax,"atom:molecule");
+    nspecial = memory->grow(atom->nspecial,nmax,3,"atom:nspecial");
+    special = memory->grow(atom->special,nmax,atom->maxspecial,"atom:special");
+    num_bond = memory->grow(atom->num_bond,nmax,"atom:num_bond");
+    bond_type = memory->grow(atom->bond_type,nmax,atom->bond_per_atom,"atom:bond_type");
+    bond_atom = memory->grow(atom->bond_atom,nmax,atom->bond_per_atom,"atom:bond_atom");
 
-  if(0 == atom->bond_per_atom)
-    error->all(FLERR,"Bonded particles need bond_per_atom > 0");
+    if(0 == atom->bond_per_atom)
+        error->all(FLERR,"Bonded particles need bond_per_atom > 0");
 
-  if(atom->n_bondhist < 0)
-	  error->all(FLERR,"atom->n_bondhist < 0 suggests that 'bond_style gran' has not been called before 'read_restart' command! Please check that.");
+    if(atom->n_bondhist < 0) // Should check to make sure bond/gran has been called
+        error->all(FLERR,"atom->n_bondhist < 0 suggests that 'bond_style gran' has not been called before 'read_restart' command! Please check that.");
 
-  if(atom->n_bondhist)
-  {
-     bond_hist = atom->bond_hist =
-        memory->grow(atom->bond_hist,nmax,atom->bond_per_atom,atom->n_bondhist,"atom:bond_hist");
-  }
+    if(atom->n_bondhist) {
+        bond_hist = atom->bond_hist =
+            memory->grow(atom->bond_hist,nmax,atom->bond_per_atom,atom->n_bondhist,"atom:bond_hist");
+    }
 
-  if (atom->nextra_grow)
-    for (int iextra = 0; iextra < atom->nextra_grow; iextra++)
-      modify->fix[atom->extra_grow[iextra]]->grow_arrays(nmax);
+    if (atom->nextra_grow)
+        for (int iextra = 0; iextra < atom->nextra_grow; iextra++)
+            modify->fix[atom->extra_grow[iextra]]->grow_arrays(nmax);
 }
 
 /* ----------------------------------------------------------------------

@@ -63,15 +63,14 @@ NORMAL_MODEL(JKR,jkr,16)
 
 namespace MODEL_PARAMS
 {
-  static ScalarProperty* createResolutionJKR(PropertyRegistry & registry, const char * caller, bool sanity_checks)
-  {
-      return createScalarProperty(registry, "resolutionJKR", caller);
-  }
-  static MatrixProperty* createWorkOfAdhesion(PropertyRegistry & registry, const char * caller, bool sanity_checks)
-  {
-    return createPerTypePairProperty(registry, "workOfAdhesion", caller);
-  }
-
+    static ScalarProperty* createResolutionJKR(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+    {
+        return createScalarProperty(registry, "resolutionJKR", caller);
+    }
+    static MatrixProperty* createWorkOfAdhesion(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+    {
+        return createPerTypePairProperty(registry, "workOfAdhesion", caller);
+    }
 }
 
 namespace LIGGGHTS {

@@ -142,7 +142,7 @@ void FixCfdCouplingForceImplicit::post_create()
         fixarg[1]="all";
         fixarg[2]="property/atom";
         fixarg[3]="Ksl";
-        fixarg[4]="scalar"; // 1 vector per particle to be registered
+        fixarg[4]="scalar"; // 1 scalar per particle to be registered
         fixarg[5]="yes";    // restart
         fixarg[6]="no";     // communicate ghost
         fixarg[7]="no";     // communicate rev
