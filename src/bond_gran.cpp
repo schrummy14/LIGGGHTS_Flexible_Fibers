@@ -450,6 +450,7 @@ void BondGran::compute(int eflag, int vflag)
             continue;
         }
 
+#ifdef  DO_SMOOTH_FIBER_FIX
         // Set Stiffness Values
         // This is a new value to try and fix the stiffness value when using a smooth mega-particle
         const double newVal1 = 2.0*radius[i1]*radius[i2]/(radius[i1]+radius[i2]);
@@ -457,7 +458,9 @@ void BondGran::compute(int eflag, int vflag)
         const double newVal = newVal1*newVal2*newVal2*newVal2;
         const double newValInv = 1.0/newVal;
         // const double newVal = newVal1*pow(newVal2,3); // a = (r1+r2)/Lb) ~~ 3  // a = gamma*F(r1,r2) ~~ 3 //  /*a(bondLength, radius[i1], radius[i2])*/
-
+#else
+        const double newValInv = bondLengthInv;
+#endif
 
         // const double newVal = radius[i1]*radius[i2]*bondLength/((radius[i1]+radius[i2])*(radius[i1]+radius[i2]));
         const double Kn = Sn[type] * A * newValInv; // * bondLengthInv;

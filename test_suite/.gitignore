@@ -1,4 +1,5 @@
 *.*
+*/post*
 !.gitignore
 !README.md
 !cleanAll.py
