@@ -74,7 +74,7 @@ enum
 enum
 {
     DAMPSTYLE_NONE = 0,
-    DAMPSTYLE_YU_GUO,
+    DAMPSTYLE_LINEAR,
     DAMPSTYLE_NON_LINEAR
 };
 /* ---------------------------------------------------------------------- */
@@ -183,11 +183,11 @@ void BondGran::compute(int eflag, int vflag)
         // (bugfix - correct sign - bonds were breaking inside domain far away from wall, added info about broken bonds)
         // should be rather bond_skin or bond_length or radius, enable periodic detection
         // 2nd check if bond overlap the box-borders
-        double maxoverlap = 0.25 * radius[i1]; // max overlap is diameter - but position is in the middle of atom
+        double maxoverlap = 0.75 * radius[i1]; // max overlap is diameter - but position is in the middle of atom
         if ((x[i1][0] < (domain->boxlo[0] + maxoverlap)) && (domain->xperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmin\n");
 #           endif
@@ -196,7 +196,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i1][0] > (domain->boxhi[0] - maxoverlap)) && (domain->xperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmax\n");
 #           endif
@@ -205,7 +205,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i1][1] < (domain->boxlo[1] + maxoverlap)) && (domain->yperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymin\n");
 #           endif
@@ -214,7 +214,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i1][1] > (domain->boxhi[1] - maxoverlap)) && (domain->yperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymax\n");
 #           endif
@@ -223,7 +223,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i1][2] < (domain->boxlo[2] + maxoverlap)) && (domain->zperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at zmin\n");
 #           endif
@@ -232,17 +232,17 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i1][2] > (domain->boxhi[2] - maxoverlap)) && (domain->zperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at zmax\n");
 #           endif
             continue;
         }
-        maxoverlap = 0.25 * radius[i2]; // max overlap is diameter - but position is in the middle of atom
+        maxoverlap = 0.75 * radius[i2]; // max overlap is diameter - but position is in the middle of atom
         if ((x[i2][0] < (domain->boxlo[0] + maxoverlap)) && (domain->xperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmin\n");
 #           endif
@@ -251,7 +251,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i2][0] > (domain->boxhi[0] - maxoverlap)) && (domain->xperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at xmax\n");
 #           endif
@@ -260,7 +260,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i2][1] < (domain->boxlo[1] + maxoverlap)) && (domain->yperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymin\n");
 #           endif
@@ -269,7 +269,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i2][1] > (domain->boxhi[1] - maxoverlap)) && (domain->yperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at ymax\n");
 #           endif
@@ -278,7 +278,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i2][2] < (domain->boxlo[2] + maxoverlap)) && (domain->zperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at zmin\n");
 #           endif
@@ -287,7 +287,7 @@ void BondGran::compute(int eflag, int vflag)
         else if ((x[i2][2] > (domain->boxhi[2] - maxoverlap)) && (domain->zperiodic == 0))
         {
             bondlist[n][3] = 1;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "broken bond %d at step %ld\n", n, update->ntimestep);
                 fprintf(screen, "   bond overlaped domain border at zmax\n");
 #           endif
@@ -343,20 +343,26 @@ void BondGran::compute(int eflag, int vflag)
         // Check if bond just formed and set eq distance
         if (bondhistlist[n][12] == 0.0)
         {
+            // const double tmp1 = Sn[type] * A /r;
+            // const double tmp2 = St[type] * A /r;
+            // const double tmp3 = St[type] * Ip /r;
+            // const double tmp4 = Sn[type] * I /r;
+            // if (n==0) fprintf(screen, "Kfn = %f, Kft = %f, Kmn = %f, Kmt = %f\n", tmp1, tmp2, tmp3, tmp4);
+            if (r < 1.0e-10)
+            {
+                fprintf(screen, "BondLength = %g\n", r);
+                error->all(FLERR, "bondlength too small\n");
+            }
             bondhistlist[n][12] = r;
-#           ifdef LIGGGHTS_DEBUG
+#           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "INFO: Setting bond length between %i and %i at %g\n", atom->tag[i1], atom->tag[i2], bondhistlist[n][12]);
 #           endif
         }
 
         // Set Bond Length
         const double bondLength = fabs(bondhistlist[n][12]);
-        const double bondLengthInv = 1.0 / bondLength;
-        if (bondLength < 1.0e-10)
-        {
-            fprintf(screen, "BondLength = %g\n", bondLength);
-            error->all(FLERR, "bondlength too small\n");
-        }
+        const double bondLengthInv = 1.0 / bondLength; // Try r1r2/(r1+r2)  
+        // const double bondLengthInv = (radius[i1]+radius[i2])/(radius[i1]*radius[i2]);
 
         // Check if the bond IS broken but the atoms need to seperate before contact physics start to occur
         if (breakmode >= BREAKSTYLE_SOFT_STRESS && bondlist[n][2] < 1)
@@ -365,7 +371,7 @@ void BondGran::compute(int eflag, int vflag)
             const double sep = r - (radius[i1] + radius[i2]);
             if (sep > 0)
             {
-#               ifdef LIGGGHTS_DEBUG
+#               ifdef LIGGGHTS_BOND_DEBUG
                     fprintf(screen, "Spheres %i and %i have seperated enough, set bond to broken and apply contact forces.\n", atom->tag[i1], atom->tag[i2]);
 #               endif
                 bondlist[n][3] = 1;
@@ -445,10 +451,19 @@ void BondGran::compute(int eflag, int vflag)
         }
 
         // Set Stiffness Values
-        const double Kn = Sn[type] * A * bondLengthInv;
-        const double Kt = St[type] * A * bondLengthInv;
-        const double K_tor = St[type] * Ip * bondLengthInv;
-        const double K_ben = Sn[type] * I * bondLengthInv;
+        // This is a new value to try and fix the stiffness value when using a smooth mega-particle
+        const double newVal1 = 2.0*radius[i1]*radius[i2]/(radius[i1]+radius[i2]);
+        const double newVal2 = bondLength/(radius[i1]+radius[i2]);
+        const double newVal = newVal1*newVal2*newVal2*newVal2;
+        const double newValInv = 1.0/newVal;
+        // const double newVal = newVal1*pow(newVal2,3); // a = (r1+r2)/Lb) ~~ 3  // a = gamma*F(r1,r2) ~~ 3 //  /*a(bondLength, radius[i1], radius[i2])*/
+
+
+        // const double newVal = radius[i1]*radius[i2]*bondLength/((radius[i1]+radius[i2])*(radius[i1]+radius[i2]));
+        const double Kn = Sn[type] * A * newValInv; // * bondLengthInv;
+        const double Kt = St[type] * A * newValInv; // * bondLengthInv;
+        const double K_tor = St[type] * Ip * newValInv; // * bondLengthInv;
+        const double K_ben = Sn[type] * I * newValInv; // * bondLengthInv;
 
         // relative rotational velocity for shear
         double wr1 = (radius[i1] * omega[i1][0] + radius[i2] * omega[i2][0]) * rinv;
@@ -617,7 +632,7 @@ void BondGran::compute(int eflag, int vflag)
             // torque_damp_n[0] = torque_damp_n[1] = torque_damp_n[2] = 0.0;
             // torque_damp_t[0] = torque_damp_t[1] = torque_damp_t[2] = 0.0;
         }
-        else if (dampmode == DAMPSTYLE_YU_GUO)
+        else if (dampmode == DAMPSTYLE_LINEAR)
         { // of the form fd = 2*b*sqrt(k*m)*v
 
             const double damp2 = 2.0 * damp[type];
@@ -716,7 +731,7 @@ void BondGran::compute(int eflag, int vflag)
             if (nstress || tstress || toohot)
             {
                 bondlist[n][3] = 1; // set back to 1...
-#               ifdef LIGGGHTS_DEBUG
+#               ifdef LIGGGHTS_BOND_DEBUG
                     fprintf(screen, "\nBroken bond between spheres %i and %i at step %ld\n", atom->tag[i1], atom->tag[i2], update->ntimestep);
                     if (toohot)
                         fprintf(screen, "   it was too hot\n");
@@ -742,7 +757,7 @@ void BondGran::compute(int eflag, int vflag)
         {
             if (r < radius[i1] + radius[i2])
             {
-#               ifdef LIGGGHTS_DEBUG
+#               ifdef LIGGGHTS_BOND_DEBUG
                     fprintf(screen, "The spheres %i and %i are overlapping, set type to negative.\n", atom->tag[i1], atom->tag[i2]);
 #               endif
                 bondlist[n][3] = 0;
@@ -763,7 +778,7 @@ void BondGran::compute(int eflag, int vflag)
                 bondhistlist[n][11] = 0.0;
                 if (breakmode == BREAKSTYLE_SOFT_CONTACT_STRESS || breakmode == BREAKSTYLE_SOFT_CONTACT_STRESS_HERTZ)
                 {
-#ifdef LIGGGHTS_DEBUG
+#ifdef LIGGGHTS_BOND_DEBUG
                     fprintf(screen, "Spheres %i and %i bond length is now %e\n", atom->tag[i1], atom->tag[i2], r);
 #endif
                     bondhistlist[n][12] = r;
@@ -881,7 +896,7 @@ void BondGran::coeff(int narg, char **arg)
     }
     else if (force->numeric(FLERR, arg[arg_id]) == 1.0)
     {
-        dampmode = DAMPSTYLE_YU_GUO;
+        dampmode = DAMPSTYLE_LINEAR;
         damp_one = force->numeric(FLERR, arg[++arg_id]);
     }
     else if (force->numeric(FLERR, arg[arg_id]) == 2.0)
@@ -1103,13 +1118,21 @@ double BondGran::getMinDt()
         const double rin = ri[type] * fmin(radius[i1], radius[i2]);
         const double rout = ro[type] * fmin(radius[i1], radius[i2]);
         const double A = M_PI * (rout * rout - rin * rin);
-        const double K = Sn[type] * A / fabs(bondhistlist[k][12]);
+
+        // Set Stiffness Values
+        // This is a new value to try and fix the stiffness value when using a smooth mega-particle
+        const double newVal1 = 2.0*radius[i1]*radius[i2]/(radius[i1]+radius[i2]);
+        const double newVal2 = fabs(bondhistlist[k][12])/(radius[i1]+radius[i2]);
+        const double newVal = newVal1*pow(newVal2,3.0);
+        const double K = Sn[type] * A / newVal;
+
+        // const double K = Sn[type] * A / fabs(bondhistlist[k][12]);
         const double m1 = 4.1887902047863909846168578443 * density[i1] * radius[i1] * radius[i1] * radius[i1];
         const double m2 = 4.1887902047863909846168578443 * density[i2] * radius[i2] * radius[i2] * radius[i2];
         const double Me = m1 * m2 / (m1 + m2);
 
         // curDt = sqrt(Me/K);
-        if (dampmode == DAMPSTYLE_YU_GUO)
+        if (dampmode == DAMPSTYLE_LINEAR)
         {
             curDt = sqrt(Me / K) / (1.0 + 2.93 * damp[type]);
         }

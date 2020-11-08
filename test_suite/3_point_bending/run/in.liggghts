@@ -147,7 +147,7 @@ fix wall all wall/gran model hertz tangential history mesh n_meshes 3 meshes plu
 fix move_P all move/mesh mesh plung linear 0.0 0.0 -${plung_speed}
 
 ## Check the time step for the bond
-fix dtBond all check/timestep/bond ${thermo_step} 0.95 error yes
+fix dtBond all check/timestep/bond ${thermo_step} 0.95 
 fix dtGran all check/timestep/gran ${thermo_step} 0.2 0.1
 
 ## Set the atoms to have a set density and set diameter
