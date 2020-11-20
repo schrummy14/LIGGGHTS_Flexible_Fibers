@@ -48,7 +48,7 @@ Most bond styles are part of the MOLECULAR package. They are only enabled if LIG
 ### Related Commands
 
 [gran](bond_gran),
-[harmonic](not_done_yet),
+[harmonic](bond_harmonic),
 [hybrid](not_done_yet),
 [bond_coeff](bond_coeff),
 [delete_bonds](not_done_yet)

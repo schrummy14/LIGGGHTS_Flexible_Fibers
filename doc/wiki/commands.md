@@ -91,7 +91,7 @@
 See the [bond_style](bond_style) command for an overview of bond potentials. Click on the style itself for a full description:
 
 [gran](bond_gran)
-[harmonic](not_done_yet)
+[harmonic](bond_harmonic)
 [hybrid](not_done_yet)
 none
 
