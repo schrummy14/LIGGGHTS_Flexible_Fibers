@@ -27,19 +27,24 @@ The *harmonic* bond style uses the following force and moment equation
 
 Where *r0* is the equilibrium bond distance. Note that the usual 1/2 factor is included in *K*.
 
-The following coefficeints must be defined for each bond type via the [bond_coeff](bond_coeff) command as in the example above, or in the data file or restart files by the [read_data](not_done_yet) or [read_restart](not_done_yet) commands:
+The following coefficeints must be defined for each bond type via the
+[bond_coeff](bond_coeff) command as in the example above, or in the data file
+or restart files by the [read_data](read_data) or
+[read_restart](read_restart) commands:
 
 * K (energy/distance^2)
 * r0 (distance)
 
 ## Restrictions
 
-This bond style can only be used if LIGGGHTS(R)-PUBLIC was built with the MOLECULAR package (which it is by default). See the [How to Install](how_to_install) section for more info on packages.
+This bond style can only be used if LIGGGHTS(R)-PUBLIC was built with the
+MOLECULAR package (which it is by default). See the
+[How to Install](how_to_install) section for more info on packages.
 
 ## Related Commands
 
 [bond_coeff](bond_coeff)
-[delete_bonds](not_done_yet)
+[delete_bonds](delete_bonds)
 
 ### Defaults
 

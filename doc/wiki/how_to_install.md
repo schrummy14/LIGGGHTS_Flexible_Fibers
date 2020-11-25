@@ -4,6 +4,8 @@
 
 [Commands](commands)
 
+[Tutorials](tutorial_main_page)
+
 ## How to install LIGGGHTS
 
 ---
