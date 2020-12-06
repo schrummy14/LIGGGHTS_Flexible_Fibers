@@ -285,7 +285,7 @@ void Variable::set(int narg, char **arg)
 
     if (universe->me == 0) {
       char filename[200]  ;
-      sprintf(filename,"tmp.lammps.variable%s",universe->universe_id?universe->universe_id:"");
+      sprintf(filename,"tmp.liggghts.variable%s",universe->universe_id?universe->universe_id:"");
       FILE *fp = fopen(filename,"w");
       fprintf(fp,"%d\n",universe->nworlds);
       fclose(fp);
@@ -524,8 +524,8 @@ int Variable::next(int narg, char **arg)
     int nextindex;
     if (me == 0) {
       char filename_1[200],filename_2[200];
-      sprintf(filename_1,"tmp.lammps.variable%s",universe->universe_id?universe->universe_id:"");
-      sprintf(filename_2,"tmp.lammps.variable.lock%s",universe->universe_id?universe->universe_id:"");
+      sprintf(filename_1,"tmp.liggghts.variable%s",universe->universe_id?universe->universe_id:"");
+      sprintf(filename_2,"tmp.liggghts.variable.lock%s",universe->universe_id?universe->universe_id:"");
       while (1) {
         if (!rename(filename_1,filename_2)) break;
         sleep(100);
