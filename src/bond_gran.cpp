@@ -417,7 +417,7 @@ void BondGran::compute(int eflag, int vflag)
                 }
                 case BREAKSTYLE_SOFT_CONTACT_STRESS_HERTZ:
                 {
-                    const double poi = 0.25;
+                    const double poi = Sn[type]/(2.0*St[type]) - 1.0; // 0.25; --> Sn/(2*St) - 1.0 = poi
                     const double one_minus_p2_inv = 1. / (1.0 - poi * poi);
                     const double deltan = r - bondLength;
                     const double reff = 0.5 * rout;
@@ -453,9 +453,9 @@ void BondGran::compute(int eflag, int vflag)
 #ifdef  DO_SMOOTH_FIBER_FIX
         // Set Stiffness Values
         // This is a new value to try and fix the stiffness value when using a smooth mega-particle
-        const double newVal1 = 2.0*radius[i1]*radius[i2]/(radius[i1]+radius[i2]);
-        const double newVal2 = bondLength/(radius[i1]+radius[i2]);
-        const double newVal = newVal1*newVal2*newVal2*newVal2;
+        const double newVal1 = 2.0*radius[i1]*radius[i2]/(radius[i1]+radius[i2]); // geometric mean of r1 and r2
+        const double newVal2 = bondLength/(radius[i1]+radius[i2]); // 0 and 1
+        const double newVal = newVal1*newVal2*newVal2*newVal2; // why ^3???????????????????
         const double newValInv = 1.0/newVal;
         // const double newVal = newVal1*pow(newVal2,3); // a = (r1+r2)/Lb) ~~ 3  // a = gamma*F(r1,r2) ~~ 3 //  /*a(bondLength, radius[i1], radius[i2])*/
 #else
@@ -1104,11 +1104,13 @@ double BondGran::getMinDt()
     const int nbondlist = neighbor->nbondlist;
     int *const *const bondlist = neighbor->bondlist;
 
-    double curDt = 0.0;
+    double curDt = 1.0;
     double minDt = 1.0;
     double *const radius = atom->radius;
     double *const density = atom->density;
     double *const *const bondhistlist = neighbor->bondhistlist;
+
+    const double sqrt_2 = sqrt(2.0);
 
     for (int k = 0; k < nbondlist; k++)
     {
@@ -1122,11 +1124,17 @@ double BondGran::getMinDt()
         const double rout = ro[type] * fmin(radius[i1], radius[i2]);
         const double A = M_PI * (rout * rout - rin * rin);
 
+
+#ifdef  DO_SMOOTH_FIBER_FIX
         // Set Stiffness Values
         // This is a new value to try and fix the stiffness value when using a smooth mega-particle
         const double newVal1 = 2.0*radius[i1]*radius[i2]/(radius[i1]+radius[i2]);
         const double newVal2 = fabs(bondhistlist[k][12])/(radius[i1]+radius[i2]);
-        const double newVal = newVal1*pow(newVal2,3.0);
+        const double newVal = newVal1*newVal2*newVal2*newVal2; // pow(newVal2,3.0);
+#else
+        const double newVal = fabs(bondhistlist[k][12]);
+#endif
+
         const double K = Sn[type] * A / newVal;
 
         // const double K = Sn[type] * A / fabs(bondhistlist[k][12]);
@@ -1139,19 +1147,20 @@ double BondGran::getMinDt()
         {
             curDt = sqrt(Me / K) / (1.0 + 2.93 * damp[type]);
         }
-        else
+        else if(dampmode == DAMPSTYLE_NON_LINEAR)
         {
-            // A fiber bond should contain two atoms with the same poisson's ratio, take the average for other systems
-            // Assume a value of 0.25 for now...
-            const double poi = 0.25;
+            const double poi = Sn[type]/(2.0*St[type]) - 1.0; 
             if (damp[type] == 0.0 && beta0[type] == 0.0)
             {
-                curDt = sqrt(Me / K) * sqrt(2.0) * sqrt(1.0 + poi) / (1.6 + 0.76 * beta1[type]);
+                curDt = sqrt(Me / K) * sqrt_2 * sqrt(1.0 + poi) / (1.6 + 0.76 * beta1[type]);
             }
             else
             {
-                curDt = sqrt(Me / K) * sqrt(2.0) * sqrt(1.0 + poi) / (2.29 - 5.49 * beta1[type] + 0.0023 * damp[type]);
+                curDt = sqrt(Me / K) * sqrt_2 * sqrt(1.0 + poi) / (2.29 - 5.49 * beta1[type] + 0.0023 * damp[type]);
             }
+        }
+        else {
+            curDt = sqrt(Me / K);
         }
         if (curDt < minDt)
             minDt = curDt;
