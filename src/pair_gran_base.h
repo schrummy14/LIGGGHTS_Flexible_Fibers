@@ -278,19 +278,21 @@ public:
         
         // If two spheres are bonded, skip contact forces (should only remove normal force)
         bool isBonded = false;
-        if (atom->disableNormalContact == 1) {
-          for(int k = 0; k < atom->num_bond[i]; k++) {
-            if(atom->bond_atom[i][k] == atom->tag[j]) {
-              // It is a bonded pair but is the bond broken?
-              // Bond type is flipped negative in bond calculation
-              if(atom->bond_type[i][k] != 0) { // Bond is brocken and contact could be applied
-                // if(atom->bond_type[i][k] < 0) 
-                  // fprintf(screen, "Spheres %i and %i were previously part of a bond and are overlapping, do not apply contact.\n", atom->tag[i], atom->tag[j]);
-                isBonded = true;
+        if (atom->molecular) {
+          if (atom->disableNormalContact == 1) {
+            for(int k = 0; k < atom->num_bond[i]; k++) {
+              if(atom->bond_atom[i][k] == atom->tag[j]) {
+                // It is a bonded pair but is the bond broken?
+                // Bond type is flipped negative in bond calculation
+                if(atom->bond_type[i][k] != 0) { // Bond is brocken and contact could be applied
+                  // if(atom->bond_type[i][k] < 0) 
+                    // fprintf(screen, "Spheres %i and %i were previously part of a bond and are overlapping, do not apply contact.\n", atom->tag[i], atom->tag[j]);
+                  isBonded = true;
+                }
+                break;
               }
-              break;
             }
-          } 
+          }
         }
         if (isBonded) continue;
 
@@ -300,12 +302,14 @@ public:
         const double rsq = delx * delx + dely * dely + delz * delz;
         double radj = radius[j];
 
-        if (atom->num_bond[i] > 0 && atom->molecule[i] == atom->molecule[j]) {
-          if (sqrt(rsq) < 0.5*(radi+radj)) {
-            isBonded = true;
+        if (atom->molecular) {
+          if (atom->num_bond[i] > 0 && atom->molecule[i] == atom->molecule[j]) {
+            if (sqrt(rsq) < 0.5*(radi+radj)) {
+              isBonded = true;
+            }
           }
+          if (isBonded) continue;
         }
-        if (isBonded) continue;
 
         // In case of multicontact models use the computed delta_ij and delta_ji to expand the radius (on a per contact basis)
         if (pg->storeSumDelta()) {
