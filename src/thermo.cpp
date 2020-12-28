@@ -1413,17 +1413,20 @@ void Thermo::compute_fmax()
 
 void Thermo::compute_numbond()
 {
-  int nlocal = atom->nlocal;
-  bigint numbond = 0;
-  for (int i = 0; i < nlocal; i++) {
-    for (int j = 0; j < atom->num_bond[i]; j++) {
-      if (atom->bond_type[i][j] > 0) numbond++;
+  if (atom->molecular) {
+    int nlocal = atom->nlocal;
+    bigint numbond = 0;
+    for (int i = 0; i < nlocal; i++) {
+      for (int j = 0; j < atom->num_bond[i]; j++) {
+        if (atom->bond_type[i][j] > 0) numbond++;
+      }
     }
+    bigint bondall;
+    MPI_Allreduce(&numbond,&bondall,1,MPI_LMP_BIGINT,MPI_SUM,world);
+    bivalue = bondall/2; // /2; //every bond is counted twice (for every partner-atom)
+  } else {
+    bivalue = 0;
   }
-    
-  bigint bondall;
-  MPI_Allreduce(&numbond,&bondall,1,MPI_LMP_BIGINT,MPI_SUM,world);
-  bivalue = bondall/2; // /2; //every bond is counted twice (for every partner-atom)
 }
 
 /* ---------------------------------------------------------------------- */
