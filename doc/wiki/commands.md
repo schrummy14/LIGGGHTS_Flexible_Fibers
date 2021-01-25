@@ -256,10 +256,11 @@ Click on the style itself for a full description:
 * [store/state](not_done_yet)
 * [viscous](not_done_yet)
 
+* [voidratio](fix_voidratio)
 * [wall/gran](not_done_yet)
 * [wall/reflect](not_done_yet)
-* [wall/region](not_done_yet)
 
+* [wall/region](not_done_yet)
 * [wall/region/sph](not_done_yet)
 
 ## Pair Style Potentials

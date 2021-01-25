@@ -15,3 +15,4 @@ STUBS/libmpi_stubs.a
 STUBS/mpi.o
 MAKE/auto_backup/*
 log.liggghts
+.vscode/*

@@ -101,11 +101,20 @@ values 0 or 1 or 2 or 3 or 4 or 5.
 break_type 1, a single value is needed. For break_type 2,4, and 5 two values
 must be provided. For break_type 3 three values must be provided.
 
+## Experimental Features
+
+A fix for accurate normal stifness values has been added when using *smooth*
+fibers. This fix can be applied by adding the additional define durring the
+building process (See the [how to install](how_to_install#-Additional-Flags) section for more
+info):
+
+-DDO_SMOOTH_FIBER_FIX
+
 ## Restrictions
 
 This bond style can only be used if LIGGGHTS(R)-PUBLIC was built with the
 MOLECULAR package (which it is by default). See the
-[How to Install](how_to_install) section for more info on packages.
+[How to Install](how_to_install#-Packages) section for more info on packages.
 
 ## Related Commands
 
