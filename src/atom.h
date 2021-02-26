@@ -84,7 +84,7 @@ class Atom : protected Pointers {
   double *q,**mu;
   double **omega,**angmom,**torque;
   double *radius,*rmass,*vfrac,*s0;
-  double *density; 
+  double *density;
   double **x0;
   int *ellipsoid,*line,*tri,*body;
   int *spin;
@@ -92,7 +92,7 @@ class Atom : protected Pointers {
   double *cs,*csforce,*vforce;
   int *etag;
   double *rho, *drho;
-  double *p; 
+  double *p;
   double *e, *de;
   double **vest;
   double *cv;
@@ -125,13 +125,13 @@ class Atom : protected Pointers {
   int **special;                // IDs of 1-2,1-3,1-4 neighs of each atom
   int maxspecial;               // special[nlocal][maxspecial]
 
-  int *num_bond;       
-  int **bond_type;     // flip to negative when broken...
-  int **bond_atom;     
-  double ***bond_hist; 
+  int *num_bond;
+  int **bond_type;              // flip to negative when broken...
+  int **bond_atom;
+  double ***bond_hist;
   int disableNormalContact = 0;
   double totBondEnergy = 0.0;
-                       
+
   int *num_angle;
   int **angle_type;
   int **angle_atom1,**angle_atom2,**angle_atom3;
@@ -147,9 +147,9 @@ class Atom : protected Pointers {
   // custom arrays used by fix property/atom
   int **ivector;
   double **dvector;
-  double ***darray; 
-  char **iname,**dname,**daname; 
-  int nivector,ndvector, ndarray; 
+  double ***darray;
+  char **iname,**dname,**daname;
+  int nivector,ndvector, ndarray;
 
   // used by USER-CUDA to flag used per-atom arrays
 
@@ -170,11 +170,11 @@ class Atom : protected Pointers {
   int vfrac_flag,spin_flag,eradius_flag,ervel_flag,erforce_flag;
   int cs_flag,csforce_flag,vforce_flag,ervelforce_flag,etag_flag;
   int rho_flag,e_flag,cv_flag,vest_flag;
-  int density_flag; 
-  int p_flag;  
-  int n_bondhist; 
-  int radvary_flag; 
-  int shapetype_flag; 
+  int density_flag;
+  int p_flag;
+  int n_bondhist;
+  int radvary_flag;
+  int shapetype_flag;
 
   // extra peratom info in restart file destined for fix & diag
 
@@ -222,7 +222,7 @@ class Atom : protected Pointers {
   // void molecule_extend();
   void mol_extend();
   int tag_consecutive();
-  int tag_max(); 
+  int tag_max();
 
   int parse_data(const char *);
   int count_words(const char *);
@@ -259,8 +259,8 @@ class Atom : protected Pointers {
   int add_custom(char *, int);
   void remove_custom(int, int);
 
-  void *extract(const char *, int &); 
-  void *extract(const char * _id) 
+  void *extract(const char *, int &);
+  void *extract(const char * _id)
   {
       int a = 0;
       return extract(_id,a);
@@ -272,7 +272,7 @@ class Atom : protected Pointers {
   bigint memory_usage();
   int memcheck(const char *);
 
-  inline class Properties* get_properties() 
+  inline class Properties* get_properties()
   { return properties; }
 
   // functions for global to local ID mapping
@@ -327,13 +327,13 @@ class Atom : protected Pointers {
   double bininvx,bininvy,bininvz; // inverse actual bin sizes
   double bboxlo[3],bboxhi[3];     // bounding box of my sub-domain
 
-  size_t memlength;                  // allocated size of memstr  
+  size_t memlength;               // allocated size of memstr
   char *memstr;                   // string of array names already counted
 
   void setup_sort_bins();
   int next_prime(int);
 
-  class Properties *properties;   
+  class Properties *properties;
 };
 
 }
