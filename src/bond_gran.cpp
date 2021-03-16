@@ -34,6 +34,7 @@
 #include "update.h"
 #include "vector_liggghts.h"
 #include "global_properties.h"
+#include "atom_vec.h" // Needed for atom->avec->grow command
 
 using namespace LAMMPS_NS;
 
@@ -51,7 +52,7 @@ MS Validation has been done against the cantilever beam and beam theory.
 
 + check whether run this bond style w/ or w/o gran pair style active,
   (neigh_modify command)
-Needs grain to handle torque
+Needs gran to handle torque
 
 + need to store bond radii per particle, not per type
 + parallel debugging and testing not yet done
@@ -101,6 +102,9 @@ BondGran::BondGran(LAMMPS *lmp) : Bond(lmp)
     if (comm->me == 0)
         error->warning(FLERR, "Bond granular: This is a beta version - be careful!");
     fix_Temp = NULL;
+
+    // Grow arrays to include new bond history value
+    if (atom->nmax) atom->avec->grow(atom->nmax);
 }
 
 /* ---------------------------------------------------------------------- */
