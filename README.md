@@ -20,16 +20,16 @@ Estimating bond damping and bond Young's modulus for a flexible wheat
 straw discrete element method model. Biosystems Engineering, 186,
 349-355. https://doi.org/10.1016/j.biosystemseng.2019.08.003
 
-Thank you to the Department of Particulate Flow Modelling at Johannes 
-Kepler University in Linz, Austria http://www.jku.at/pfm for releasing 
+Thank you to the Department of Particulate Flow Modelling at Johannes
+Kepler University in Linz, Austria http://www.jku.at/pfm for releasing
 their dynamic insertion code!
 
 This also contains the source files for the JKR contact model as
 provided by eidevag (https://github.com/eidevag/LIGGGHTS-PUBLIC-JKR).
 Please cite the following paper when utilizing the JKR model.
 
-Eidevåg, T., Abrahamsson, P., Eng, M., & Rasmuson, A. (2019). 
-Modeling of dry snow adhesion during normal impact with surfaces. 
+Eidevåg, T., Abrahamsson, P., Eng, M., & Rasmuson, A. (2019).
+Modeling of dry snow adhesion during normal impact with surfaces.
 Powder Technology, 361, 1081–1092. https://doi.org/10.1016/j.powtec.2019.10.085
 
 ----------------------------------------------------------------------
