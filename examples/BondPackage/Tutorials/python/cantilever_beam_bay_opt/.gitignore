@@ -1,0 +1,13 @@
+*.txt
+log.liggghts*
+screen*
+tmp.lammps.variable
+results/*
+restart_forced*
+in.liggghts~
+*.m~
+beam.csv
+*.csv
+__pycache__/
+bayOpt/__pycache__/
+dataRead/__pycache__/
