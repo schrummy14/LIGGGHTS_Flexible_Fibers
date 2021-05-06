@@ -64,12 +64,12 @@ typedef struct complex {
   d.im = x.re*y.im+x.im*y.re; }
 
 #define C_RMULT(d, x, y) { \
-  register complex t = x; \
+  complex t = x; \
   d.re = t.re*y.re-t.im*y.im; \
   d.im = t.re*y.im+t.im*y.re; }
 
 #define C_CRMULT(d, x, y) { \
-  register complex t = x; \
+  complex t = x; \
   d.re = t.re*y.re-t.im*y.im; \
   d.im = -t.re*y.im-t.im*y.re; }
 
@@ -94,7 +94,7 @@ typedef struct complex {
   d.im = y; }
 
 #define C_ANGLE(d, angle) { \
-  register double a = angle; \
+  double a = angle; \
   d.re = cos(a); \
   d.im = sin(a); }
 
