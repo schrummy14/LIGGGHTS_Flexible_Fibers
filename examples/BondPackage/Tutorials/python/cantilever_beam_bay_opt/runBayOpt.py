@@ -8,6 +8,7 @@ commit number 'b4527b6b5bb722944a5773f4853ff8d331749fc3'
 import os
 import sys
 import glob
+import typing
 
 import black_box as bb
 import numpy as np
@@ -45,7 +46,6 @@ def doOpt(x0, y0, bounds, algo=1):
 
     return x, y
     
-
 def runBest(x):
     global _count
     _count += 1
@@ -77,12 +77,12 @@ def getPreviousRuns():
     except:
         return None, None
 
-def run_liggghts(params):
+def run_liggghts(params: typing.Dict[str, float]) -> None:
     _lmp.command("clear")
     set_liggghts_variables(params)
     _lmp.file("in.liggghts")
 
-def sample_loss2(x):
+def sample_loss2(x: typing.List[float]) -> float:
     global _count
     _count += 1
     params = {
@@ -115,7 +115,7 @@ def sample_loss2(x):
         f.write('%d, %f, %f, %f\n' % (_count, x[0], x[1], funErr))
     return funErr
 
-def sample_loss(x):
+def sample_loss(x: typing.List[float]) -> float:
     global _count
     _count += 1
     print("Running Bay Opt Sim: %d" % (_count))
@@ -132,7 +132,7 @@ def sample_loss(x):
     print("Error in x1 = %f, x2 = %f has function error = %f" % (100.0*e1, 100.0*e2, funErr))
     return -funErr
 
-def get_data():
+def get_data() -> typing.Tuple[float, float]:
     global _count
     fname = "results/run_%s/beam.csv" % str(_count)
     curData = np.genfromtxt(fname = fname, delimiter = ",")
@@ -140,7 +140,7 @@ def get_data():
     frq, bgd = ep.getProps(data)
     return frq, bgd
 
-def set_liggghts_variables(params):
+def set_liggghts_variables(params: typing.Dict[str, float]) -> None:
     # Set simulation variables
     for key in params.keys():
         curStr = "variable %s equal %e" % (key, params[key])
