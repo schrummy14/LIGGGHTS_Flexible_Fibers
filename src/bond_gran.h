@@ -49,6 +49,7 @@ class BondGran : public Bond {
    protected:
       int dampmode;
       int breakmode;
+      int damagemode;
       double *Sn,*St;
       double *r_break,*sigma_break,*tau_break,*T_break;
 

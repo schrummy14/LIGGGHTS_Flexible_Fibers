@@ -82,8 +82,11 @@ enum
 
 BondGran::BondGran(LAMMPS *lmp) : Bond(lmp)
 {
-    // we need 13 history values - the 6 for the forces, 6 for torques from the last time-step and 1 for initial bond length
-    n_granhistory(13);
+    // // we need 13 history values - the 6 for the forces, 6 for torques from the last time-step and 1 for initial bond length
+    // n_granhistory(13);
+
+    // we need 14 history values - the 6 for the forces, 6 for torques from the last time-step, 1 for initial bond length, and 1 for the current bond damage
+    n_granhistory(14);
     /*	NP
        number of entries in bondhistlist. bondhistlist[number of bond][number of value (from 0 to number given here)]
        so with this number you can modify how many pieces of information you savae with every bond
@@ -358,6 +361,7 @@ void BondGran::compute(int eflag, int vflag)
                 error->all(FLERR, "bondlength too small\n");
             }
             bondhistlist[n][12] = r;
+            bondhistlist[n][13] = 1.0;
 #           ifdef LIGGGHTS_BOND_DEBUG
                 fprintf(screen, "INFO: Setting bond length between %i and %i at %g\n", atom->tag[i1], atom->tag[i2], bondhistlist[n][12]);
 #           endif
@@ -367,6 +371,8 @@ void BondGran::compute(int eflag, int vflag)
         const double bondLength = fabs(bondhistlist[n][12]);
         const double bondLengthInv = 1.0 / bondLength; // Try r1r2/(r1+r2)  
         // const double bondLengthInv = (radius[i1]+radius[i2])/(radius[i1]*radius[i2]);
+
+        const double curBondDamage = abs(bondhistlist[n][13]);
 
         // Check if the bond IS broken but the atoms need to seperate before contact physics start to occur
         if (breakmode >= BREAKSTYLE_SOFT_STRESS && bondlist[n][2] < 1)
@@ -467,10 +473,10 @@ void BondGran::compute(int eflag, int vflag)
 #endif
 
         // const double newVal = radius[i1]*radius[i2]*bondLength/((radius[i1]+radius[i2])*(radius[i1]+radius[i2]));
-        const double Kn = Sn[type] * A * newValInv; // * bondLengthInv;
-        const double Kt = St[type] * A * newValInv; // * bondLengthInv;
-        const double K_tor = St[type] * Ip * newValInv; // * bondLengthInv;
-        const double K_ben = Sn[type] * I * newValInv; // * bondLengthInv;
+        const double Kn = curBondDamage * Sn[type] * A * newValInv; // * bondLengthInv;
+        const double Kt = curBondDamage * St[type] * A * newValInv; // * bondLengthInv;
+        const double K_tor = curBondDamage * St[type] * Ip * newValInv; // * bondLengthInv;
+        const double K_ben = curBondDamage * Sn[type] * I * newValInv; // * bondLengthInv;
 
         // relative rotational velocity for shear
         double wr1 = (radius[i1] * omega[i1][0] + radius[i2] * omega[i2][0]) * rinv;
@@ -731,12 +737,14 @@ void BondGran::compute(int eflag, int vflag)
             const double ntorque_mag = sqrt(bondhistlist[n][6] * bondhistlist[n][6] + bondhistlist[n][7] * bondhistlist[n][7] + bondhistlist[n][8] * bondhistlist[n][8]);
             const double ttorque_mag = sqrt(bondhistlist[n][9] * bondhistlist[n][9] + bondhistlist[n][10] * bondhistlist[n][10] + bondhistlist[n][11] * bondhistlist[n][11]);
 
-            const bool nstress = sigma_break[type] < (nforce_mag / A + 2. * ttorque_mag / J * (rout - rin));
-            const bool tstress = tau_break[type] < (tforce_mag / A + ntorque_mag / J * (rout - rin));
+            const double sigma_value = (nforce_mag / A + 2. * ttorque_mag / J * (rout - rin));
+            const double tau_value = (tforce_mag / A + ntorque_mag / J * (rout - rin));
+
+            const bool nstress = sigma_break[type] < sigma_value;
+            const bool tstress = tau_break[type] < tau_value;
             const bool toohot = breakmode == BREAKSTYLE_STRESS_TEMP ? 0.5 * (Temp[i1] + Temp[i2]) > T_break[type] : false;
 
-            if (nstress || tstress || toohot)
-            {
+            if (nstress || tstress || toohot) {
                 bondlist[n][3] = 1; // set back to 1...
 #               ifdef LIGGGHTS_BOND_DEBUG
                     fprintf(screen, "\nBroken bond between spheres %i and %i at step %ld\n", atom->tag[i1], atom->tag[i2], update->ntimestep);
@@ -754,6 +762,23 @@ void BondGran::compute(int eflag, int vflag)
                         fprintf(screen, "Temp[i1] %f Temp[i2] %f, T_break[type] %f\n", Temp[i1], Temp[i2], T_break[type]);
                     }
 #               endif
+            } else if (damagemode > 0) {
+                // add damage code
+                const double sigma_ratio = sigma_value/sigma_break[type];
+                const double tau_ratio = tau_value/tau_break[type];
+                if ((sigma_ratio > 0.9) || (tau_ratio > 0.9)) {
+                    double newBondDamage;
+                    if (sigma_ratio < tau_ratio)
+                        newBondDamage = curBondDamage - (tau_ratio - 0.9);
+                    else
+                        newBondDamage = curBondDamage - (sigma_ratio - 0.9);
+                    if (newBondDamage < 0.0) {
+                        bondlist[n][3] = 1;
+                        bondhistlist[n][13] = 1.0;
+                    } else {
+                        bondhistlist[n][13] = newBondDamage;
+                    }
+                }
             }
         }
 
@@ -890,6 +915,8 @@ void BondGran::coeff(int narg, char **arg)
     double damp_one = 0.0;
     double beta0_one = 0.0;
     double beta1_one = 0.0;
+
+    damagemode = 0;
 
     if (ro_one <= ri_one)
         error->all(FLERR, "ro must be greater than ri");
