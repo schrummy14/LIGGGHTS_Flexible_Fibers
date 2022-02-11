@@ -2,13 +2,13 @@ PROJECT(LIGGGHTS C CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(LIGGGHTS_MAJOR_VERSION 3)
-SET(LIGGGHTS_MINOR_VERSION 7)
+SET(LIGGGHTS_MINOR_VERSION 8)
 SET(LIGGGHTS_PATCH_VERSION 0)
 SET(LIGGGHTS_VERSION ${LIGGGHTS_MAJOR_VERSION}.${LIGGGHTS_MINOR_VERSION}.${LIGGGHTS_PATCH_VERSION})
 
 IF (NOT CMAKE_CXX_FLAGS)
   IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++11 -Wno-literal-suffix -fPIC")
+    SET(CMAKE_CXX_FLAGS "-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++17 -Wno-literal-suffix -mtune=native -march=native -fPIC")
   ENDIF()
 ENDIF()
 
