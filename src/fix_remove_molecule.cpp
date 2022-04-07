@@ -19,8 +19,6 @@
    See the README file in the top-level directory.
 ------------------------------------------------------------------------- */
 
-// #include "lmptype.h"
-// #include "math.h"
 #include "mpi.h"
 #include "string.h"
 #include "stdlib.h"
@@ -29,14 +27,8 @@
 #include "respa.h"
 #include "atom.h"
 #include "atom_vec.h"
-// #include "force.h"
-// #include "pair.h"
 #include "comm.h"
 #include "neighbor.h"
-// #include "neigh_list.h"
-// #include "neigh_request.h"
-// #include "random_mars.h"
-// #include "memory.h"
 #include "error.h"
 #include "modify.h"
 #include "domain.h"
@@ -93,7 +85,7 @@ void FixRemoveMolecule::post_integrate()
     for (int k = 0; k < nbondlist; k++) {
         if (bondlist[k][3] != 1) continue;
 
-        // now check if the atom is inside the boundary        
+        // now check if the atom is inside the boundary
         const int i1 = bondlist[k][0];
         const int i2 = bondlist[k][1];
         if (!((x[i1][0] - 0.25*radius[i1] < domain->boxlo[0] || x[i1][0] + 0.25*radius[i1] > domain->boxhi[0]) && domain->xperiodic == 0)) continue;
@@ -103,7 +95,7 @@ void FixRemoveMolecule::post_integrate()
         if (!((x[i2][0] - 0.25*radius[i2] < domain->boxlo[0] || x[i2][0] + 0.25*radius[i2] > domain->boxhi[0]) && domain->xperiodic == 0)) continue;
         if (!((x[i2][1] - 0.25*radius[i2] < domain->boxlo[1] || x[i2][1] + 0.25*radius[i2] > domain->boxhi[1]) && domain->yperiodic == 0)) continue;
         if (!((x[i2][2] - 0.25*radius[i2] < domain->boxlo[2] || x[i2][2] + 0.25*radius[i2] > domain->boxhi[2]) && domain->zperiodic == 0)) continue;
-        
+
         if (mol[i1] == mol[i2]) {
             remove_molecule(mol[i1]);
         } else {
@@ -142,7 +134,7 @@ void FixRemoveMolecule::remove_molecule(int mol_id)
     }
 
     remove_atoms(atom_tags, kk);
-    
+
     // We have removed the atoms on our processor that had the above mol id...
     // Now we need to tell the other procs to do the same.
 

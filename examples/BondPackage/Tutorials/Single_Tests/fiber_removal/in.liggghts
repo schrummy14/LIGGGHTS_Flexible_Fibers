@@ -1,0 +1,192 @@
+#### Writen for LIGGGHTS 3.7.0 with bond ##########################################################
+
+### Material Independent Properties
+variable particle_diameter             equal 2.83e-3    # particles diameter in meters
+variable bond_out_diameter             equal 2.83e-3    # fiber outer diameter in meters
+variable bond_in_diameter              equal 0.0        # fiber inner diameter in meters
+variable bond_length                   equal 2.83e-3    # distance, in meters, between two particles in bond 
+variable bond_damp_type                equal 1          # Use Global Force Damping
+variable bond_damp_val                 equal 0.001      # NA
+variable particle_density              equal 2500.0     # kg/m3
+variable fiber_contact_youngs_modulus  equal 1.4e7      # Pa
+variable wall_contact_youngs_modulus   equal 180.0e9    # Pa
+variable bond_youngs_modulus           equal 1.4e7      # Pa
+variable particle_poissons_ratio       equal 0.3        # NA
+variable wall_poissons_ratio           equal 0.3        # NA
+variable ke_tol                        equal 1.0e-5     # Energy that we will run the simulation to obtain
+variable coef_res_pp                   equal 0.500      # particle-particle coefficient of restitution
+variable coef_res_pw                   equal 0.300      # particle-wall coefficient of restitution
+variable coef_res_ww                   equal 0.500      # wall-wall coefficient of restitution
+variable coef_fri_pp                   equal 0.400      # particle-particle coefficient of friction
+variable coef_fri_pw                   equal 0.600      # particle-wall coefficient of friction
+variable coef_fri_ww                   equal 0.200      # wall-wall coefficient of friction
+
+### Material Dependent Properties
+variable particle_radius               equal 0.5*${particle_diameter}
+variable bond_shear_modulus            equal ${bond_youngs_modulus}/(2.0*(1.0+${particle_poissons_ratio}))
+variable bond_out_per                  equal ${bond_out_diameter}/${particle_diameter}
+variable bond_in_per                   equal ${bond_in_diameter}/${particle_diameter}
+
+### Calculate dt using the bond model
+variable r2                            equal ${particle_radius}*${particle_radius}
+variable r3                            equal ${r2}*${particle_radius}
+variable K                             equal ${bond_youngs_modulus}*PI*${r2}/${bond_length}
+variable m                             equal 4.0*PI*${r3}*${particle_density}/3.0
+variable w                             equal sqrt($K/$m)
+variable dt                            equal 1.0e-6
+
+### Add needed directories
+shell mkdir restarts
+
+### Build Simulation
+# Specify what we are simulating
+atom_style hybrid granular bond/gran n_bondtypes 1 bonds_per_atom 6
+atom_modify map array
+hard_particles yes # <- Needed because of the high Youngs modulus
+
+# Fixed boundary conditions
+boundary f f f
+
+# newton off is needed due to the tangential history contact model
+newton off
+communicate single vel yes
+units si
+
+# Create the domain arround the drum that will be imported
+region        domain block -0.2 0.2 -0.2 0.2 -0.01 0.25 units box
+# Create the simulation domain with two material types
+create_box    2 domain
+
+# Use hertz-mindeln contact model
+pair_style gran model hertz tangential history
+# Use the stiff granular bond model
+bond_style gran
+
+# Set neighbor bin sizes and update after each run step if needed
+neighbor      0.001 bin
+neigh_modify delay 0
+
+## Set coefficients for contact and bond model
+# For the contact model, we do not need to set anything
+pair_coeff * *
+# Set coefficients for bond model
+bond_coeff 1 ${bond_out_per} ${bond_in_per} ${bond_youngs_modulus} ${bond_shear_modulus} ${bond_damp_type} ${bond_damp_val} 1 1.0e32 1.0e32
+
+
+## Set material properties for fiber and wall
+fix m1 all property/global youngsModulus peratomtype ${fiber_contact_youngs_modulus} ${wall_contact_youngs_modulus}
+fix m2 all property/global poissonsRatio peratomtype ${particle_poissons_ratio} ${wall_poissons_ratio}
+fix m3 all property/global coefficientRestitution peratomtypepair 2 ${coef_res_pp} ${coef_res_pw} &
+                                                                    ${coef_res_pw} ${coef_res_ww}
+
+fix m4 all property/global coefficientFriction peratomtypepair 2 ${coef_fri_pp} ${coef_fri_pw} &
+                                                                 ${coef_fri_pw} ${coef_fri_ww}
+
+## Insert the geometry for the simulation
+# Load in the stl file of a container and make it interactable
+#fix Drum all mesh/surface/stress file STL_files/Drum.STL type 2 scale 0.001 move 0.0 0.0 0.0
+#fix wall all wall/gran model hertz tangential history mesh n_meshes 1 meshes Drum
+# Create a thin infinitly large plane in the x plain at a height of 0.15 meters
+#fix w1 all wall/gran model hertz tangential history primitive type 2 zplane 0.15
+
+## Construct the template for a fiber
+# This cannot be automated (beside reading in a file with the same info), and must be changed by hand.
+# This function IS part of LIGGGHTS but is NOT documented
+fix  pts1 all particletemplate/multiplespheres 15485863 atom_type 1 density constant ${particle_density} nspheres 21 ntry 50000 spheres &
+0.00000 0.0 0.0 0.001415 &
+0.00283 0.0 0.0 0.001415 &
+0.00566 0.0 0.0 0.001415 &
+0.00849 0.0 0.0 0.001415 & 
+0.01132 0.0 0.0 0.001415 & 
+0.01415 0.0 0.0 0.001415 &
+0.01698 0.0 0.0 0.001415 &
+0.01981 0.0 0.0 0.001415 &
+0.02264 0.0 0.0 0.001415 &
+0.02547 0.0 0.0 0.001415 &
+0.02830 0.0 0.0 0.001415 &
+0.03113 0.0 0.0 0.001415 &
+0.03396 0.0 0.0 0.001415 &
+0.03679 0.0 0.0 0.001415 &
+0.03962 0.0 0.0 0.001415 &
+0.04245 0.0 0.0 0.001415 &
+0.04528 0.0 0.0 0.001415 &
+0.04811 0.0 0.0 0.001415 &
+0.05094 0.0 0.0 0.001415 &
+0.05377 0.0 0.0 0.001415 &
+0.05660 0.0 0.0 0.001415 &
+bonded yes/explicit nbond_pairs 20 &
+1 2 &
+2 3 &
+3 4 &
+4 5 &
+5 6 &
+6 7 &
+7 8 &
+8 9 &
+9 10 &
+10 11 &
+11 12 &
+12 13 &
+13 14 &
+14 15 &
+15 16 &
+16 17 &
+17 18 &
+18 19 &
+19 20 &
+20 21 bond_type 1
+
+# Set the probability that a template will be used
+fix  pdd1 all particledistribution/discrete 32452843 1 pts1 1.0
+
+#region and insertion
+group  nve_group region domain
+region bc cylinder z 0.0 0.0 0.110 0.00143 0.1 units box
+
+#particle insertion
+fix ins nve_group insert/pack seed 32452867 distributiontemplate pdd1 &
+    maxattempt 1000 insert_every once overlapcheck yes orientation random &
+    all_in yes vel constant 0.0 0.0 -1.0 region bc particles_in_region 25 &
+    ntry_mc 10000 do_dense_pack yes
+
+fix grav all gravity 9.81 vector 0.0 0.0 -1.0
+
+fix integr all nve/sphere
+
+timestep ${dt}
+print "dt = ${dt}"
+
+fix fiber_removal all remove/molecule
+
+## Insert all of the particles
+run 1
+
+
+thermo_style custom step time atoms numbonds cpu cpuremain ke
+# Set how often the simulation outputs to the screen
+thermo 500
+# Ignore particles that leave the domain and do NOT noramlize the data
+thermo_modify lost ignore norm no
+
+# Wrtie particle locations to file
+dump dmp all custom 500 post/dump*.liggghts id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
+
+run 100000 upto
+
+## Bond Particles together
+# Define the bond radius to determine if two particle become bonded together
+#variable bond_skin equal 1.000001*${particle_diameter}
+# Define a bond of type bond_1 between atom types atom_a and atom_b every n_step steps
+#variable bond_1 equal 1
+#variable atom_a equal 1
+#variable atom_b equal 1
+#variable n_step equal 1
+#fix bondcr all bond/create/gran ${n_step} ${atom_a} ${atom_b} ${bond_skin} ${bond_1} 6
+# Find potential bonds
+#run 1
+# Do not create new bonds after this line
+#fix_modify bondcr every 0
+
+# Update all fixes and save
+#run 1
+# write_restart restarts/restart0.liggghts

@@ -2,13 +2,14 @@ PROJECT(LIGGGHTS C CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(LIGGGHTS_MAJOR_VERSION 3)
-SET(LIGGGHTS_MINOR_VERSION 7)
+SET(LIGGGHTS_MINOR_VERSION 8)
 SET(LIGGGHTS_PATCH_VERSION 0)
 SET(LIGGGHTS_VERSION ${LIGGGHTS_MAJOR_VERSION}.${LIGGGHTS_MINOR_VERSION}.${LIGGGHTS_PATCH_VERSION})
+SET(ENABLE_SQ OFF CACHE BOOL "Disable Superquadrics by Default")
 
 IF (NOT CMAKE_CXX_FLAGS)
   IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++11 -Wno-literal-suffix -fPIC")
+    SET(CMAKE_CXX_FLAGS "-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++17 -Wno-literal-suffix -mtune=native -march=native -fPIC")
   ENDIF()
 ENDIF()
 
@@ -16,6 +17,12 @@ FILE(GLOB SOURCES *.cpp)
 FILE(GLOB HEADERS *.h)
 
 #LIST(REMOVE_ITEM SOURCES main.cpp)
+
+IF(ENABLE_SQ)
+ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSUPERQUADRIC_ACTIVE_FLAG -DNONSPHERICAL_ACTIVE_FLAG")
+ find_package(Boost)
+ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${additional_includes_local} ${Boost_INCLUDE_DIRS})
+ENDIF()
 
 IF(WIN32)
   #include (GenerateExportHeader)
