@@ -1,5 +1,5 @@
 FROM ubuntu:focal-20220531
-LABEL maintainer="Matt Schramm"
+LABEL maintainer="Matthewwschramm@gmail.com"
 
 # Update SERIAL_NUMBER to force rebuild of all layers (don't use cached layers)
 ARG SERIAL_NUMBER
@@ -15,6 +15,9 @@ RUN apt-get -y install curl && curl -H 'Cache-Control: no-cache' \
 RUN git clone https://github.com/schrummy14/LIGGGHTS_Flexible_Fibers.git /opt/LIGGGHTS
 RUN cd /opt/LIGGGHTS/src && make clean-auto && make -j$(python3 -c 'import multiprocessing as mp; print(int(mp.cpu_count() * 1.5))') auto
 RUN ln -s /opt/LIGGGHTS/src/lmp_auto /usr/local/bin/liggghts_flexible_fibers
+
+# Add PushToCompute Work Flow Metadata
+ADD ./NAE/AppDef.json /etc/NAE/AppDef.json
 
 # For general use, you do not need to expose these ports
 # Expose port 22 for local JARVICE emulation in docker
