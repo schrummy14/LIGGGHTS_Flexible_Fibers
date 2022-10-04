@@ -197,6 +197,18 @@ void FixEfield::post_force(int vflag)
   double *q = atom->q;
   int *mask = atom->mask;
   int nlocal = atom->nlocal;
+  int const * type = atom->type;
+
+  // Dirty hack, set q of atoms
+  int max_type = atom->get_properties()->max_type();
+  double const * q_val = static_cast<FixPropertyGlobal*>(
+    modify->find_fix_property(
+      "atomCharge","property/global","peratomtype",max_type,0,"electricField"
+    )
+  )->get_values();
+  for (int i = 0; i < nlocal; i++) {
+    q[i] = q_val[type[i]-1];
+  }
 
   // reallocate efield array if necessary
 

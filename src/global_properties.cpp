@@ -357,7 +357,7 @@ namespace MODEL_PARAMS
       const double Yi = Y->compute_vector(i-1);
 
       // error checks on Y
-      
+
       if(sanity_checks && (0 == lmp->modify->n_fixes_style("bubble")) && (!registry.getLAMMPS()->atom->get_properties()->allow_soft_particles()))
       {
         if(strcmp(lmp->update->unit_style,"si") == 0  && Yi < 5e6)
