@@ -73,51 +73,97 @@ using namespace MODEL_PARAMS;
 
 /* ---------------------------------------------------------------------- */
 
-FixCableRunning::FixCableRunning(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
+FixCableRunning::FixCableRunning(LAMMPS *lmp, int narg, char **arg) :
+    Fix(lmp, narg, arg),
+    Y_cable(1.0e7),
+    nu_cable(0.3),
+    coeffRest_cable_conduit(0.03),
+    coeffFriction_cable_conduit(0.03),
+    Y_conduit(1.0e7),
+    nu_conduit(0.3),
+    conduitRadius(1.0),
+    airStartTime(0.0),
+    airVelocity(0.0),
+    airDynamicViscosity(1.8e-7),
+    airDensity(1.225),
+    timeSinceStart(0.0),
+    pushSpeed(0.0)
 {
-    double scaling = 0.3048;
-    this->Y_cable = 1.0e7;
-    this->nu_cable = 0.3;
-    this->coeffRest_cable_conduit = 0.3;
-    this->Y_conduit = 1.0e7;
-    this->nu_conduit = 0.3;
-    if (narg < 4)
-        error->all(FLERR,"Illegal fix cable running command\nMust provide file name");
-    const int n = strlen(arg[3]) + 1;
-    this->pointsFileName = new char[n];
-    strcpy(this->pointsFileName, arg[3]);
-    this->cableRadius = force->numeric(FLERR, arg[4]);
+    double scaling = 1.0;
+    if (narg < 7)
+        error->all(FLERR,"Illegal fix cable running command\nMust provide file name and conduitRadius");
 
+    bool hasFile = false;
+    bool hasConduitRadius = false;
+    int iarg = 3;
+    while (iarg < narg) {
+        if (0 == strcmp("file", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'file'");
+            hasFile = true;
+            const int n = strlen(arg[iarg+1]) + 1;
+            this->pointsFileName = new char[n];
+            strcpy(this->pointsFileName, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("scaling", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'scaling'");
+            scaling = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("pushSpeed", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'pushSpeed'");
+            this->pushSpeed = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("conduitRadius", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'conduitRadius'");
+            hasConduitRadius = true;
+            this->conduitRadius = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("cableYoungs", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'cableYoungs'");
+            this->Y_cable = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("conduitYoungs", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'conduitYoungs'");
+            this->Y_conduit = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("cablePoissons", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'cablePoissons'");
+            this->nu_cable = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("conduitPoissons", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'conduitPoissons'");
+            this->nu_conduit = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("coeffFrctionCableConduit", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'coeffFrctionCableConduit'");
+            this->coeffFriction_cable_conduit = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("coeffRestCableConduit", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'coeffRestCableConduit'");
+            this->coeffRest_cable_conduit = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("airStartTime", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'airStartTime'");
+            this->airStartTime = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("airVelocity", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'airVelocity'");
+            this->airVelocity = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("airDynamicViscosity", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'airDynamicViscosity'");
+            this->airDynamicViscosity = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else if (0 == strcmp("airDensity", arg[iarg])) {
+            if (narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'airDensity'");
+            this->airDensity = force->numeric(FLERR, arg[iarg+1]);
+            iarg += 2;
+        } else {
+            error->fix_error(FLERR, this, "Incorrect options...");
+        }
+    }
 
-    // if (narg < 5)
-    //     error->all(FLERR,"Illegal fix air drag command\nMust have air_viscosity and air_density");
-
-    // air_viscosity = force->numeric(FLERR,arg[3]);
-    // air_density   = force->numeric(FLERR,arg[4]);
-
-    // iregion = -1;
-    // idregion = NULL;
-    // wx = 0.0;
-    // wy = 0.0;
-    // wz = 0.0;
-
-    // if (narg > 5) {
-    //     if (narg < 8)
-    //         error->all(FLERR,"Illegal fix air drag command\nMissing wx, wy, and wz"); // region
-    //     wx =  force->numeric(FLERR,arg[5]);
-    //     wy =  force->numeric(FLERR,arg[6]);
-    //     wz =  force->numeric(FLERR,arg[7]);
-    // }
-
-    // if (narg > 8) {
-    //     if (narg > 9) error->all(FLERR,"Illegal fix air drag command\nRegion variable name error");
-
-    //     iregion = domain->find_region(arg[8]);
-    //     if (iregion == -1) error->all(FLERR,"Region ID for fix setforce does not exist");
-    //     const int n = strlen(arg[8]) + 1;
-    //     idregion = new char[n];
-    //     strcpy(idregion,arg[8]);
-    // }
+    if (!hasFile) error->fix_error(FLERR,this,"Missing file name...");
+    if (!hasConduitRadius) error->fix_error(FLERR,this,"Missing conduit radius...");
 
     // Need to load in the points and build the parameterization curves
     std::ifstream pointsFile (this->pointsFileName);
@@ -217,21 +263,22 @@ void FixCableRunning::min_setup(int vflag)
 }
 
 /* ---------------------------------------------------------------------- */
-// Needed constants
+#define M_6_PI 18.8495559215387594307758602
+#define M_8_PI 25.1327412287183459077011471
 void FixCableRunning::post_force(int vflag)
 {
     // apply drag force to atoms in group
     // direction is opposed to velocity vector
     // magnitude depends on atom type
-    double * const * const x = atom->x;
-    double * const * const v = atom->v;
-    double * const * const omega = atom->omega;
+    const double * const * const x = atom->x;
+    const double * const * const omega = atom->omega;
 
+    double **v = atom->v;
     double **f = atom->f;
     double **T = atom->torque;
 
-    double * const radius = atom->radius;
-    int * const mask = atom->mask;
+    const double * const radius = atom->radius;
+    const int * const mask = atom->mask;
     const int nlocal = atom->nlocal;
 
     const double sqrtFiveOverSix = 0.91287092917527685576161630466800355658790782499663875;
@@ -244,8 +291,16 @@ void FixCableRunning::post_force(int vflag)
     const double coeffRestLog = log(this->coeffRest_cable_conduit);
     const double betaeff = coeffRestLog / sqrt(pow(coeffRestLog,2.)+pow(M_PI,2.));
 
+    int oldTag = 0;
+    int k_old = 1;
     for (int i = 0; i < nlocal; i++) {
+        int k_start = 1;
         if (mask[i] & groupbit) {
+
+            if (atom->tag[i] > oldTag) {
+                oldTag = atom->tag[i];
+                k_start = k_old;
+            }
 
             // Find the section p1 and p2 that contains the current point
             double p0[3] = {0.0};
@@ -258,7 +313,7 @@ void FixCableRunning::post_force(int vflag)
             double y2 = 0.0;
             double z1 = 0.0;
             double z2 = 0.0;
-            for (int k = 1; k < this->points.size(); k++) {
+            for (int k = k_start; k < this->points.size(); k++) {
                 p1[0] = this->points[k-1][0];
                 p1[1] = this->points[k-1][1];
                 p1[2] = this->points[k-1][2];
@@ -276,14 +331,15 @@ void FixCableRunning::post_force(int vflag)
                 z1 = MIN(p1[2], p2[2]);
                 z2 = MAX(p1[2], p2[2]);
 
-                if (x[i][0] < x1-this->cableRadius) continue;
-                if (x2+this->cableRadius < x[i][0]) continue;
-                if (x[i][1] < y1-this->cableRadius) continue;
-                if (y2+this->cableRadius < x[i][1]) continue;
-                if (x[i][2] < z1-this->cableRadius) continue;
-                if (z2+this->cableRadius < x[i][2]) continue;
+                if (x[i][0] < x1-this->conduitRadius) continue;
+                if (x2+this->conduitRadius < x[i][0]) continue;
+                if (x[i][1] < y1-this->conduitRadius) continue;
+                if (y2+this->conduitRadius < x[i][1]) continue;
+                if (x[i][2] < z1-this->conduitRadius) continue;
+                if (z2+this->conduitRadius < x[i][2]) continue;
 
                 foundPoints = true;
+                k_old = k;
                 break;
             }
 
@@ -324,13 +380,71 @@ void FixCableRunning::post_force(int vflag)
             );
 
             const double d2 = mag_d21_cross_d10_squared/mag_d21;
-            const double d = sqrt(d2);
+            const double d = std::sqrt(d2);
+
+            // Check if this is a PUSHED particle (need to check if atom is in first section...)
+            if (x[i][1] < 0.0) {
+                // Zero out force and torque
+                f[i][0] = 0.0;
+                f[i][1] = 0.0;
+                f[i][2] = 0.0;
+                T[i][0] = 0.0;
+                T[i][1] = 0.0;
+                T[i][2] = 0.0;
+
+                // Set atom velocity to pushed velocity
+                const double pushedVelocity = this->pushSpeed;
+                const double inv_sqrt_mag_d21 = 1.0/sqrt(mag_d21);
+                const double pushed_ex = d21[0]*inv_sqrt_mag_d21;
+                const double pushed_ey = d21[1]*inv_sqrt_mag_d21;
+                const double pushed_ez = d21[2]*inv_sqrt_mag_d21;
+                v[i][0] = pushed_ex*pushedVelocity;
+                v[i][1] = pushed_ey*pushedVelocity;
+                v[i][2] = pushed_ez*pushedVelocity;
+
+                continue;
+            }
 
             // Apply wind drag force now...
+            // FORCES ----------------------------------------------------------
+            if (this->timeSinceStart >= this->airStartTime) {
+                // Calculate b and c coefficients for forces
+                // Equations from "Classical Mechanics" by John R. Taylor
+                // Linear term b = 3*pi*nu*D
+                const double air_b = M_6_PI * this->airDynamicViscosity * radius[i]; // 6 * pi * nu * r
+                // Quadratic term c = k*p*A
+                const double air_c = M_PI_4 * this->airDensity *radius[i]*radius[i]; // 0.25 * rho * pi*r*r
+
+                const double inv_sqrt_mag_d21 = 1.0/sqrt(mag_d21);
+                const double air_ex = d21[0]*inv_sqrt_mag_d21;
+                const double air_ey = d21[1]*inv_sqrt_mag_d21;
+                const double air_ez = d21[2]*inv_sqrt_mag_d21;
+
+                const double air_wx = this->airVelocity*air_ex;
+                const double air_wy = this->airVelocity*air_ey;
+                const double air_wz = this->airVelocity*air_ez;
+
+                const double air_vrx = air_wx - v[i][0];
+                const double air_vry = air_wy - v[i][1];
+                const double air_vrz = air_wz - v[i][2];
+                const double air_vel_norm = sqrt(air_vrx*air_vrx + air_vry*air_vry + air_vrz*air_vrz);
+
+                const double temp = air_b + air_c*air_vel_norm;
+                f[i][0] += air_vrx*temp;
+                f[i][1] += air_vry*temp;
+                f[i][2] += air_vrz*temp;
+
+                // TORQUES ---------------------------------------------------------
+                // Equations from "Viscous torque on a sphere under arbitrary rotation" by U. Lei et all
+                const double airTorque_d = M_8_PI*this->airDynamicViscosity*radius[i]*radius[i]*radius[i]; // 8 * pi * nu * r*r*r
+                T[i][0] -= airTorque_d*omega[i][0];
+                T[i][1] -= airTorque_d*omega[i][1];
+                T[i][2] -= airTorque_d*omega[i][2];
+            }
 
             // Check if the sphere is touching the cable
-            // const double atomCableOverlap = d+radius[i] - this->cableRadius;
-            if (d+radius[i] - this->cableRadius < 0.0)
+            // const double atomCableOverlap = d+radius[i] - this->conduitRadius;
+            if (d+radius[i] - this->conduitRadius < 0.0)
                 continue;
 
             // (x1-x0) * (x2-x1) / mag_d21
@@ -338,87 +452,6 @@ void FixCableRunning::post_force(int vflag)
             p0[0] = p1[0] + t*(p1[0]-p2[0]);
             p0[1] = p1[1] + t*(p1[1]-p2[1]);
             p0[2] = p1[2] + t*(p1[2]-p2[2]);
-
-            // For HM, Lets just try harmonic...
-            // const double ddxx = x[i][0] - p0[0];
-            // const double ddyy = x[i][1] - p0[1];
-            // const double ddzz = x[i][2] - p0[2];
-            // const double ddmm = sqrt(ddxx*ddxx + ddyy*ddyy + ddzz*ddzz);
-            // const double eexx = ddxx/ddmm;
-            // const double eeyy = ddyy/ddmm;
-            // const double eezz = ddzz/ddmm;
-
-            // p0[0] = p0[0] + eexx*this->cableRadius;
-            // p0[1] = p0[1] + eeyy*this->cableRadius;
-            // p0[2] = p0[2] + eezz*this->cableRadius;
-
-            // const double dx = x[i][0] - p0[0];
-            // const double dy = x[i][1] - p0[1];
-            // const double dz = x[i][2] - p0[2];
-            // const double dm2 = ddxx*ddxx + ddyy*ddyy + ddzz*ddzz;
-            // const double invdm2 = 1./dm2;
-            // const double dm = sqrt(dm2);
-            // const double invdm = 1./dm;
-
-            // // normal component
-            // // double vnnr = vr1 * delx + vr2 * dely + vr3 * delz;
-            // // vnnr *= rsqinv;
-            // // const double vn1 = delx * vnnr;
-            // // const double vn2 = dely * vnnr;
-            // // const double vn3 = delz * vnnr;
-
-            // // // tangential component at the center of the sphere
-            // // const double vt1 = vr1 - vn1;
-            // // const double vt2 = vr2 - vn2;
-            // // const double vt3 = vr3 - vn3;
-
-            // const double vr1 = v[i][0];
-            // const double vr2 = v[i][1];
-            // const double vr3 = v[i][2]; // - this->conduit_velocity_z
-            // const double vnnr = (vr1*dx + vr2*dy + vr3*dz)*invdm2;
-            // const double vn1 = dx*vnnr;
-            // const double vn2 = dy*vnnr;
-            // const double vn3 = dz*vnnr;
-            // const double vt1 = vr1-vn1;
-            // const double vt2 = vr2-vn2;
-            // const double vt3 = vr3-vn3;
-
-            // const double Yi = this->Y_conduit;
-            // const double Yj = this->Y_cable;
-            // const double vi = this->nu_conduit;
-            // const double vj = this->nu_cable;
-            // const double Yeff = 1./((1.-pow(vi,2.))/Yi+(1.-pow(vj,2.))/Yj);
-            // const double Geff = 1./(2.*(2.-vi)*(1.+vi)/Yi+2.*(2.-vj)*(1.+vj)/Yj);
-            // const double coeffRestLog = log(this->coeffRest_cable_conduit);
-            // const double betaeff = coeffRestLog / sqrt(pow(coeffRestLog,2.)+pow(M_PI,2.));
-
-            // const double meff = 4.0 * M_PI * radius[i]*radius[i]*radius[i]*atom->density[i] / 3.0;
-            // const double sqrtval = sqrt(radius[i]*d);
-            // const double Sn=2.*Yeff*sqrtval;
-            // const double St=8.*Geff*sqrtval;
-
-            // double kn=4./3.*Yeff*sqrtval;
-            // double kt=St;
-            // const double gamman=-2.*sqrtFiveOverSix*betaeff*sqrt(Sn*meff);
-            // const double gammat=-2.*sqrtFiveOverSix*betaeff*sqrt(St*meff);
-
-            // // convert Kn and Kt from pressure units to force/distance^2
-            // kn /= force->nktv2p;
-            // kt /= force->nktv2p;
-
-            // const double Fn_damping = -gamman*sqrt(vn1*vn1 + vn2*vn2 + vn3*vn3);
-            // const double Fn_contact = kn*d;
-            // double Fn = Fn_contact + Fn_damping;
-
-            // f[i][0] += (invdm*Fn*dx);
-            // f[i][1] += (invdm*Fn*dy);
-            // f[i][2] += (invdm*Fn*dz);
-
-            // Harmonic update
-            // fprintf(screen,"-----------------\n");
-            // fprintf(screen, "P0 = {%e, %e, %e}\n", p0[0], p0[1], p0[2]);
-            // fprintf(screen, "P1 = {%e, %e, %e}\n", p1[0], p1[1], p1[2]);
-            // fprintf(screen, "P2 = {%e, %e, %e}\n", p2[0], p2[1], p2[2]);
 
             double dx = x[i][0] - p0[0];
             double dy = x[i][1] - p0[1];
@@ -430,9 +463,9 @@ void FixCableRunning::post_force(int vflag)
             double ez = invmagd*dz;
 
             // Move p0 to the surface of the conduit
-            p0[0] += this->cableRadius*ex;
-            p0[1] += this->cableRadius*ey;
-            p0[2] += this->cableRadius*ez;
+            p0[0] += this->conduitRadius*ex;
+            p0[1] += this->conduitRadius*ey;
+            p0[2] += this->conduitRadius*ez;
 
             // Calculate new dx
             dx = x[i][0] - p0[0];
@@ -471,78 +504,86 @@ void FixCableRunning::post_force(int vflag)
             const double Fn_contact = kn*atomCableOverlap;
             const double Fn_damping = -gamman*vn;
             const double Fn = Fn_contact + Fn_damping;
-            // fprintf(
-            //     screen,
-            //     "------------------------\n" \
-            //     "tag = %d, Fn = %e, kn = %e, Yeff = %e, sqrtval = %e\n" \
-            //     "radius = %e, atomCableOverlap = %e\n" \
-            //     "ex = %e, ey = %e, ez = %e\n" \
-            //     "dx = %e, dy = %e, dz = %e\n" \
-            //     "p0[0] = %e, p0[1] = %e, p0[2] = %e\n" \
-            //     "p1[0] = %e, p1[1] = %e, p1[2] = %e\n" \
-            //     "p2[0] = %e, p2[1] = %e, p2[2] = %e\n" \
-            //     "x[0] = %e, x[1] = %e, x[2] = %e\n",
-            //     atom->tag[i], Fn, kn, Yeff, sqrtval, \
-            //     radius[i], atomCableOverlap, \
-            //     ex, ey, ez, \
-            //     dx, dy, dz, \
-            //     p0[0], p0[1], p0[2], \
-            //     p1[0], p1[1], p1[2],\
-            //     p2[0], p2[1], p2[2], \
-            //     x[i][0], x[i][1], x[i][2]
-            // );
+
             f[i][0] += (ex*Fn);
             f[i][1] += (ey*Fn);
             f[i][2] += (ez*Fn);
 
 
+            // Apply tangent force update
+            const double cr = radius[i] - 0.5*atomCableOverlap;
+            const double rinv = 1.0/(radius[i] - atomCableOverlap);
+            const double rvx = cr * omega[i][0] * rinv;
+            const double rvy = cr * omega[i][1] * rinv;
+            const double rvz = cr * omega[i][2] * rinv;
 
-            //limit force to avoid the artefact of negative repulsion force
+            const double vtr1 = vt1 - (dz*rvy - dy*rvz);
+            const double vtr2 = vt2 - (dx*rvz - dz*rvx);
+            const double vtr3 = vt3 - (dy*rvx - dx*rvy);
 
-            // Apply hertz mindlin contact model...
-            // const double poi = Sn[type]/(2.0*St[type]) - 1.0; // 0.25; --> Sn/(2*St) - 1.0 = poi
-            // const double one_minus_p2_inv = 1. / (1.0 - poi * poi);
-            // const double deltan = r - bondLength;
-            // const double reff = 0.5 * rout;
-            // const double Yeff = 0.5 * Sn[type] * one_minus_p2_inv; // Need Poisson's ratio here also... set to 0.25...
-            // const double sqrtval = sqrt(-reff * deltan);
-            // const double kn = 4. / 3. * Yeff * sqrtval;
-            // fn = MAX(-kn * deltan * rinv, 0.0);
-            // f[i1][0] += fn * delx;
-            // f[i1][1] += fn * dely;
-            // f[i1][2] += fn * delz;
+            const double oldShearX = 0.0;
+            const double oldShearY = 0.0;
+            const double oldShearZ = 0.0;
 
-            // if (iregion >= 0 && !domain->regions[iregion]->match(x[i][0],x[i][1],x[i][2]))
-            //     continue;
+            double shearX = oldShearX + vtr1*update->dt; // Dont have access to oldshear unless we add it to history values...
+            double shearY = oldShearY + vtr2*update->dt;
+            double shearZ = oldShearZ + vtr3*update->dt;
 
-            // FORCES ----------------------------------------------------------
-            // Calculate b and c coefficients for forces
-            // Equations from "Classical Mechanics" by John R. Taylor
-            // Linear term b = 3*pi*nu*D
-            // b = M_6_PI * air_viscosity * radius[i]; // 6 * pi * nu * r
-            // Quadratic term c = k*p*A
-            // c = M_PI_4 * air_density *radius[i]*radius[i]; // 0.25 * rho * pi*r*r
+            const double rsht = shearX*ex + shearY*ey + shearZ*ez;
+            shearX -= rsht * ex;
+            shearY -= rsht * ey;
+            shearZ -= rsht * ez;
 
-            // vrx = wx - v[i][0];
-            // vry = wy - v[i][1];
-            // vrz = wz - v[i][2];
-            // vel_norm = sqrt(vrx*vrx + vry*vry + vrz*vrz);
+            const double shearmag = std::sqrt(shearX*shearX + shearY*shearY + shearZ*shearZ);
 
-            // temp = b + c*vel_norm;
-            // f[i][0] += vrx*temp;
-            // f[i][1] += vry*temp;
-            // f[i][2] += vrz*temp;
+            double ftx = -kt*shearX;
+            double fty = -kt*shearY;
+            double ftz = -kt*shearZ;
 
-            // TORQUES ---------------------------------------------------------
-            // Equations from "Viscous torque on a sphere under arbitrary rotation" by U. Lei et all
-            // d = M_8_PI*air_viscosity*radius[i]*radius[i]*radius[i]; // 8 * pi * nu * r*r*r
-            // T[i][0] -= d*omega[i][0];
-            // T[i][1] -= d*omega[i][1];
-            // T[i][2] -= d*omega[i][2];
+            const double ft_shear = kt*shearmag;
+            const double ft_friction = this->coeffFriction_cable_conduit*std::fabs(Fn);
+
+            if (ft_shear > ft_friction) {
+                if (shearmag != 0.0) {
+                    const double ratio = ft_friction / ft_shear;
+
+                    ftx *= ratio;
+                    fty *= ratio;
+                    ftz *= ratio;
+
+                    shearX = -ftx/kt;
+                    shearY = -fty/kt;
+                    shearZ = -ftz/kt;
+                } else {
+                    ftx = 0.0;
+                    fty = 0.0;
+                    ftz = 0.0;
+                }
+            } else {
+                ftx -= gammat*vtr1;
+                fty -= gammat*vtr2;
+                ftz -= gammat*vtr3;
+            }
+
+            const double torquex = ey*ftz - ez*fty;
+            const double torquey = ez*ftx - ex*ftz;
+            const double torquez = ex*fty - ey*ftx;
+
+            const double torque1x = -cr*torquex;
+            const double torque1y = -cr*torquey;
+            const double torque1z = -cr*torquez;
+
+            f[i][0] += ftx;
+            f[i][1] += fty;
+            f[i][2] += ftz;
+
+            T[i][0] += torque1x;
+            T[i][1] += torque1y;
+            T[i][2] += torque1z;
         }
     }
-    // delete [] Y_values;
-    // delete [] nu_values;
+
+    this->timeSinceStart += update->dt;
 }
 
 /* ---------------------------------------------------------------------- */

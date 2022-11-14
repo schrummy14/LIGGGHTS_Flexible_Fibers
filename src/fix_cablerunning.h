@@ -77,7 +77,6 @@ class FixCableRunning : public Fix {
         // class Properties* properties;
 
         char * pointsFileName;
-        double cableRadius;
         std::vector<double *> points;
 
         // double * Y_values;
@@ -85,8 +84,16 @@ class FixCableRunning : public Fix {
         double Y_cable;
         double nu_cable;
         double coeffRest_cable_conduit;
+        double coeffFriction_cable_conduit;
         double Y_conduit;
         double nu_conduit;
+        double conduitRadius;
+        double airStartTime;
+        double airVelocity;
+        double airDynamicViscosity;
+        double airDensity;
+        double timeSinceStart;
+        double pushSpeed;
 
 };
 
