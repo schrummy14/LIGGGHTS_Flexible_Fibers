@@ -78,6 +78,8 @@ class RegTetMesh : public Region {
   double tet_vol(int i);
   double tet_acc_vol(int i);
 
+  void rebuild(); // LB
+
   class TriMesh *get_tri_mesh()
   { return &tri_mesh; }
 
@@ -107,12 +109,12 @@ class RegTetMesh : public Region {
    double *rbound, rbound_max;
 
    int *n_face_neighs;
-   int **face_neighs; 
+   int **face_neighs;
 
    int **n_face_neighs_node;
 
    int *n_node_neighs;
-   int **node_neighs; 
+   int **node_neighs;
 
    int *n_surfaces;
    int **surfaces;
@@ -128,6 +130,10 @@ class RegTetMesh : public Region {
    class TriMesh &tri_mesh;
 
    #include "region_mesh_tet_I.h"
+
+private: // LB
+  double domain_sublo[3];
+  double domain_subhi[3];
 };
 
 }

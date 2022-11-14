@@ -54,14 +54,14 @@
 
 #include <cmath>
 #include "pointers.h"
-#include "error.h" 
-#include "comm.h" 
-#include "vector_liggghts.h" 
-#include "neighbor.h" 
-#include "atom.h" 
+#include "error.h"
+#include "comm.h"
+#include "vector_liggghts.h"
+#include "neighbor.h"
+#include "atom.h"
 #include "math_extra_liggghts.h"
 
-#define SMALL_DMBRDR 1.0e-8 
+#define SMALL_DMBRDR 1.0e-8
 
 namespace LAMMPS_NS {
 
@@ -124,7 +124,7 @@ class Domain : protected Pointers {
   int box_change;                // 1 if any of next 3 flags are set, else 0
   int box_change_size;           // 1 if box size changes, 0 if not
   int box_change_shape;          // 1 if box shape changes, 0 if not
-                                 
+
   int box_change_domain;         // 1 if proc sub-domains change, 0 if not
 
   int deform_flag;                // 1 if fix deform exist, else 0
@@ -165,10 +165,16 @@ class Domain : protected Pointers {
   void add_region(int, char **);
   void delete_region(int, char **);
   int find_region(const char *);
-  virtual void set_boundary(int, char **, int); 
+  void update_all_regions(); // LB
+  virtual void set_boundary(int, char **, int);
   void set_box(int, char **);
-  virtual void print_box(const char *); 
+  virtual void print_box(const char *);
   void boundary_string(char *);
+
+  //NP load balancing
+  /*NL*/int decide_loadbalance();
+  /*NL*/bool does_loadbalance() {return lbalance != NULL;}
+  /*NL*/class Lbalance *lbalance;
 
   virtual void lamda2x(int);
   virtual void x2lamda(int);
@@ -189,19 +195,19 @@ class Domain : protected Pointers {
     return 0;
   }
 
-  int is_in_domain(double* pos); 
-  int is_in_subdomain(double* pos); 
-  int is_in_extended_subdomain(double* pos); 
-  double dist_subbox_borders(double* pos); 
-  void min_subbox_extent(double &min_extent,int &dim); 
-  int is_periodic_ghost(int i); 
-  bool is_owned_or_first_ghost(int i); 
+  int is_in_domain(double* pos);
+  int is_in_subdomain(double* pos);
+  int is_in_extended_subdomain(double* pos);
+  double dist_subbox_borders(double* pos);
+  void min_subbox_extent(double &min_extent,int &dim);
+  int is_periodic_ghost(int i);
+  bool is_owned_or_first_ghost(int i);
 
-  virtual int is_in_domain_wedge(double* pos) { UNUSED(pos); return 0; } 
-  virtual int is_in_subdomain_wedge(double* pos) { UNUSED(pos); return 0; } 
-  virtual int is_in_extended_subdomain_wedge(double* pos) { UNUSED(pos); return 0; } 
-  virtual double dist_subbox_borders_wedge(double* pos) { UNUSED(pos); return 0.; } 
-  virtual int is_periodic_ghost_wedge(int i) { UNUSED(i); return 0;} 
+  virtual int is_in_domain_wedge(double* pos) { UNUSED(pos); return 0; }
+  virtual int is_in_subdomain_wedge(double* pos) { UNUSED(pos); return 0; }
+  virtual int is_in_extended_subdomain_wedge(double* pos) { UNUSED(pos); return 0; }
+  virtual double dist_subbox_borders_wedge(double* pos) { UNUSED(pos); return 0.; }
+  virtual int is_periodic_ghost_wedge(int i) { UNUSED(i); return 0;}
 
  private:
   double small[3];                  // fractions of box lengths

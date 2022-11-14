@@ -81,10 +81,11 @@ class Region : protected Pointers {
   virtual ~Region();
   virtual void init();
   virtual int dynamic_check();
+  virtual void rebuild() {} // LB
 
   // called by other classes to check point versus region
 
-  inline int match(double *point) 
+  inline int match(double *point)
   { return match(point[0],point[1],point[2]);}
 
   void prematch();
@@ -134,7 +135,7 @@ class Region : protected Pointers {
 
   int seed;
   class RanPark *random;
-  
+
  private:
   double volume_limit_;             //volume below which error will be thrown
   int dynamic;                      // 1 if region position/orientation changes over time

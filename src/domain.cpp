@@ -79,6 +79,8 @@
 // include last to ensure correct macros
 #include "domain_definitions.h"
 
+#include "lbalance.h"
+
 using namespace LAMMPS_NS;
 using namespace MathConst;
 
@@ -128,7 +130,7 @@ Domain::Domain(LAMMPS *lmp) :
     nregion(0),
     maxregion(0),
     regions(NULL),
-    
+
     is_wedge(false)
 {
     periodicity[0] = xperiodic;
@@ -283,7 +285,7 @@ void Domain::set_initial_box()
 
 void Domain::set_global_box()
 {
-  
+
   prd[0] = xprd = boxhi[0] - boxlo[0];
   prd[1] = yprd = boxhi[1] - boxlo[1];
   prd[2] = zprd = boxhi[2] - boxlo[2];
@@ -500,8 +502,10 @@ void Domain::reset_box()
   // reset box whether shrink-wrapping or not
 
   set_global_box();
-  
-           set_local_box();
+  if (decide_loadbalance())
+    lbalance->loadbalance_local_boxes();
+  else
+    set_local_box();
 
   // if shrink-wrapped & kspace is defined (i.e. using MSM) call setup()
 
@@ -514,6 +518,12 @@ void Domain::reset_box()
     x2lamda(atom->nlocal);
     pbc();
   }
+}
+
+int Domain::decide_loadbalance() // LB
+{
+   if (lbalance) return 1;
+   return 0;
 }
 
 /* ----------------------------------------------------------------------
@@ -730,7 +740,7 @@ void Domain::box_too_small_check()
   double **x = atom->x;
   int nlocal = atom->nlocal;
 
-  double delx,dely,delz,rsq; 
+  double delx,dely,delz,rsq;
   double maxbondme = 0.0;
 
   for (i = 0; i < nlocal; i++)
@@ -1376,7 +1386,7 @@ void Domain::add_region(int narg, char **arg)
     #undef REGION_CLASS
     else error->all(FLERR,"Invalid region style");
   }
-  
+
   else
   {
     if (strcmp(arg[1],"none") == 0) error->all(FLERR,"Invalid region style");
@@ -1426,6 +1436,15 @@ int Domain::find_region(const char *name)
   for (int iregion = 0; iregion < nregion; iregion++)
     if (strcmp(name,regions[iregion]->id) == 0) return iregion;
   return -1;
+}
+
+/* ----------------------------------------------------------------------
+   update regions upon (sub)domain change (e.g. due to load balancing)
+------------------------------------------------------------------------- */
+
+void Domain::update_all_regions()
+{
+  for (int i = 0; i < nregion; i++) regions[i]->rebuild();
 }
 
 /* ----------------------------------------------------------------------

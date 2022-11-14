@@ -55,6 +55,11 @@
 #include "math_extra_liggghts.h"
 #include "input_mesh_tet.h"
 
+// LB
+#include <vector>
+#include <set>
+#include "region.h"
+
 // include last to ensure correct macros
 #include "domain_definitions.h"
 
@@ -236,13 +241,13 @@ void RegTetMesh::generate_random_shrinkby_cut(double *pos,double cut,bool subdom
 
     for(int i = 0; i < nTet; i++)
     {
-        
+
     }
 
     do
     {
        ntry++;
-       
+
        int iTetChosen = mesh_randpos(pos);
        is_near_surface = false;
        double delta[3];
@@ -251,17 +256,17 @@ void RegTetMesh::generate_random_shrinkby_cut(double *pos,double cut,bool subdom
        for(int is = 0; is < n_surfaces[iTetChosen]; is++)
        {
          int iSurf = surfaces[iTetChosen][is];
-         
+
          if(tri_mesh.resolveTriSphereContact(-1,iSurf,cut,pos,delta,barysign) < 0)
          {
             is_near_surface = true;
-            break; 
+            break;
           }
-          
+
        }
 
        if(is_near_surface)
-        continue; 
+        continue;
 
        // check all surfaces of face neigh tets
        for(int iFaceNeigh = 0; iFaceNeigh < n_face_neighs[iTetChosen]; iFaceNeigh++)
@@ -269,32 +274,32 @@ void RegTetMesh::generate_random_shrinkby_cut(double *pos,double cut,bool subdom
            for(int is = 0; is < n_surfaces[face_neighs[iTetChosen][iFaceNeigh]]; is++)
            {
              int iSurf = surfaces[face_neighs[iTetChosen][iFaceNeigh]][is];
-             
+
              if(tri_mesh.resolveTriSphereContact(-1,iSurf,cut,pos,delta,barysign) < 0)
              {
                 is_near_surface = true;
-                break; 
+                break;
               }
-              
+
            }
        }
        if(is_near_surface)
-        continue; 
+        continue;
 
        // check all surfaces of node neigh tets
        for(int iNodeNeigh = 0; iNodeNeigh < n_node_neighs[iTetChosen]; iNodeNeigh++)
        {
-           
+
            for(int is = 0; is < n_surfaces[node_neighs[iTetChosen][iNodeNeigh]]; is++)
            {
              int iSurf = surfaces[node_neighs[iTetChosen][iNodeNeigh]][is];
-                
+
              if(tri_mesh.resolveTriSphereContact(-1,iSurf,cut,pos,delta,barysign) < 0)
              {
                 is_near_surface = true;
-                break; 
+                break;
              }
-             
+
            }
        }
     }
@@ -345,6 +350,20 @@ void RegTetMesh::add_tet(double **n)
 }
 
 /* ---------------------------------------------------------------------- */
+
+void RegTetMesh::rebuild()
+{
+  if (MathExtraLiggghts::compDouble(domain->sublo[0],domain_sublo[0]) &&
+      MathExtraLiggghts::compDouble(domain->sublo[1],domain_sublo[1]) &&
+      MathExtraLiggghts::compDouble(domain->sublo[2],domain_sublo[2]) &&
+      MathExtraLiggghts::compDouble(domain->subhi[0],domain_subhi[0]) &&
+      MathExtraLiggghts::compDouble(domain->subhi[1],domain_subhi[1]) &&
+      MathExtraLiggghts::compDouble(domain->subhi[2],domain_subhi[2]))
+    return;
+
+//   build_tree();
+    build_neighs();
+}
 
 void RegTetMesh::build_neighs()
 {
@@ -410,10 +429,10 @@ void RegTetMesh::build_neighs()
 
             if(0 == nNodesEqual)
                 continue;
-            
+
             else if(3 > nNodesEqual)
             {
-                
+
                 if(100 == n_node_neighs[i])
                     badMesh = true;
                 else
@@ -430,10 +449,10 @@ void RegTetMesh::build_neighs()
                     n_node_neighs[iOverlap]++;
                 }
             }
-            
+
             else if(3 == nNodesEqual)
             {
-                
+
                 face_neighs[i][n_face_neighs[i]++] = iOverlap;
                 face_neighs[iOverlap][n_face_neighs[iOverlap]++] = i;
 
@@ -449,7 +468,7 @@ void RegTetMesh::build_neighs()
             }
             else
             {
-                
+
                 char errstr[256];
 
                 sprintf(errstr,"duplicate elements %d and %d in tet for region %s",i,iOverlap,id);
@@ -464,7 +483,7 @@ void RegTetMesh::build_neighs()
 
     for(int i = 0; i < nTet; i++)
     {
-        
+
     }
 }
 
@@ -472,7 +491,7 @@ void RegTetMesh::build_neighs()
 
 void RegTetMesh::build_surface()
 {
-    
+
     double **nodeTmp = create<double>(nodeTmp,3,3);
 
     int n_surf_elems = 0;
@@ -497,7 +516,7 @@ void RegTetMesh::build_surface()
         {
             if(!(3 == n_face_neighs[i]))
                 error->one(FLERR,"assertion failed");
-            
+
             int which;
             MathExtraLiggghts::max(n_face_neighs_node[i],4,which);
             for(int k=0;k<3;k++){
@@ -763,7 +782,7 @@ inline int RegTetMesh::mesh_randpos(double *pos)
     tet_randpos(iTriChosen,pos);
     if(pos[0] == 0. && pos[1] == 0. && pos[2] == 0.)
         error->one(FLERR,"illegal RegTetMesh::mesh_randpos");
-    
+
     return iTriChosen;
 }
 
@@ -832,17 +851,17 @@ void RegTetMesh::volume_mc(int n_test,bool cutflag,double cut,double &vol_global
     //error->all(FLERR,"end");
 
     //NO TODO: implementation for cutflag = true
-    
+
     if(total_volume == 0.) error->all(FLERR,"mesh/tet region has zero volume, cannot continue");
 
-    vol_global = total_volume; 
+    vol_global = total_volume;
 
     for(int iTet = 0; iTet < nTet; iTet++)
     {
-        
+
         for(int iNode = 0; iNode < 5; iNode++)
         {
-            
+
             double weight = (iNode<4) ? (volume[iTet]*0.1) : (volume[iTet]*0.6);
 
             if(iNode<4)
