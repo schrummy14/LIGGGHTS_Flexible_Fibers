@@ -12,6 +12,7 @@ RUN apt-get -y install curl && curl -H 'Cache-Control: no-cache' \
         https://raw.githubusercontent.com/nimbix/image-common/ubuntu-focal-support/install-nimbix.sh \
         | bash -s -- --setup-nimbix-desktop --image-common-branch ubuntu-focal-support
 
+# Build LIGGGHTS
 RUN git clone https://github.com/schrummy14/LIGGGHTS_Flexible_Fibers.git /opt/LIGGGHTS
 RUN cd /opt/LIGGGHTS/src && make clean-auto && make -j$(python3 -c 'import multiprocessing as mp; print(int(mp.cpu_count() * 1.5))') auto
 RUN ln -s /opt/LIGGGHTS/src/lmp_auto /usr/local/bin/liggghts_flexible_fibers

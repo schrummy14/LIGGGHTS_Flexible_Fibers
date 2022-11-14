@@ -11,7 +11,7 @@ SET(ENABLE_JPEG OFF CACHE BOOL "In simulation imaging support")
 
 IF (NOT CMAKE_CXX_FLAGS)
   IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "-O3 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++17 -Wno-literal-suffix -mtune=native -march=native -fPIC")
+    SET(CMAKE_CXX_FLAGS "-O3 -funroll-loops -fstrict-aliasing -Wall -Wno-uninitialized -std=c++17 -Wno-literal-suffix -mtune=native -march=native -fPIC -flto")
   ENDIF()
 ENDIF()
 
