@@ -94,7 +94,7 @@ BondGran::BondGran(LAMMPS *lmp) : Bond(lmp)
     */
 
     /* NP
-       gibt groesse der gespeicherten werte  pro bond wieder 
+       gibt groesse der gespeicherten werte  pro bond wieder
        neighbor.cpp:       memory->create(bondhistlist,maxbond,atom->n_bondhist,"neigh:bondhistlist");
        neigh_bond.cpp:     memory->grow(bondhistlist,maxbond,atom->n_bondhist,"neighbor:bondhistlist");
        bond.cpp: void Bond::n_granhistory(int nhist) {ngranhistory = nhist;     atom->n_bondhist = ngranhistory; if(){FLERR}}
@@ -369,7 +369,7 @@ void BondGran::compute(int eflag, int vflag)
 
         // Set Bond Length
         const double bondLength = fabs(bondhistlist[n][12]);
-        const double bondLengthInv = 1.0 / bondLength; // Try r1r2/(r1+r2)  
+        const double bondLengthInv = 1.0 / bondLength; // Try r1r2/(r1+r2)
         // const double bondLengthInv = (radius[i1]+radius[i2])/(radius[i1]*radius[i2]);
 
         const double curBondDamage = abs(bondhistlist[n][13]);
@@ -685,21 +685,21 @@ void BondGran::compute(int eflag, int vflag)
             // 0.5*k*x^2 -> 0.5*k*k*x^2/k -> 0.5*f^2/k
             // Factor out the 0.5 as the energy is multiplied by 2
 
-            force_damp_n[0] = -Kn * (beta0[type] + beta1[type] * sqrt(2.0 * Efnx * Kn_inv) + 2.0 * damp[type] * Efnx * Kn_inv) * SIGNUM_DOUBLE(vr1);
-            force_damp_n[1] = -Kn * (beta0[type] + beta1[type] * sqrt(2.0 * Efny * Kn_inv) + 2.0 * damp[type] * Efny * Kn_inv) * SIGNUM_DOUBLE(vr2);
-            force_damp_n[2] = -Kn * (beta0[type] + beta1[type] * sqrt(2.0 * Efnz * Kn_inv) + 2.0 * damp[type] * Efnz * Kn_inv) * SIGNUM_DOUBLE(vr3);
+            force_damp_n[0] = -Kn * (beta0[type] + beta1[type] * sqrt(2.0 * Efnx * Kn_inv) + 2.0 * damp[type] * Efnx * Kn_inv) * SIGNUM_DOUBLE(vn1);
+            force_damp_n[1] = -Kn * (beta0[type] + beta1[type] * sqrt(2.0 * Efny * Kn_inv) + 2.0 * damp[type] * Efny * Kn_inv) * SIGNUM_DOUBLE(vn2);
+            force_damp_n[2] = -Kn * (beta0[type] + beta1[type] * sqrt(2.0 * Efnz * Kn_inv) + 2.0 * damp[type] * Efnz * Kn_inv) * SIGNUM_DOUBLE(vn3);
 
-            force_damp_t[0] = -Kt * (beta0[type] + beta1[type] * sqrt(2.0 * Eftx * Kt_inv) + 2.0 * damp[type] * Eftx * Kt_inv) * SIGNUM_DOUBLE(vr1);
-            force_damp_t[1] = -Kt * (beta0[type] + beta1[type] * sqrt(2.0 * Efty * Kt_inv) + 2.0 * damp[type] * Efty * Kt_inv) * SIGNUM_DOUBLE(vr2);
-            force_damp_t[2] = -Kt * (beta0[type] + beta1[type] * sqrt(2.0 * Eftz * Kt_inv) + 2.0 * damp[type] * Eftz * Kt_inv) * SIGNUM_DOUBLE(vr3);
+            force_damp_t[0] = -Kt * (beta0[type] + beta1[type] * sqrt(2.0 * Eftx * Kt_inv) + 2.0 * damp[type] * Eftx * Kt_inv) * SIGNUM_DOUBLE(vt1);
+            force_damp_t[1] = -Kt * (beta0[type] + beta1[type] * sqrt(2.0 * Efty * Kt_inv) + 2.0 * damp[type] * Efty * Kt_inv) * SIGNUM_DOUBLE(vt2);
+            force_damp_t[2] = -Kt * (beta0[type] + beta1[type] * sqrt(2.0 * Eftz * Kt_inv) + 2.0 * damp[type] * Eftz * Kt_inv) * SIGNUM_DOUBLE(vt3);
 
-            torque_damp_n[0] = -K_tor * (beta0[type] + beta1[type] * sqrt(2.0 * Emnx * K_tor_inv) + 2.0 * damp[type] * Emnx * K_tor_inv) * SIGNUM_DOUBLE(wr1);
-            torque_damp_n[1] = -K_tor * (beta0[type] + beta1[type] * sqrt(2.0 * Emny * K_tor_inv) + 2.0 * damp[type] * Emny * K_tor_inv) * SIGNUM_DOUBLE(wr2);
-            torque_damp_n[2] = -K_tor * (beta0[type] + beta1[type] * sqrt(2.0 * Emnz * K_tor_inv) + 2.0 * damp[type] * Emnz * K_tor_inv) * SIGNUM_DOUBLE(wr3);
+            torque_damp_n[0] = -K_tor * (beta0[type] + beta1[type] * sqrt(2.0 * Emnx * K_tor_inv) + 2.0 * damp[type] * Emnx * K_tor_inv) * SIGNUM_DOUBLE(wn1);
+            torque_damp_n[1] = -K_tor * (beta0[type] + beta1[type] * sqrt(2.0 * Emny * K_tor_inv) + 2.0 * damp[type] * Emny * K_tor_inv) * SIGNUM_DOUBLE(wn2);
+            torque_damp_n[2] = -K_tor * (beta0[type] + beta1[type] * sqrt(2.0 * Emnz * K_tor_inv) + 2.0 * damp[type] * Emnz * K_tor_inv) * SIGNUM_DOUBLE(wn3);
 
-            torque_damp_t[0] = -K_ben * (beta0[type] + beta1[type] * sqrt(2.0 * Emtx * K_ben_inv) + 2.0 * damp[type] * Emtx * K_ben_inv) * SIGNUM_DOUBLE(wr1);
-            torque_damp_t[1] = -K_ben * (beta0[type] + beta1[type] * sqrt(2.0 * Emty * K_ben_inv) + 2.0 * damp[type] * Emty * K_ben_inv) * SIGNUM_DOUBLE(wr2);
-            torque_damp_t[2] = -K_ben * (beta0[type] + beta1[type] * sqrt(2.0 * Emtz * K_ben_inv) + 2.0 * damp[type] * Emtz * K_ben_inv) * SIGNUM_DOUBLE(wr3);
+            torque_damp_t[0] = -K_ben * (beta0[type] + beta1[type] * sqrt(2.0 * Emtx * K_ben_inv) + 2.0 * damp[type] * Emtx * K_ben_inv) * SIGNUM_DOUBLE(wt1);
+            torque_damp_t[1] = -K_ben * (beta0[type] + beta1[type] * sqrt(2.0 * Emty * K_ben_inv) + 2.0 * damp[type] * Emty * K_ben_inv) * SIGNUM_DOUBLE(wt2);
+            torque_damp_t[2] = -K_ben * (beta0[type] + beta1[type] * sqrt(2.0 * Emtz * K_ben_inv) + 2.0 * damp[type] * Emtz * K_ben_inv) * SIGNUM_DOUBLE(wt3);
         }
         else
         {
@@ -1180,7 +1180,7 @@ double BondGran::getMinDt()
         }
         else if(dampmode == DAMPSTYLE_NON_LINEAR)
         {
-            const double poi = Sn[type]/(2.0*St[type]) - 1.0; 
+            const double poi = Sn[type]/(2.0*St[type]) - 1.0;
             if (damp[type] == 0.0 && beta0[type] == 0.0)
             {
                 curDt = sqrt(Me / K) * sqrt_2 * sqrt(1.0 + poi) / (1.6 + 0.76 * beta1[type]);
